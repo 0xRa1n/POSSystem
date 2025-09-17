@@ -3,7 +3,25 @@
 #include <string>
 #include <sstream>
 #include <conio.h>
+#include <cstdlib>
+#include <windows.h>
 using namespace std;
+
+template<size_t N>
+int showMenu(string title, string (&menu)[N]) {      
+    cout << "---------------------------------" << endl;
+    cout << title << endl ;
+    cout << "---------------------------------" << endl;
+    int selection;
+    int size = sizeof(menu) / sizeof(menu[0]); // correct element count
+    for(int i = 0; i < size; i++){
+        cout << "[" << i+1 << "] " << menu[i] << endl;
+    }      
+    cout << "Option: ";
+    cin >> selection;
+
+    return selection;
+}
 
 class POSAdmin {
     public:
@@ -60,6 +78,8 @@ class POSAdmin {
             fout.close();
             cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
         }
+
+        Sleep(1000);
     }
 };
 
@@ -102,15 +122,18 @@ class PointOfSale {
 
     void adminMenu(PointOfSale& POS) {
         while (true) {
-            int adminSelection;
-            cout << "1. Inventory\n2. Monitoring\nSelect (1/2): ";
-            cin >> adminSelection;
-
+            system("cls");
+            
+            string menu[] = {"Inventory", "Monitoring"};
+            int adminSelection = showMenu("Admin", menu);
+            system("cls");
             if (adminSelection == 1) {
                 while (true) {  // loop for the inventory submenu
-                    int inventoryInput;
-                    cout << "1. Add products\n2. Refresh all available products\n3. Update quantity or name\n4. Delete product\n5. Go back\nSelect (1/2/3/4/5): ";
-                    cin >> inventoryInput;
+                    system("cls");
+
+                    string adminMenu[] = {"Add products", "Add an account", "Refresh all products", "Update quantity or name", "Delete product", "Delete an account", "Go back"};
+                    int inventoryInput = showMenu("Inventory", adminMenu);
+                    system("cls");
 
                     if (inventoryInput == 1) {
                         int quantity, price;
@@ -124,30 +147,38 @@ class PointOfSale {
                         cin >> price;
 
                         POS.admin.addProduct(productName, quantity, price);
-                        // this code will return to the menu above
-                        continue;
+                    } else if (inventoryInput == 2){
+                        cout << "Hi";
+                        Sleep(1000);
                     } else if (inventoryInput == 3){
-
-                    } else if (inventoryInput == 5) {
+                        cout << "Hello";
+                        Sleep(1000);
+                    } else if (inventoryInput == 4){
+                        cout << "Hilu";
+                        Sleep(1000);
+                    } else if (inventoryInput == 6) {
                         // Go back to main admin menu
                         break;
                     } else {
                         cout << "Option not implemented or invalid. Please try again.\n";
+                        Sleep(1000);
                     }
                 }
             } else if (adminSelection == 2) {
                 cout << "Monitoring selected (feature not implemented).\n";
+                Sleep(1000);
             } else {
                 cout << "Invalid option, please select 1 or 2.\n";
+                Sleep(1000);
             }
         }
     }
 
-    void managerMenu() {
+    void managerMenu(PointOfSale& POS) {
         cout << "Welcome MANAGER\n";
         // Add manager-related options here
     }
-    void cashierMenu() {
+    void cashierMenu(PointOfSale& POS) {
         cout << "Welcome CASHIER\n";
         // Add cashier-related options here
     }
@@ -158,25 +189,24 @@ int main(){
     PointOfSale POS;
 
     // initialize a VERY SECURE username and password
-    int ch, retries = 0;
+    int retries = 0;
     string usernameInput, passwordInput, role;
 
-    for(;;){
+    while(true){
         cout << "Enter your username: ";
         cin >> usernameInput;
 
         cout << "Enter your password: ";
         cin >> passwordInput;
 
-        
         if (POS.login(usernameInput, passwordInput, role)) {
             // check if the user's account is admin, manager, or cashier
             if(role == "Admin"){
                 POS.adminMenu(POS);
             } else if(role == "Manager"){
-                POS.managerMenu();
+                POS.managerMenu(POS);
             } else if (role == "Cashier"){
-                POS.cashierMenu();
+                POS.cashierMenu(POS);
             } else {
                 cout << "Invalid role received.";
                 break;
