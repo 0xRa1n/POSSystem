@@ -156,7 +156,13 @@ class PointOfSale {
                     } else if (inventoryInput == 4){
                         cout << "Hilu";
                         Sleep(1000);
+                    } else if (inventoryInput == 5) {
+                        // Go back to main admin menu
+                        break;
                     } else if (inventoryInput == 6) {
+                        // Go back to main admin menu
+                        break;
+                    } else if (inventoryInput == 7) {
                         // Go back to main admin menu
                         break;
                     } else {
