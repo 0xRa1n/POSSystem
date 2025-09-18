@@ -5,6 +5,7 @@
     "span": "cpp",
     "tuple": "cpp",
     "iosfwd": "cpp",
-    "stdexcept": "cpp"
+    "stdexcept": "cpp",
+    "cstddef": "cpp"
   }
 }

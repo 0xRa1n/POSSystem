@@ -17,8 +17,10 @@ int showMenu(string title, string (&menu)[N]) {
 
     int selection;
     int size = sizeof(menu) / sizeof(menu[0]); // correct element count
-    for(int i = 0; i < size; i++){
-        cout << "[" << i+1 << "] " << menu[i] << endl;
+    int i = 1;
+    
+    for(string menuOptions : menu){
+        cout << "[" << i++ << "] " << menuOptions << endl;
     }      
 
     cout << "---------------------------------" << endl;
@@ -191,77 +193,108 @@ class PointOfSale {
     void adminMenu(PointOfSale& POS) {
         const string productsDatabase = "database/products.csv";
         const string usersDatabase = "database/userAccounts.csv";
+
         while (true) {
             system("cls");
-            
             string menu[] = {"Inventory", "Monitoring", "Logout"};
             int adminSelection = showMenu("Admin", menu);
             system("cls");
-            if (adminSelection == 1) {
-                while (true) {  // loop for the inventory submenu
-                    system("cls");
 
-                    string adminMenu[] = {"Add products", "Add an account", "View all products", "Update quantity or name", "Delete product", "Delete an account", "Go back"};
-                    int inventoryInput = showMenu("Inventory", adminMenu);
-                    system("cls");
+            switch (adminSelection) {
+                case 1: {  // Inventory submenu
+                    while (true) {
+                        system("cls");
+                        string inventoryMenu[] = {
+                            "Add products",
+                            "Add an account",
+                            "View all products",
+                            "Update quantity or name (U)",
+                            "Delete product (U)",
+                            "Delete an account (U)",
+                            "Go back"
+                        };
+                        int inventoryInput = showMenu("Inventory", inventoryMenu);
+                        system("cls");
 
-                    if (inventoryInput == 1) {
                         int quantity, price;
-                        string productName;
+                        string productName, username, password, role;
 
-                        cout << "Enter the product name: ";
-                        cin >> productName;
-                        cout << "Enter the quantity: ";
-                        cin >> quantity;
-                        cout << "Enter the price: ";
-                        cin >> price;
+                        switch (inventoryInput) {
+                            case 1:
+                                cout << "Enter the product name (type 0 to return): ";
+                                cin >> productName;
+                                if (productName == "0") break;
+                                cout << "Enter the quantity: ";
+                                cin >> quantity;
+                                cout << "Enter the price: ";
+                                cin >> price;
 
-                        POS.admin.addProduct(productsDatabase, productName, quantity, price);
-                    } else if (inventoryInput == 2){
-                        string username, password, role;
+                                POS.admin.addProduct(productsDatabase, productName, quantity, price);
+                                break;
 
-                        cout << "Enter the username you want to add: ";
-                        cin >> username;
-                        cout << "Enter the password: ";
-                        cin >> password;
-                        cout << "What is the role of the user? (Admin/Manager/Cashier): ";
-                        cin >> role;
+                            case 2:
+                                cout << "Enter the username you want to add: ";
+                                cin >> username;
+                                cout << "Enter the password: ";
+                                cin >> password;
+                                cout << "What is the role of the user? (Admin/Manager/Cashier): ";
+                                cin >> role;
 
-                        POS.admin.addUser(usersDatabase, username, password, role);
-                    } else if (inventoryInput == 3){
-                        // system("cls");
-                        POS.admin.readProducts(productsDatabase);
-                        // since the terminal would not clear if it expects an input to the user
-                        // and we aim to let the inventory stay for a little while until the user wants to go back
-                        int readProductsInput;
-                        cout << "\nType any number to go back: ";
-                        cin >> readProductsInput;
-                    } else if (inventoryInput == 4){
-                        cout << "Hilu";
-                        Sleep(1000);
-                    } else if (inventoryInput == 5) {
-                        // Go back to main admin menu
-                        break;
-                    } else if (inventoryInput == 6) {
-                        // Go back to main admin menu
-                        break;
-                    } else if (inventoryInput == 7) {
-                        // Go back to main admin menu
-                        break;
-                    } else {
-                        cout << "Option not implemented or invalid. Please try again.\n";
-                        Sleep(1000);
+                                POS.admin.addUser(usersDatabase, username, password, role);
+                                break;
+
+                            case 3:
+                                // since the terminal would not clear if it expects an input to the user
+                                // and we aim to let the inventory stay for a little while until the user wants to go back
+                                POS.admin.readProducts(productsDatabase);
+                                cout << "\nType any number to go back: ";
+                                int dummyInput;
+                                cin >> dummyInput;
+                                break;
+
+                            case 4:
+                                cout << "Feature not implemented yet.\n";
+                                system("pause");
+                                break;
+
+                            case 5:
+                                cout << "Feature not implemented yet.\n";
+                                system("pause");
+                                break;
+
+                            case 6:
+                                cout << "Feature not implemented yet.\n";
+                                system("pause");
+                                break;
+
+                            case 7: 
+                                // Go back to admin main menu
+                                goto endInventoryLoop;
+
+                            default:
+                                cout << "Invalid selection. Try again.\n";
+                                system("pause");
+                                break;
+                        }
                     }
+                    // this serves as an exit point for the second while loop
+                    endInventoryLoop: ;
+                    break;
                 }
-            } else if (adminSelection == 2) {
-                cout << "Monitoring selected (feature not implemented).\n";
-                Sleep(1000);
-            } else if(adminSelection == 3){
-                cout << "Goodbye.";
-                exit(0);
-            } else {
-                cout << "Invalid option\n";
-                Sleep(1000);
+
+                case 2:
+                    cout << "Monitoring selected (feature not implemented).\n";
+                    Sleep(1000);
+                    break;
+
+                case 3:
+                    cout << "Goodbye.\n";
+                    exit(0);
+
+                default:
+                    cout << "Invalid option\n";
+                    Sleep(1000);
+                    break;
             }
         }
     }
