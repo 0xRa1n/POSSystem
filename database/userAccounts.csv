@@ -2,3 +2,4 @@ UserID,Username,Password,Role
 1,admin,admin123,Admin
 2,john,pass456,Manager
 3,mary,cashier789,Cashier
+4,rain,rainAdmin,Admin

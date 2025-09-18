@@ -5,6 +5,8 @@
 #include <conio.h>
 #include <cstdlib>
 #include <windows.h>
+#include <bits/stdc++.h>
+#include <iomanip> // for setw
 using namespace std;
 
 template<size_t N>
@@ -12,11 +14,14 @@ int showMenu(string title, string (&menu)[N]) {
     cout << "---------------------------------" << endl;
     cout << title << endl ;
     cout << "---------------------------------" << endl;
+
     int selection;
     int size = sizeof(menu) / sizeof(menu[0]); // correct element count
     for(int i = 0; i < size; i++){
         cout << "[" << i+1 << "] " << menu[i] << endl;
     }      
+
+    cout << "---------------------------------" << endl;
     cout << "Option: ";
     cin >> selection;
 
@@ -26,7 +31,7 @@ int showMenu(string title, string (&menu)[N]) {
 class POSAdmin {
     public:
     // this part is related to adding an a product
-    int getLastProductId(const string& filename) {
+    int getLastId(const string& filename) {
         ifstream fin(filename);
         string line;
         int lastId = 0;
@@ -45,7 +50,7 @@ class POSAdmin {
         return lastId;
     }
 
-    bool isProductInCsv(const string& filename, const string& productNameToCheck) {
+    bool isAlreadyInCsv(const string& filename, const string& productNameToCheck) {
         ifstream fin(filename);
         string line;
 
@@ -57,18 +62,15 @@ class POSAdmin {
         return false;
     }
 
-    void addProduct(string productName, int quantity, int price){
-        const string productsDatabase = "database/database.csv";
-
-        if (isProductInCsv(productsDatabase, productName)) {
+    void addProduct(const string& database, const string& productName, int quantity, int price) {
+        if (isAlreadyInCsv(database, productName)) {
             cout << "Product '" << productName << "' is already in the CSV.\n";
-            return;
         } else {
-            int lastId = getLastProductId(productsDatabase);
+            int lastId = getLastId(database);
             int newId = lastId + 1;
 
             fstream fout;
-            fout.open(productsDatabase, ios::out | ios::app);
+            fout.open(database, ios::out | ios::app);
 
             fout << newId << ", "
                 << productName << ", "
@@ -79,7 +81,73 @@ class POSAdmin {
             cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
         }
 
-        Sleep(1000);
+        Sleep(1200);
+    }
+
+    void addUser(const string& database, const string& username, const string& password, const string& role){
+        if(isAlreadyInCsv(database, username)){
+            cout << "User is already in the database!";
+        } else {
+            int lastUserId = getLastId(database);
+            int newUserId = lastUserId + 1;
+
+            fstream fout;
+            fout.open(database, ios::out | ios::app);
+
+            fout << newUserId << ","
+                << username << ","
+                << password << ","
+                << role << "\n";
+
+            fout.close();
+            cout << "Successfully added user " << username << endl;
+        }
+        Sleep(1200);
+    }
+
+    // ampersand is added so that it will make sure that the filename argument would not be modifieds
+    void readProducts(const string& database) {
+        ifstream file(database);
+        if (!file.is_open()) {
+            cout << "Failed to open file\n";
+            return;
+        }
+
+        // Read all rows first
+        vector<vector<string>> rows;
+        string line;
+        while (getline(file, line)) {
+            stringstream ss(line);
+            string cell;
+            vector<string> row;
+            while (getline(ss, cell, ',')) {
+                row.push_back(cell);
+            }
+            rows.push_back(row);
+        }
+        file.close();
+
+        if (rows.empty()) return;
+
+        // Find max width of each column
+        size_t cols = 0;
+        for (auto &r : rows) cols = max(cols, r.size());
+        vector<size_t> widths(cols, 0);
+        for (auto &r : rows) {
+            for (size_t c = 0; c < r.size(); ++c)
+                widths[c] = max(widths[c], r[c].size());
+        }
+
+        // Add a little padding for readability
+        for (auto &w : widths) w += 2;
+
+        // Print
+        for (auto &r : rows) {
+            for (size_t c = 0; c < r.size(); ++c) {
+                cout << left << setw(static_cast<int>(widths[c])) << r[c];
+            }
+            cout << '\n';
+        }
     }
 };
 
@@ -121,17 +189,19 @@ class PointOfSale {
     }
 
     void adminMenu(PointOfSale& POS) {
+        const string productsDatabase = "database/products.csv";
+        const string usersDatabase = "database/userAccounts.csv";
         while (true) {
             system("cls");
             
-            string menu[] = {"Inventory", "Monitoring"};
+            string menu[] = {"Inventory", "Monitoring", "Logout"};
             int adminSelection = showMenu("Admin", menu);
             system("cls");
             if (adminSelection == 1) {
                 while (true) {  // loop for the inventory submenu
                     system("cls");
 
-                    string adminMenu[] = {"Add products", "Add an account", "Refresh all products", "Update quantity or name", "Delete product", "Delete an account", "Go back"};
+                    string adminMenu[] = {"Add products", "Add an account", "View all products", "Update quantity or name", "Delete product", "Delete an account", "Go back"};
                     int inventoryInput = showMenu("Inventory", adminMenu);
                     system("cls");
 
@@ -146,13 +216,26 @@ class PointOfSale {
                         cout << "Enter the price: ";
                         cin >> price;
 
-                        POS.admin.addProduct(productName, quantity, price);
+                        POS.admin.addProduct(productsDatabase, productName, quantity, price);
                     } else if (inventoryInput == 2){
-                        cout << "Hi";
-                        Sleep(1000);
+                        string username, password, role;
+
+                        cout << "Enter the username you want to add: ";
+                        cin >> username;
+                        cout << "Enter the password: ";
+                        cin >> password;
+                        cout << "What is the role of the user? (Admin/Manager/Cashier): ";
+                        cin >> role;
+
+                        POS.admin.addUser(usersDatabase, username, password, role);
                     } else if (inventoryInput == 3){
-                        cout << "Hello";
-                        Sleep(1000);
+                        // system("cls");
+                        POS.admin.readProducts(productsDatabase);
+                        // since the terminal would not clear if it expects an input to the user
+                        // and we aim to let the inventory stay for a little while until the user wants to go back
+                        int readProductsInput;
+                        cout << "\nType any number to go back: ";
+                        cin >> readProductsInput;
                     } else if (inventoryInput == 4){
                         cout << "Hilu";
                         Sleep(1000);
@@ -173,8 +256,11 @@ class PointOfSale {
             } else if (adminSelection == 2) {
                 cout << "Monitoring selected (feature not implemented).\n";
                 Sleep(1000);
+            } else if(adminSelection == 3){
+                cout << "Goodbye.";
+                exit(0);
             } else {
-                cout << "Invalid option, please select 1 or 2.\n";
+                cout << "Invalid option\n";
                 Sleep(1000);
             }
         }
@@ -198,12 +284,17 @@ int main(){
     int retries = 0;
     string usernameInput, passwordInput, role;
 
+    system("cls");
+    cout << "---------------------------------" << endl;
+    cout << "Login" << endl ;
+    cout << "---------------------------------" << endl;
     while(true){
         cout << "Enter your username: ";
         cin >> usernameInput;
 
         cout << "Enter your password: ";
         cin >> passwordInput;
+        cout << "\n";
 
         if (POS.login(usernameInput, passwordInput, role)) {
             // check if the user's account is admin, manager, or cashier

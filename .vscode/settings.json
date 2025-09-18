@@ -4,6 +4,7 @@
     "ostream": "cpp",
     "span": "cpp",
     "tuple": "cpp",
-    "iosfwd": "cpp"
+    "iosfwd": "cpp",
+    "stdexcept": "cpp"
   }
 }
