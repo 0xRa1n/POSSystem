@@ -64,6 +64,7 @@ class POSAdmin {
         return false;
     }
 
+    // CRUD-Related Functions
     void addProduct(const string& database, const string& productName, int quantity, int price) {
         if (isAlreadyInCsv(database, productName)) {
             cout << "Product '" << productName << "' is already in the CSV.\n";
@@ -74,9 +75,9 @@ class POSAdmin {
             fstream fout;
             fout.open(database, ios::out | ios::app);
 
-            fout << newId << ", "
-                << productName << ", "
-                << quantity << ", "
+            fout << newId << ","
+                << productName << ","
+                << quantity << ","
                 << price << "\n";
 
             fout.close();
@@ -151,6 +152,42 @@ class POSAdmin {
             cout << '\n';
         }
     }
+
+    void deleteInformation(const string& filename, const string& toLook){
+        ifstream input_file(filename);
+        vector<string> rows;
+        string line;
+        bool found = false;
+
+        // Read each line and filter out the one with the username
+        while (getline(input_file, line)) {
+            stringstream ss(line);
+            string token;
+            getline(ss, token, ',');     // read id (not used)
+            getline(ss, token, ',');     // read username
+            if(token != toLook){
+                rows.push_back(line);
+            } else {
+                found = true;
+            }
+        }
+        input_file.close();
+
+        if (!found) {
+            cout << "Query not found";
+            Sleep(1200);
+        } else {
+            // Write back filtered rows
+            ofstream output_file(filename, ios::trunc);
+            for (const auto& row : rows) {
+                output_file << row << "\n";
+            }
+            output_file.close();
+
+            cout << "Successfully deleted " << toLook << endl;
+            Sleep(1200);
+        }
+    }
 };
 
 class PointOfSale {
@@ -209,15 +246,16 @@ class PointOfSale {
                             "Add an account",
                             "View all products",
                             "Update quantity or name (U)",
-                            "Delete product (U)",
-                            "Delete an account (U)",
+                            "Delete product",
+                            "Delete an account",
                             "Go back"
                         };
-                        int inventoryInput = showMenu("Inventory", inventoryMenu);
+                        int inventoryInput = showMenu("Admin Utilities", inventoryMenu);
                         system("cls");
 
                         int quantity, price;
                         string productName, username, password, role;
+                        string deleteUserInput, deleteProductInput;
 
                         switch (inventoryInput) {
                             case 1:
@@ -233,8 +271,9 @@ class PointOfSale {
                                 break;
 
                             case 2:
-                                cout << "Enter the username you want to add: ";
+                                cout << "Enter the username you want to add (type 0 to return): ";
                                 cin >> username;
+                                if (username == "0") break;
                                 cout << "Enter the password: ";
                                 cin >> password;
                                 cout << "What is the role of the user? (Admin/Manager/Cashier): ";
@@ -247,6 +286,7 @@ class PointOfSale {
                                 // since the terminal would not clear if it expects an input to the user
                                 // and we aim to let the inventory stay for a little while until the user wants to go back
                                 POS.admin.readProducts(productsDatabase);
+
                                 cout << "\nType any number to go back: ";
                                 int dummyInput;
                                 cin >> dummyInput;
@@ -258,13 +298,21 @@ class PointOfSale {
                                 break;
 
                             case 5:
-                                cout << "Feature not implemented yet.\n";
-                                system("pause");
+                                cout << "Enter the product you want to delete (type 0 to return): ";
+                                cin >> deleteProductInput;
+
+                                if (deleteProductInput == "0") break;
+
+                                POS.admin.deleteInformation(productsDatabase, deleteProductInput);
                                 break;
 
                             case 6:
-                                cout << "Feature not implemented yet.\n";
-                                system("pause");
+                                cout << "Enter the username you want to delete (type 0 to return): ";
+                                cin >> deleteUserInput;
+
+                                if (deleteUserInput == "0") break;
+
+                                POS.admin.deleteInformation(usersDatabase, deleteUserInput);
                                 break;
 
                             case 7: 
@@ -283,8 +331,10 @@ class PointOfSale {
                 }
 
                 case 2:
-                    cout << "Monitoring selected (feature not implemented).\n";
-                    Sleep(1000);
+                    POS.admin.readProducts(productsDatabase);
+                    cout << "\nType any number to go back: ";
+                    int dummyInput;
+                    cin >> dummyInput;
                     break;
 
                 case 3:
