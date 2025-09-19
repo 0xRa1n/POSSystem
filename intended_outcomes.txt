@@ -4,3 +4,5 @@ POS System:
 
 To do:
 1. Add a logging system where every transaction (including manager and cashier) will be documented, and the admin can only see it
+2. Optimize further the structure of the code
+3. If the user is in the update product name, quantity, price page, the go back function should return on the update account or update product page

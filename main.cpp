@@ -1,5 +1,4 @@
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <sstream>
 #include <conio.h>
@@ -65,6 +64,7 @@ class POSAdmin {
     }
 
     // CRUD-Related Functions
+    // ampersand is added so that it will make sure that the filename argument would not be modified
     void addProduct(const string& database, const string& productName, int quantity, int price) {
         if (isAlreadyInCsv(database, productName)) {
             cout << "Product '" << productName << "' is already in the CSV.\n";
@@ -108,7 +108,6 @@ class POSAdmin {
         Sleep(1200);
     }
 
-    // ampersand is added so that it will make sure that the filename argument would not be modifieds
     void readProducts(const string& database) {
         ifstream file(database);
         if (!file.is_open()) {
@@ -188,6 +187,56 @@ class POSAdmin {
             Sleep(1200);
         }
     }
+        
+    void updateInformation(const string& filename, const string& productName, const string& type, const string& newValue) {
+        ifstream fileIn(filename);
+        if (!fileIn) {
+            cout << "Cannot open file " << filename << endl;
+            return;
+        }
+
+        string fileContent, line;
+        bool found = false;
+
+        while (getline(fileIn, line)) {
+            stringstream ss(line);
+            string number, name, quantity, price;
+            getline(ss, number, ',');
+            getline(ss, name, ',');
+            getline(ss, quantity, ',');
+            getline(ss, price, ',');
+
+            if (name == productName) {
+               if(type == "quantity"){
+                    quantity = newValue;
+               } else if(type == "price"){
+                    price = newValue;
+               } else if(type == "productName"){
+                    name = newValue;
+               }
+                found = true;
+            }
+
+            fileContent += number + "," + name + "," + quantity + "," + price + "\n";
+        }
+        fileIn.close();
+
+        if (!found) {
+            cout << "Error: product '" << productName << "' not found.\n";
+        } else {
+            ofstream fileOut(filename);
+            if (!fileOut) {
+                cout << "Cannot write to file " << filename << endl;
+            }
+
+            fileOut << fileContent;
+            fileOut.close();
+
+            cout << "Updated successfully.\n";
+            Sleep(1200);
+        }
+    }
+
 };
 
 class PointOfSale {
@@ -245,7 +294,7 @@ class PointOfSale {
                             "Add products",
                             "Add an account",
                             "View all products",
-                            "Update quantity or name (U)",
+                            "Update quantity or name",
                             "Delete product",
                             "Delete an account",
                             "Go back"
@@ -253,12 +302,13 @@ class PointOfSale {
                         int inventoryInput = showMenu("Admin Utilities", inventoryMenu);
                         system("cls");
 
-                        int quantity, price;
-                        string productName, username, password, role;
                         string deleteUserInput, deleteProductInput;
 
                         switch (inventoryInput) {
-                            case 1:
+                            case 1: {
+                                string productName;
+                                int quantity, price;
+
                                 cout << "Enter the product name (type 0 to return): ";
                                 cin >> productName;
                                 if (productName == "0") break;
@@ -269,11 +319,16 @@ class PointOfSale {
 
                                 POS.admin.addProduct(productsDatabase, productName, quantity, price);
                                 break;
+                            }
 
-                            case 2:
+                            case 2: {
+                                string username, password, role;
+                                
                                 cout << "Enter the username you want to add (type 0 to return): ";
                                 cin >> username;
+
                                 if (username == "0") break;
+
                                 cout << "Enter the password: ";
                                 cin >> password;
                                 cout << "What is the role of the user? (Admin/Manager/Cashier): ";
@@ -282,6 +337,7 @@ class PointOfSale {
                                 POS.admin.addUser(usersDatabase, username, password, role);
                                 break;
 
+                            }
                             case 3:
                                 // since the terminal would not clear if it expects an input to the user
                                 // and we aim to let the inventory stay for a little while until the user wants to go back
@@ -292,10 +348,70 @@ class PointOfSale {
                                 cin >> dummyInput;
                                 break;
 
-                            case 4:
-                                cout << "Feature not implemented yet.\n";
-                                system("pause");
+                            case 4: {
+                                string updateMenu[] = {"Product", "Account", "Go back"};
+                                int updateInput = showMenu("Update", updateMenu);
+                                system("cls");
+
+                                if(updateInput == 1){
+                                    string updateProductMenu[] = {"Product name", "Product quantity", "Product price", "Go back"};
+                                    int updateProductInput = showMenu("Update product", updateProductMenu);
+
+                                    if(updateProductInput == 4){
+                                        // so that the user would not have to enter a product name to exit
+                                        break;
+                                    }
+
+                                    string originalProductName;
+
+                                    cout << "Enter the product name: ";
+                                    cin >> originalProductName;
+
+                                    switch(updateProductInput){
+                                        case 1: {
+                                            string newProductName;
+
+                                            cout << "Enter the new product name: ";
+                                            cin >> newProductName;
+
+                                            POS.admin.updateInformation(productsDatabase, originalProductName, "productName", newProductName);
+                                            break;
+                                        }
+                                        case 2: {
+                                            string newQuantity;
+    
+                                            cout << "Enter the new quantity: ";
+                                            cin >> newQuantity;
+
+                                            POS.admin.updateInformation(productsDatabase, originalProductName, "quantity", newQuantity);
+                                            break;
+                                        }
+                                        case 3: {
+                                            string newPrice;
+    
+                                            cout << "Enter the new price: ";
+                                            cin >> newPrice;
+
+                                            POS.admin.updateInformation(productsDatabase, originalProductName, "price", newPrice);
+                                            break;
+                                        }
+                                        default:
+                                            cout << "Invalid selection";
+                                            break;
+                                    }
+                                } else if (updateInput == 2){
+                                    string updateProductMenu[] = {"Username", "Password", "Role"};
+                                    int updateProductInput = showMenu("Update account", updateProductMenu);
+                                    
+                                    Sleep(1200);
+                                } else if(updateInput == 3){
+                                    break;
+                                } else {
+                                    cout << "Invalid selection";
+                                }
+
                                 break;
+                            }
 
                             case 5:
                                 cout << "Enter the product you want to delete (type 0 to return): ";
