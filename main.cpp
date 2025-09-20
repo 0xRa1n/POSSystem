@@ -15,7 +15,9 @@ int showMenu(string title, string (&menu)[N]) {
     cout << "---------------------------------" << endl;
 
     int selection;
-    int size = sizeof(menu) / sizeof(menu[0]); // correct element count
+    // count all the elements in the array
+    int size = sizeof(menu) / sizeof(menu[0]);
+    // the counter should start at 1
     int i = 1;
     
     for(string menuOptions : menu){
@@ -45,9 +47,11 @@ class POSAdmin {
                 try {
                     int id = stoi(idStr);
                     if (id > lastId) lastId = id;
+                // if it fails, do nothing
                 } catch (...) {}
             }
         }
+        // return the last ID found
         return lastId;
     }
 
@@ -65,13 +69,31 @@ class POSAdmin {
 
     // CRUD-Related Functions
     // ampersand is added so that it will make sure that the filename argument would not be modified
-    void addProduct(const string& database, const string& productName, int quantity, int price) {
+    void addProduct(const string& database) {
+        string productName;
+        int quantity, price;
+
+        // ask the user for the product name (if 0 is entered, it will go back to the menu)
+        cout << "Enter the product name (type 0 to return): ";
+        cin >> productName;
+
+        if (productName == "0") return;
+
+        // ask the user for the product's quantity and price
+        cout << "Enter the quantity: ";
+        cin >> quantity;
+        cout << "Enter the price: ";
+        cin >> price;
+
+        // use the function to check if the entry is already in the database
         if (isAlreadyInCsv(database, productName)) {
             cout << "Product '" << productName << "' is already in the CSV.\n";
         } else {
+            // get the last product id from the database
             int lastId = getLastId(database);
             int newId = lastId + 1;
 
+            // open the database file, and add the new product
             fstream fout;
             fout.open(database, ios::out | ios::app);
 
@@ -84,19 +106,37 @@ class POSAdmin {
             cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
         }
 
+        // wait for 1.2 seconds to go back to the main menu
         Sleep(1200);
     }
 
-    void addUser(const string& database, const string& username, const string& password, const string& role){
+    void addUser(const string& database){
+        string username, password, role;
+                                
+        // ask the user for the username (if 0 is entered, it will go back to the menu)
+        cout << "Enter the username you want to add (type 0 to return): ";
+        cin >> username;
+
+        if (username == "0") return;
+
+        // ask for the password and role
+        cout << "Enter the password: ";
+        cin >> password;
+        cout << "What is the role of the user? (Admin/Manager/Cashier): ";
+        cin >> role;
+
+        // use the function to check if the entry is already in the database
         if(isAlreadyInCsv(database, username)){
             cout << "User is already in the database!";
         } else {
+            // get the last user id from the dtabase
             int lastUserId = getLastId(database);
             int newUserId = lastUserId + 1;
 
             fstream fout;
             fout.open(database, ios::out | ios::app);
 
+            // open the database file, and add the new product
             fout << newUserId << ","
                 << username << ","
                 << password << ","
@@ -105,6 +145,7 @@ class POSAdmin {
             fout.close();
             cout << "Successfully added user " << username << endl;
         }
+        // wait for 1.2 seconds before going back to the menu
         Sleep(1200);
     }
 
@@ -153,6 +194,13 @@ class POSAdmin {
     }
 
     void deleteInformation(const string& filename, const string& toLook){
+        string deleteProductInput;
+
+        cout << "Enter the entry name you want to delete (type 0 to return): ";
+        cin >> deleteProductInput;
+
+        if (deleteProductInput == "0") return;
+
         ifstream input_file(filename);
         vector<string> rows;
         string line;
@@ -305,39 +353,12 @@ class PointOfSale {
                         string deleteUserInput, deleteProductInput;
 
                         switch (inventoryInput) {
-                            case 1: {
-                                string productName;
-                                int quantity, price;
-
-                                cout << "Enter the product name (type 0 to return): ";
-                                cin >> productName;
-                                if (productName == "0") break;
-                                cout << "Enter the quantity: ";
-                                cin >> quantity;
-                                cout << "Enter the price: ";
-                                cin >> price;
-
-                                POS.admin.addProduct(productsDatabase, productName, quantity, price);
+                            case 1: 
+                                POS.admin.addProduct(productsDatabase);
                                 break;
-                            }
-
-                            case 2: {
-                                string username, password, role;
-                                
-                                cout << "Enter the username you want to add (type 0 to return): ";
-                                cin >> username;
-
-                                if (username == "0") break;
-
-                                cout << "Enter the password: ";
-                                cin >> password;
-                                cout << "What is the role of the user? (Admin/Manager/Cashier): ";
-                                cin >> role;
-
-                                POS.admin.addUser(usersDatabase, username, password, role);
+                            case 2: 
+                                POS.admin.addUser(usersDatabase);
                                 break;
-
-                            }
                             case 3:
                                 // since the terminal would not clear if it expects an input to the user
                                 // and we aim to let the inventory stay for a little while until the user wants to go back
@@ -368,6 +389,7 @@ class PointOfSale {
                                     cin >> originalProductName;
 
                                     switch(updateProductInput){
+                                        // i'm not gonna change the structure of this code for now, since we are determining for the third argument on which operation to do
                                         case 1: {
                                             string newProductName;
 
@@ -409,32 +431,18 @@ class PointOfSale {
                                 } else {
                                     cout << "Invalid selection";
                                 }
-
                                 break;
                             }
 
                             case 5:
-                                cout << "Enter the product you want to delete (type 0 to return): ";
-                                cin >> deleteProductInput;
-
-                                if (deleteProductInput == "0") break;
-
                                 POS.admin.deleteInformation(productsDatabase, deleteProductInput);
                                 break;
-
                             case 6:
-                                cout << "Enter the username you want to delete (type 0 to return): ";
-                                cin >> deleteUserInput;
-
-                                if (deleteUserInput == "0") break;
-
                                 POS.admin.deleteInformation(usersDatabase, deleteUserInput);
                                 break;
-
                             case 7: 
                                 // Go back to admin main menu
                                 goto endInventoryLoop;
-
                             default:
                                 cout << "Invalid selection. Try again.\n";
                                 system("pause");

@@ -7,5 +7,6 @@
     "iosfwd": "cpp",
     "stdexcept": "cpp",
     "cstddef": "cpp"
-  }
+  },
+  "C_Cpp.errorSquiggles": "enabled"
 }
