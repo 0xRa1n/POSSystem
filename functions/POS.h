@@ -9,12 +9,15 @@ using namespace std;
 
 #include "POSAdmin.h"
 
+void showHeader(const string& headerTitle){
+    system("cls");
+    cout << "---------------------------------" << endl;
+    cout << headerTitle << endl ;
+    cout << "---------------------------------" << endl;
+}
 template<size_t N>
-int showMenu(string title, string (&menu)[N]) {      
-    cout << "---------------------------------" << endl;
-    cout << title << endl ;
-    cout << "---------------------------------" << endl;
-
+int showMenu(const string& headerTitle, string (&menu)[N]) {      
+    showHeader(headerTitle);
     int selection;
     // count all the elements in the array
     int size = sizeof(menu) / sizeof(menu[0]);
@@ -77,8 +80,8 @@ class PointOfSale {
         // initalize a loop, where it contains the menu Inventory, Monitoring, and Logout
         while (true) {
             system("cls");
-            string menu[] = {"Inventory", "Monitoring", "Logout"};
-            int adminSelection = showMenu("Admin", menu);
+            string menu[] = {"Utilities", "Monitoring", "Logout"};
+            int adminSelection = showMenu("P.O.S. (Admin)", menu);
             system("cls");
 
             switch (adminSelection) {
@@ -90,24 +93,30 @@ class PointOfSale {
                             "Add products",
                             "Add an account",
                             "View all products",
-                            "Update quantity or name",
-                            "Delete product",
+                            "Update account or product",
+                            "Delete a product",
                             "Delete an account",
                             "Go back"
                         };
-                        int inventoryInput = showMenu("Admin Utilities", inventoryMenu);
+                        int inventoryInput = showMenu("Admin utilities", inventoryMenu);
                         system("cls");
 
                         string deleteUserInput, deleteProductInput;
 
                         switch (inventoryInput) {
-                            case 1: 
+                            case 1: // add product
+                                showHeader("Add a product");
+
                                 POS.admin.addProduct(productsDatabase);
                                 break;
-                            case 2: 
+                            case 2: // add account                
+                                showHeader("Add an account");              
+                                cout << "Add account" << endl;
+
                                 POS.admin.addUser(usersDatabase);
                                 break;
-                            case 3:
+                            case 3: // view products
+                                showHeader("View all products");
                                 // since the terminal would not clear if it expects an input to the user
                                 // and we aim to let the inventory stay for a little while until the user wants to go back
                                 POS.admin.readProducts(productsDatabase);
@@ -116,7 +125,7 @@ class PointOfSale {
                                 int dummyInput;
                                 cin >> dummyInput;
                                 break;
-                            case 4: {
+                            case 4: { // update
                                 // initialize a loop where it contains the menu Product, Account, and Go back
                                 while(true){
                                     system("cls");
@@ -135,51 +144,54 @@ class PointOfSale {
                                                 break;
                                             }
 
-                                            string originalProductName;
-
-                                            cout << "Enter the product name: ";
-                                            cin >> originalProductName;
-
                                             switch(updateProductInput){
-                                                case 1: {
-                                                    string newProductName;
-
-                                                    cout << "Enter the new product name: ";
-                                                    cin >> newProductName;
-
-                                                    POS.admin.updateInformation(productsDatabase, originalProductName, "productName", newProductName);
+                                                case 1: { // update product name
+                                                    POS.admin.updateProductFields("product", productsDatabase, "name");
                                                     break;
                                                 }
-                                                case 2: {
-                                                    string newQuantity;
-            
-                                                    cout << "Enter the new quantity: ";
-                                                    cin >> newQuantity;
-
-                                                    POS.admin.updateInformation(productsDatabase, originalProductName, "quantity", newQuantity);
+                                                case 2: { // update product quantity
+                                                    POS.admin.updateProductFields("product", productsDatabase, "quantity");
                                                     break;
                                                 }
-                                                case 3: {
-                                                    string newPrice;
-            
-                                                    cout << "Enter the new price: ";
-                                                    cin >> newPrice;
-
-                                                    POS.admin.updateInformation(productsDatabase, originalProductName, "price", newPrice);
+                                                case 3: { // update product price
+                                                    POS.admin.updateProductFields("product", productsDatabase, "price");
                                                     break;
                                                 }
                                                 default:
                                                     cout << "Invalid selection";
                                                     break;
                                             }
-                                            break;
                                         }
-                                    } else if (updateInput == 2){
-                                        string updateProductMenu[] = {"Username", "Password", "Role"};
-                                        int updateProductInput = showMenu("Update account", updateProductMenu);
-                                        
-                                        Sleep(1200);
-                                    } else if(updateInput == 3){
+                                    } else if (updateInput == 2){                                        
+                                        // initialize a loop to update the information of a product                          
+                                        while(true){
+                                            string updateAccountMenu[] = {"Username", "Password", "Role", "Go back"};
+                                            int updateAccountInput = showMenu("Update account", updateAccountMenu);
+
+                                            if(updateAccountInput == 4){
+                                                // this will end the loop, and will return to the previous loop
+                                                break;
+                                            }
+
+                                            switch(updateAccountInput){
+                                                case 1: { // update username
+                                                    POS.admin.updateProductFields("account", usersDatabase, "username");
+                                                    break;
+                                                }
+                                                case 2: { // update password
+                                                    POS.admin.updateProductFields("account", usersDatabase, "password");
+                                                    break;
+                                                }
+                                                case 3: { // update role
+                                                    POS.admin.updateProductFields("account", usersDatabase, "role");
+                                                    break;
+                                                }
+                                                default:
+                                                    cout << "Invalid selection";
+                                                    break;
+                                            }
+                                        }
+                                    } else if(updateInput == 3){ // go back
                                         // this will go back to the admin menu
                                         break;
                                     } else {
@@ -188,13 +200,15 @@ class PointOfSale {
                                 }
                                 break;
                             }
-                            case 5:
+                            case 5: // delete product
+                                showHeader("Delete product");
                                 POS.admin.deleteInformation(productsDatabase);
                                 break;
-                            case 6:
+                            case 6: // delete account
+                                showHeader("Delete account");
                                 POS.admin.deleteInformation(usersDatabase);
                                 break;
-                            case 7: 
+                            case 7: // go back
                                 // Go back to admin main menu
                                 goto endInventoryLoop;
                             default:
@@ -208,10 +222,7 @@ class PointOfSale {
                     break;
                 }
                 case 2:
-                    POS.admin.readProducts(productsDatabase);
-                    cout << "\nType any number to go back: ";
-                    int dummyInput;
-                    cin >> dummyInput;
+                    // in this part, just use the function above to print all the products
                     break;
 
                 case 3:

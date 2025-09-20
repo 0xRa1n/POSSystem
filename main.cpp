@@ -9,9 +9,7 @@ int main(){
     string usernameInput, passwordInput, role;
 
     system("cls");
-    cout << "---------------------------------" << endl;
-    cout << "Login" << endl ;
-    cout << "---------------------------------" << endl;
+    showHeader("Threads and Charms");
     while(true){
         cout << "Enter your username: ";
         cin >> usernameInput;

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cctype>
 #include <sstream>
 #include <conio.h>
 #include <cstdlib>
@@ -212,11 +213,10 @@ class POSAdmin {
         Sleep(1200);
     }
         
-    void updateInformation(const string& filename, const string& productName, const string& type, const string& newValue) {
+    void updateInformation(const string& filename, const string& query, const string& type, const string& newValue) {
         ifstream fileIn(filename);
         if (!fileIn) {
             cout << "Cannot open file " << filename << endl;
-            return;
         }
 
         string fileContent, line;
@@ -224,29 +224,34 @@ class POSAdmin {
 
         while (getline(fileIn, line)) {
             stringstream ss(line);
-            string number, name, quantity, price;
-            getline(ss, number, ',');
-            getline(ss, name, ',');
-            getline(ss, quantity, ',');
-            getline(ss, price, ',');
+            string indexOne, indexTwo, indexThree, indexFour;
+            getline(ss, indexOne, ',');
+            getline(ss, indexTwo, ',');
+            getline(ss, indexThree, ',');
+            getline(ss, indexFour, ',');
 
-            if (name == productName) {
-               if(type == "quantity"){
-                    quantity = newValue;
-               } else if(type == "price"){
-                    price = newValue;
-               } else if(type == "productName"){
-                    name = newValue;
+            if (indexTwo == query) {
+               if(type == "productName"){
+                    indexTwo = newValue;
+               } else if(type == "productQuantity"){
+                    indexThree = newValue;
+               } else if(type == "productPrice"){
+                    indexFour = newValue;
+               } else if(type == "accountUsername"){
+                    indexTwo = newValue;
+               } else if(type == "accountPassword"){
+                    indexThree = newValue;
+               } else if(type == "accountRole"){
+                    indexFour = newValue;
                }
                 found = true;
             }
-
-            fileContent += number + "," + name + "," + quantity + "," + price + "\n";
+            fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "\n";
         }
         fileIn.close();
 
         if (!found) {
-            cout << "Error: product '" << productName << "' not found.\n";
+            cout << "Error: product '" << query << "' not found.\n";
         } else {
             ofstream fileOut(filename);
             if (!fileOut) {
@@ -257,7 +262,30 @@ class POSAdmin {
             fileOut.close();
 
             cout << "Updated successfully.\n";
-            Sleep(1200);
         }
+        Sleep(1200);
     }
+    
+    void updateProductFields(const string &type, const string& productsDatabase, string field){
+        system("cls");
+        cout << "---------------------------------" << endl;
+        cout << "Update " + type + " " + field << endl;
+        cout << "---------------------------------" << endl;
+        string originalInputName;
+
+        cout << "Enter the " + type + " name (type 0 to go back): ";
+        cin >> originalInputName;
+
+        // just somehow if the user decides to change his mind
+        if(originalInputName == "0") return;
+        string newInputField;
+
+        cout << "Enter the new " + type + " " + field + ": ";
+        cin >> newInputField;
+
+        field[0] = toupper(field[0]);
+
+        updateInformation(productsDatabase, originalInputName, type + field, newInputField);
+    }
+
 };
