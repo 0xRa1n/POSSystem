@@ -1,5 +1,4 @@
 UserID,Username,Password,Role
 1,admin,admin,Admin
-2,john,admin,Admin
 3,rainCashier,rain,Cashier
 4,rainManager,manager,Manager
