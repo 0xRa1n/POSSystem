@@ -11,7 +11,7 @@ using namespace std;
 class POSAdmin {
     public:
     // this part is related to adding an a product
-    int getLastId(const string& filename) {
+    int getLastId(string filename) {
         ifstream fin(filename);
         string line;
         int lastId = 0;
@@ -32,7 +32,7 @@ class POSAdmin {
         return lastId;
     }
 
-    bool isAlreadyInCsv(const string& filename, const string& productNameToCheck) {
+    bool isAlreadyInCsv(string filename, string productNameToCheck) {
         ifstream fin(filename);
         string line;
 
@@ -45,8 +45,7 @@ class POSAdmin {
     }
 
     // CRUD-Related Functions
-    // ampersand is added so that it will make sure that the filename argument would not be modified
-    void addProduct(const string& database) {
+    void addProduct(string database) {
         string productName;
         int quantity, price;
 
@@ -87,7 +86,7 @@ class POSAdmin {
         Sleep(1200);
     }
 
-    void addUser(const string& database){
+    void addUser(string database){
         string username, password, role;
                                 
         // ask the user for the username (if 0 is entered, it will go back to the menu)
@@ -126,7 +125,7 @@ class POSAdmin {
         Sleep(1200);
     }
 
-    void readProducts(const string& database) {
+    void readProducts(string database) {
         ifstream file(database);
         if (!file.is_open()) {
             cout << "Failed to open file\n";
@@ -171,7 +170,7 @@ class POSAdmin {
         }
     }
 
-    void deleteInformation(const string& filename){
+    void deleteInformation(string filename){
         string deleteProductInput;
 
         cout << "Enter the entry name you want to delete (type 0 to return): ";
@@ -213,7 +212,7 @@ class POSAdmin {
         Sleep(1200);
     }
         
-    void updateInformation(const string& filename, const string& query, const string& type, const string& newValue) {
+    void updateInformation(string filename, string query, string type, string newValue) {
         ifstream fileIn(filename);
         if (!fileIn) {
             cout << "Cannot open file " << filename << endl;
@@ -266,7 +265,7 @@ class POSAdmin {
         Sleep(1200);
     }
     
-    void updateProductFields(const string &type, const string& productsDatabase, string field){
+    void updateProductFields(string type, string productsDatabase, string field){
         system("cls");
         cout << "---------------------------------" << endl;
         cout << "Update " + type + " " + field << endl;

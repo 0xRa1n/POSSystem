@@ -9,14 +9,14 @@ using namespace std;
 
 #include "POSAdmin.h"
 
-void showHeader(const string& headerTitle){
+void showHeader(string headerTitle){
     system("cls");
     cout << "---------------------------------" << endl;
     cout << headerTitle << endl ;
     cout << "---------------------------------" << endl;
 }
 template<size_t N>
-int showMenu(const string& headerTitle, string (&menu)[N]) {      
+int showMenu(string headerTitle, string (&menu)[N]) {      
     showHeader(headerTitle);
     int selection;
     // count all the elements in the array
@@ -40,7 +40,7 @@ class PointOfSale {
     // POSAdmin is called from the functions/POSAdmin.h
     POSAdmin admin;
 
-    bool login(const string& username, const string& password, string& outRole) {
+    bool login(string username, string password, string& outRole) {
         const string userAccounts = "database/userAccounts.csv";
         ifstream file(userAccounts);
         if (!file.is_open()) {
