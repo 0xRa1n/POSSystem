@@ -84,7 +84,7 @@ class POSCashier {
 
     }
 
-    void    ProductsBySubcategory(string productsDatabase, string subCategory){
+    void readProductsBySubcategory(string productsDatabase, string subCategory){
         int quantityToPurchase;
         ifstream file(productsDatabase);
               
