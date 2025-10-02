@@ -8,6 +8,7 @@
 using namespace std;
 
 #include "POSAdmin.h"
+#include "POSCashier.h"
 
 void showHeader(string headerTitle){
     system("cls");
@@ -39,6 +40,7 @@ class PointOfSale {
     public:
     // POSAdmin is called from the functions/POSAdmin.h
     POSAdmin admin;
+    POSCashier cashier;
 
     bool login(string username, string password, string& outRole) {
         const string userAccounts = "database/userAccounts.csv";
@@ -222,7 +224,10 @@ class PointOfSale {
                     break;
                 }
                 case 2:
-                    // in this part, just use the function above to print all the products
+                    POS.admin.readProducts(productsDatabase);
+                    cout << "\nType any number to go back: ";
+                    int dummyInput;
+                    cin >> dummyInput;
                     break;
 
                 case 3:
@@ -242,7 +247,114 @@ class PointOfSale {
         // Add manager-related options here
     }
     void cashierMenu(PointOfSale& POS) {
-        cout << "Welcome CASHIER\n";
-        // Add cashier-related options here
+        const string productsDatabase = "database/products.csv";
+        while(true){
+            system("cls");
+            string menu[] = {"Tops", "Bottoms", "Accessories", "Exit"};
+            int cashierSelection = showMenu("P.O.S. (Cashier)", menu);
+
+            switch (cashierSelection) {
+                case 1 : {
+                    string topsSubCategory[] = {"T-Shirts", "Polo Shirts", "Jackets", "Go back"};
+                    int topsSelection = showMenu("Tops", topsSubCategory);
+
+                    if(topsSelection == 4){
+                        // go back to the previous menu
+                        break;
+                    }
+
+                    switch(topsSelection){
+                        case 1: 
+                            showHeader("T-Shirts");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "T_Shirts");
+                            break;
+                            
+                        case 2:
+                            showHeader("Polo Shirts");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Polo_Shirts");
+                            break;
+
+                        case 3:
+                            showHeader("Jackets");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Jackets");
+                            break;
+                        default:
+                            cout << "Invalid option\n";
+                            Sleep(1200);
+                            break;
+                    }
+                    break;
+                }
+                case 2: {
+                    string bottomsSubCategory[] = {"Jeans", "Shorts", "Skirts", "Go back"};
+                    int bottomsSelection = showMenu("Bottoms", bottomsSubCategory);
+
+                    if(bottomsSelection == 4){
+                        // go back to the previous menu
+                        break;
+                    }
+
+                    switch(bottomsSelection){
+                        case 1: 
+                            showHeader("Jeans");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Jeans");
+                            break;
+                            
+                        case 2:
+                            showHeader("Shorts");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Shorts");
+                            break;
+
+                        case 3:
+                            showHeader("Skirts");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Skirts");
+                            break;
+                        default:
+                            cout << "Invalid option\n";
+                            Sleep(1200);
+                            break;
+                    }
+                    break;
+                }
+                case 3: {
+                    string accessoriesSubCategory[] = {"Bags", "Headware", "Wallets", "Go back"};
+                    int accessoriesSelection = showMenu("Accessories", accessoriesSubCategory);
+
+                    if(accessoriesSelection == 4){
+                        // go back to the previous menu
+                        break;
+                    }
+
+                    switch(accessoriesSelection){
+                        case 1: 
+                            showHeader("Bags");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Bags");
+                            break;
+                            
+                        case 2:
+                            showHeader("Headware");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Headware");
+                            break;
+
+                        case 3:
+                            showHeader("Wallets");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Wallets");
+                            break;
+                        default:
+                            cout << "Invalid option\n";
+                            Sleep(1200);
+                            break;
+                    }
+                    break;
+                }
+                case 4:
+                    cout << "Goodbye.\n";
+                    exit(0);
+                default:
+                    cout << "Invalid option\n";
+                    Sleep(1000);
+                    break;
+            }
+        }
     }
 };

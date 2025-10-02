@@ -17,13 +17,13 @@ class POSAdmin {
         int lastId = 0;
 
         while (getline(fin, line)) {
-            if (line.empty()) continue;
-            stringstream ss(line);
+            if (line.empty()) continue; // skip empty lines
+            stringstream ss(line); 
             string idStr;
             if (getline(ss, idStr, ',')) {
                 try {
                     int id = stoi(idStr);
-                    if (id > lastId) lastId = id;
+                    if (id > lastId) lastId = id; // update lastId if current id is greater
                 // if it fails, do nothing
                 } catch (...) {}
             }
@@ -46,7 +46,7 @@ class POSAdmin {
 
     // CRUD-Related Functions
     void addProduct(string database) {
-        string productName;
+        string productName, productSubCategory;
         int quantity, price;
 
         // ask the user for the product name (if 0 is entered, it will go back to the menu)
@@ -54,6 +54,11 @@ class POSAdmin {
         cin >> productName;
 
         if (productName == "0") return;
+
+        // ask the user if what product sub-category is the product
+
+        cout << "Enter the product sub-category: ";
+        cin >> productSubCategory;
 
         // ask the user for the product's quantity and price
         cout << "Enter the quantity: ";
@@ -75,6 +80,7 @@ class POSAdmin {
 
             fout << newId << ","
                 << productName << ","
+                << productSubCategory << ","
                 << quantity << ","
                 << price << "\n";
 
@@ -133,16 +139,16 @@ class POSAdmin {
         }
 
         // Read all rows first
-        vector<vector<string>> rows;
+        vector<vector<string>> rows; // 2D vector to hold rows and columns
         string line;
         while (getline(file, line)) {
             stringstream ss(line);
             string cell;
-            vector<string> row;
-            while (getline(ss, cell, ',')) {
-                row.push_back(cell);
+            vector<string> row; 
+            while (getline(ss, cell, ',')) { // split by comma
+                row.push_back(cell); // add cell to the current row
             }
-            rows.push_back(row);
+            rows.push_back(row); // add the row to the list of rows
         }
         file.close();
 
@@ -151,11 +157,11 @@ class POSAdmin {
 
         // Find max width of each column
         size_t cols = 0;
-        for (auto &r : rows) cols = max(cols, r.size());
-        vector<size_t> widths(cols, 0);
-        for (auto &r : rows) {
-            for (size_t c = 0; c < r.size(); ++c)
-                widths[c] = max(widths[c], r[c].size());
+        for (auto &r : rows) cols = max(cols, r.size()); // number of columns
+        vector<size_t> widths(cols, 0); // initialize widths with 0
+        for (auto &r : rows) { 
+            for (size_t c = 0; c < r.size(); ++c) // for each column in the row
+                widths[c] = max(widths[c], r[c].size()); // update max width
         }
 
         // Add a little padding for readability
@@ -163,8 +169,8 @@ class POSAdmin {
 
         // Print
         for (auto &r : rows) {
-            for (size_t c = 0; c < r.size(); ++c) {
-                cout << left << setw(static_cast<int>(widths[c])) << r[c];
+            for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
+                cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding
             }
             cout << '\n';
         }
@@ -190,7 +196,7 @@ class POSAdmin {
             getline(ss, token, ',');     // read id (not used)
             getline(ss, token, ',');     // read username
             if(token != deleteProductInput){
-                rows.push_back(line);
+                rows.push_back(line); // keep the line if it doesn't match
             } else {
                 found = true;
             }
