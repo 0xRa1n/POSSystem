@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <conio.h>
+#include <cctype>
 #include <cstdlib>
 #include <windows.h>
 #include <bits/stdc++.h>
@@ -16,26 +17,34 @@ void showHeader(string headerTitle){
     cout << headerTitle << endl ;
     cout << "---------------------------------" << endl;
 }
+// ...existing code...
 template<size_t N>
 int showMenu(string headerTitle, string (&menu)[N]) {      
     showHeader(headerTitle);
-    int selection;
-    // count all the elements in the array
-    int size = sizeof(menu) / sizeof(menu[0]);
-    // the counter should start at 1
+
+    // print menu
     int i = 1;
-    
-    for(string menuOptions : menu){
+    for (string menuOptions : menu) {
         cout << "[" << i++ << "] " << menuOptions << endl;
-    }      
+    }
 
     cout << "---------------------------------" << endl;
     cout << "Option: ";
-    cin >> selection;
 
-    return selection;
+    int input;
+    cin >> input;
+    // in this manner, if the user inputs a non-integer value, it will not crash the program
+    // or not use try-catch
+    if(cin.fail()){
+        cin.clear(); // clear the fail state
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // the numeric_limits basically ignores everything until the next newline character
+        // in this manner, everything will be cleared until it comes back to the loop
+        return -1;
+    } else {
+        return input;
+    }
 }
-
+// ...existing code...
 class PointOfSale {
     public:
     // POSAdmin is called from the functions/POSAdmin.h
@@ -44,7 +53,10 @@ class PointOfSale {
 
     bool login(string username, string password, string& outRole) {
         const string userAccounts = "database/userAccounts.csv";
+        // open the userAccounts database
         ifstream file(userAccounts);
+        
+        // check if the file exists
         if (!file.is_open()) {
             cerr << "Could not open file " << userAccounts << endl;
             return false;
@@ -55,14 +67,14 @@ class PointOfSale {
 
         while (getline(file, line)) {
             // finds the position of each value after the comma
-            size_t pos1 = line.find(',');
-            size_t pos2 = line.find(',', pos1 + 1);
-            size_t pos3 = line.find(',', pos2 + 1);
+            size_t pos1 = line.find(','); // first comma
+            size_t pos2 = line.find(',', pos1 + 1); // second comma
+            size_t pos3 = line.find(',', pos2 + 1); // third comma
 
             // substrings the previous values, and gets the username, password, and role
-            string csvUsername = line.substr(pos1 + 1, pos2 - pos1 - 1);
-            string csvPassword = line.substr(pos2 + 1, pos3 - pos2 - 1);
-            string csvRole = line.substr(pos3 + 1);
+            string csvUsername = line.substr(pos1 + 1, pos2 - pos1 - 1); // username
+            string csvPassword = line.substr(pos2 + 1, pos3 - pos2 - 1); // password
+            string csvRole = line.substr(pos3 + 1); // role
 
             if (csvUsername == username && csvPassword == password) {
                 outRole = csvRole;
@@ -214,8 +226,8 @@ class PointOfSale {
                                 // Go back to admin main menu
                                 goto endInventoryLoop;
                             default:
-                                cout << "Invalid selection. Try again.\n";
-                                system("pause");
+                                cout << "Invalid selection.\n";
+                                Sleep(1200);
                                 break;
                         }
                     }

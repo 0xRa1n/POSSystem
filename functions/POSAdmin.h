@@ -18,7 +18,7 @@ class POSAdmin {
 
         while (getline(fin, line)) {
             if (line.empty()) continue; // skip empty lines
-            stringstream ss(line); 
+            stringstream ss(line);
             string idStr;
             if (getline(ss, idStr, ',')) {
                 try {
@@ -76,7 +76,7 @@ class POSAdmin {
 
             // open the database file, and add the new product
             fstream fout;
-            fout.open(database, ios::out | ios::app);
+            fout.open(database, ios::out | ios::app); // append mode
 
             fout << newId << ","
                 << productName << ","
@@ -132,7 +132,10 @@ class POSAdmin {
     }
 
     void readProducts(string database) {
+        // Open the file
         ifstream file(database);
+
+        // check if file exists
         if (!file.is_open()) {
             cout << "Failed to open file\n";
             return;
@@ -146,11 +149,11 @@ class POSAdmin {
             string cell;
             vector<string> row; 
             while (getline(ss, cell, ',')) { // split by comma
-                row.push_back(cell); // add cell to the current row
+                row.push_back(cell); // add each cell to the row
             }
             rows.push_back(row); // add the row to the list of rows
         }
-        file.close();
+        file.close(); // close the file
 
         // stop if the rows are empty
         if (rows.empty()) return;
