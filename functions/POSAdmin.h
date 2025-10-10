@@ -53,6 +53,7 @@ class POSAdmin {
         cout << "Enter the product name (type 0 to return): ";
         cin >> productName;
 
+        // if user changes his mind
         if (productName == "0") return;
 
         // ask the user if what product sub-category is the product
@@ -99,6 +100,7 @@ class POSAdmin {
         cout << "Enter the username you want to add (type 0 to return): ";
         cin >> username;
 
+        // just somehow if the user decides to change his mind
         if (username == "0") return;
 
         // ask for the password and role
@@ -210,10 +212,11 @@ class POSAdmin {
             cout << "Query not found";
         } else {
             // Write back filtered rows
-            ofstream output_file(filename, ios::trunc);
-            for (const auto& row : rows) {
-                output_file << row << "\n";
-            }
+            ofstream output_file(filename, ios::trunc); // open in truncate mode
+            // it avoids the line that has the query, and it rewrites the csv without it
+            for (const auto& row : rows) { // write each remaining row
+                output_file << row << "\n"; // add newline
+            } 
             output_file.close();
 
             cout << "Successfully deleted " << deleteProductInput << endl;
@@ -232,20 +235,29 @@ class POSAdmin {
 
         while (getline(fileIn, line)) {
             stringstream ss(line);
-            string indexOne, indexTwo, indexThree, indexFour;
+            string indexOne, indexTwo, indexThree, indexFour, indexFive;
+            // get a copy of each entries
             getline(ss, indexOne, ',');
             getline(ss, indexTwo, ',');
             getline(ss, indexThree, ',');
             getline(ss, indexFour, ',');
+            getline(ss, indexFive, ','); // in case there are more commas, just get the rest of the line
 
+            // modify the entry if it matches the query
             if (indexTwo == query) {
+                // update the corresponding field
+                // product
                if(type == "productName"){
                     indexTwo = newValue;
                } else if(type == "productQuantity"){
-                    indexThree = newValue;
-               } else if(type == "productPrice"){
                     indexFour = newValue;
-               } else if(type == "accountUsername"){
+               } else if(type == "productPrice"){
+                    indexFive = newValue;
+               }  else if(type == "productSubCategory"){
+                    indexThree = newValue;
+               } 
+               // account
+               else if(type == "accountUsername"){
                     indexTwo = newValue;
                } else if(type == "accountPassword"){
                     indexThree = newValue;
@@ -254,7 +266,8 @@ class POSAdmin {
                }
                 found = true;
             }
-            fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "\n";
+            // write back to the file content
+            fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "," + indexFive + "\n";
         }
         fileIn.close();
 
@@ -274,7 +287,7 @@ class POSAdmin {
         Sleep(1200);
     }
     
-    void updateProductFields(string type, string productsDatabase, string field){
+    void updateProductFields(string type, string database, string field){
         system("cls");
         cout << "---------------------------------" << endl;
         cout << "Update " + type + " " + field << endl;
@@ -293,7 +306,7 @@ class POSAdmin {
 
         field[0] = toupper(field[0]);
 
-        updateInformation(productsDatabase, originalInputName, type + field, newInputField);
+        updateInformation(database, originalInputName, type + field, newInputField);
     }
 
 };

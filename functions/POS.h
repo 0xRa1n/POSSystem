@@ -17,7 +17,7 @@ void showHeader(string headerTitle){
     cout << headerTitle << endl ;
     cout << "---------------------------------" << endl;
 }
-// ...existing code...
+
 template<size_t N>
 int showMenu(string headerTitle, string (&menu)[N]) {      
     showHeader(headerTitle);
@@ -150,27 +150,31 @@ class PointOfSale {
                                     if(updateInput == 1){                  
                                         // initialize a loop to update the information of a product                          
                                         while(true){
-                                            string updateProductMenu[] = {"Product name", "Product quantity", "Product price", "Go back"};
+                                            string updateProductMenu[] = {"Product name", "Product Sub-Category", "Product quantity", "Product price", "Go back"};
                                             int updateProductInput = showMenu("Update product", updateProductMenu);
 
-                                            if(updateProductInput == 4){
+                                            if(updateProductInput == 5){
                                                 // this will end the loop, and will return to the previous loop
                                                 break;
                                             }
 
                                             switch(updateProductInput){
-                                                case 1: { // update product name
+                                                case 1:  // update product name
                                                     POS.admin.updateProductFields("product", productsDatabase, "name");
                                                     break;
-                                                }
-                                                case 2: { // update product quantity
+                                                
+                                                case 2:  // update product sub-category
+                                                    POS.admin.updateProductFields("product", productsDatabase, "subCategory");
+                                                    break;
+                                                  
+                                                case 3:  // update product quantity
                                                     POS.admin.updateProductFields("product", productsDatabase, "quantity");
                                                     break;
-                                                }
-                                                case 3: { // update product price
+                                                
+                                                case 4:  // update product price
                                                     POS.admin.updateProductFields("product", productsDatabase, "price");
                                                     break;
-                                                }
+                                                
                                                 default:
                                                     cout << "Invalid selection";
                                                     break;

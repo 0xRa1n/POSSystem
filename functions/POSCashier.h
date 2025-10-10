@@ -79,8 +79,7 @@ class POSCashier {
             cout << "Purchase cancelled." << endl;
         }
         cout << "---------------------------------" << endl;
-        cout << "Press any key to create another purchase\n" << endl;
-        getch();
+        system("pause");
 
     }
 
@@ -90,8 +89,6 @@ class POSCashier {
               
         if (!file.is_open()) {
             cout << "Failed to open file\n";
-            cout << "Press any key to continue...";
-            getch();
             return;
         }
 
@@ -117,8 +114,7 @@ class POSCashier {
 
         if (tshirtRows.empty()) {
             cout << "No T-Shirts available.\n";
-            cout << "Press any key to continue...";
-            getch();
+            Sleep(1200);
             return;
         }
 
