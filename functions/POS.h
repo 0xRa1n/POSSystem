@@ -19,12 +19,16 @@ void showHeader(string headerTitle){
 }
 
 template<size_t N>
-int showMenu(string headerTitle, string (&menu)[N]) {      
+// the template size_t N is used so that the function will know the size of the array passed to it
+// and where will it end
+// for example: string updateAccountMenu[] = {"Username", "Password", "Role", "Go back"};
+// the size of this array is 4, so N will be 4. and will print 4 options
+int showMenu(string headerTitle, string (&menu)[N]) {  // pass array by reference to retain size information
     showHeader(headerTitle);
 
     // print menu
     int i = 1;
-    for (string menuOptions : menu) {
+    for (string menuOptions : menu) { // iterate through each option in the menu array
         cout << "[" << i++ << "] " << menuOptions << endl;
     }
 
@@ -44,7 +48,6 @@ int showMenu(string headerTitle, string (&menu)[N]) {
         return input;
     }
 }
-// ...existing code...
 class PointOfSale {
     public:
     // POSAdmin is called from the functions/POSAdmin.h
@@ -115,18 +118,13 @@ class PointOfSale {
                         int inventoryInput = showMenu("Admin utilities", inventoryMenu);
                         system("cls");
 
-                        string deleteUserInput, deleteProductInput;
-
                         switch (inventoryInput) {
                             case 1: // add product
                                 showHeader("Add a product");
-
                                 POS.admin.addProduct(productsDatabase);
                                 break;
                             case 2: // add account                
                                 showHeader("Add an account");              
-                                cout << "Add account" << endl;
-
                                 POS.admin.addUser(usersDatabase);
                                 break;
                             case 3: // view products
@@ -135,9 +133,7 @@ class PointOfSale {
                                 // and we aim to let the inventory stay for a little while until the user wants to go back
                                 POS.admin.readProducts(productsDatabase);
 
-                                cout << "\nType any number to go back: ";
-                                int dummyInput;
-                                cin >> dummyInput;
+                                system("pause");
                                 break;
                             case 4: { // update
                                 // initialize a loop where it contains the menu Product, Account, and Go back
@@ -162,20 +158,16 @@ class PointOfSale {
                                                 case 1:  // update product name
                                                     POS.admin.updateProductFields("product", productsDatabase, "name");
                                                     break;
-                                                
                                                 case 2:  // update product sub-category
                                                     POS.admin.updateProductFields("product", productsDatabase, "subCategory");
                                                     break;
-                                                  
                                                 case 3:  // update product quantity
                                                     POS.admin.updateProductFields("product", productsDatabase, "quantity");
                                                     break;
-                                                
                                                 case 4:  // update product price
                                                     POS.admin.updateProductFields("product", productsDatabase, "price");
                                                     break;
-                                                
-                                                default:
+                                                default: // fallback
                                                     cout << "Invalid selection";
                                                     break;
                                             }
@@ -192,18 +184,15 @@ class PointOfSale {
                                             }
 
                                             switch(updateAccountInput){
-                                                case 1: { // update username
+                                                case 1:  // update username
                                                     POS.admin.updateProductFields("account", usersDatabase, "username");
                                                     break;
-                                                }
-                                                case 2: { // update password
+                                                case 2:  // update password
                                                     POS.admin.updateProductFields("account", usersDatabase, "password");
                                                     break;
-                                                }
-                                                case 3: { // update role
+                                                case 3:  // update role
                                                     POS.admin.updateProductFields("account", usersDatabase, "role");
                                                     break;
-                                                }
                                                 default:
                                                     cout << "Invalid selection";
                                                     break;
@@ -226,7 +215,7 @@ class PointOfSale {
                                 showHeader("Delete account");
                                 POS.admin.deleteInformation(usersDatabase);
                                 break;
-                            case 7: // go back
+                            case 7:
                                 // Go back to admin main menu
                                 goto endInventoryLoop;
                             default:
@@ -241,15 +230,11 @@ class PointOfSale {
                 }
                 case 2:
                     POS.admin.readProducts(productsDatabase);
-                    cout << "\nType any number to go back: ";
-                    int dummyInput;
-                    cin >> dummyInput;
+                    system("pause");
                     break;
-
                 case 3:
                     cout << "Goodbye.\n";
                     exit(0);
-
                 default:
                     cout << "Invalid option\n";
                     Sleep(1000);
@@ -263,6 +248,8 @@ class PointOfSale {
         // Add manager-related options here
     }
     void cashierMenu(PointOfSale& POS) {
+
+
         const string productsDatabase = "database/products.csv";
         while(true){
             system("cls");

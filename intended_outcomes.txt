@@ -1,5 +1,0 @@
-POS System:
-
-To do:
-1. Add a logging system where every transaction (including manager and cashier) will be documented, and the admin can only see it
-2. Optimize further the structure of the code

@@ -10,6 +10,7 @@ using namespace std;
 
 class POSCashier {
     public:
+    
     // this part is related to adding an a product
     int getLastId(string filename) {
         ifstream fin(filename);
@@ -45,7 +46,7 @@ class POSCashier {
     }
 
     // CRUD-Related Functions
-    void processTransaction(string productName, int productQuantity, int productPrice){
+    void processTransaction(vector<string> productNames, vector<int> productQuantities, vector<int> productPrices) {
         char confirmation;
         // make a function that will first print the order summary
         system("cls");
@@ -54,9 +55,15 @@ class POSCashier {
         cout << "---------------------------------" << endl;
 
         cout << "Order Summary" << endl;
-        cout << "\nProduct Name: " << productName << endl;
-        cout << "Quantity: " << productQuantity << endl;
-        cout << "Price: " << productPrice << endl;
+        int totalAmount = 0;
+        int userMoney;
+        for(size_t i = 0; i < productNames.size(); i++){ // use size_t to avoid signed/unsigned comparison warnings
+            cout << "\n" <<productNames[i] << "\n";
+            cout << "Quantity: " << productQuantities[i] << "\n";
+            cout << "Price: " << productPrices[i] * productQuantities[i] << "\n";
+
+            totalAmount += productPrices[i] * productQuantities[i];
+        }
 
         cout << "\nProceed to purchase? (Y/N): ";
         cin >> confirmation;
@@ -68,27 +75,50 @@ class POSCashier {
             cout << "---------------------------------" << endl;
 
             cout << "Order Receipt" << endl;
-            cout << "\nProduct Name: " << productName << endl;
-            cout << "Quantity: " << productQuantity << "\n\n";
+            cout << "\n";
+            for(size_t i = 0; i < productNames.size(); i++){
+                cout << productNames[i] << "\n";
+                cout << "Quantity: " << productQuantities[i] << "\n";
+                cout << "Price: " << productPrices[i] * productQuantities[i] << "\n\n";
+            }
 
-            cout << "Total Amount: " << productPrice * productQuantity << endl;
-            cout << "VAT (12%): " << (productPrice * productQuantity) * 0.12 << endl;
-            cout << "Amount Due: " << (productPrice * productQuantity) + ((productPrice * productQuantity) * 0.12) << endl;
-
+            cout << "Total Amount: " << totalAmount << endl;
+            cout << "VAT (12%): " << (totalAmount) * 0.12 << endl;
+            cout << "Amount Due: " << (totalAmount) + ((totalAmount) * 0.12) << endl;
         } else {
             cout << "Purchase cancelled." << endl;
+            Sleep(1200);
+            return;
         }
+
         cout << "---------------------------------" << endl;
+        cout << "Enter the user's money: ";
+        cin >> userMoney;
+
+        if(userMoney < (totalAmount) + ((totalAmount) * 0.12)){
+            cout << "Insufficient money. Transaction cancelled.\n";
+        } else {
+            cout << "Change: " << userMoney - ((totalAmount) + ((totalAmount) * 0.12)) << endl;
+        }
         system("pause");
 
+        // clear the cart after the transaction
+        cartProducts.clear();
+        cartQuantities.clear();
+        cartPrices.clear();
     }
 
+    vector<string> cartProducts;
+    vector<int> cartQuantities;
+    vector<int> cartPrices;
     void readProductsBySubcategory(string productsDatabase, string subCategory){
+
         int quantityToPurchase;
         ifstream file(productsDatabase);
               
         if (!file.is_open()) {
             cout << "Failed to open file\n";
+            Sleep(1200);
             return;
         }
 
@@ -154,12 +184,27 @@ class POSCashier {
             }
         }
 
-        cout << "\nEnter quantity to purchase: ";
-        cin >> quantityToPurchase;
-
         if (!found) {
             cout << "Invalid product ID!\n";
         }
-        processTransaction(productName, quantityToPurchase, productPrice);
+
+        cout << "\nEnter quantity to purchase: ";
+        cin >> quantityToPurchase;
+
+        // ask if the user wants to add more products to the cart
+        cout << "Do you want to add more? (Y/N): ";
+        char addMore;
+        cin >> addMore;
+
+        // save or append the previous product
+        cartProducts.push_back(productName);
+        cartQuantities.push_back(quantityToPurchase);
+        cartPrices.push_back(productPrice);
+
+        if(toupper(addMore) == 'Y'){
+            return;
+        }        
+
+        processTransaction(cartProducts, cartQuantities, cartPrices);
     }
 };
