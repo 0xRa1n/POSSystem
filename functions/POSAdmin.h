@@ -44,6 +44,45 @@ class POSAdmin {
         return false;
     }
 
+    void saveLogs(string type, string operation, string affectedEntry, string adminName) {
+        // use different log files for different types
+        string database;
+        if(type == "accounts"){
+            database = "database/logs/adminUserLogs.csv";
+        } else if(type == "products"){
+            database = "database/logs/adminProductsLogs.csv";
+        } else {
+            cout << "Invalid log type specified." << endl;
+            return;
+        }
+
+        // get the current date and time
+        time_t timestamp = time(NULL);
+        struct tm datetime = *localtime(&timestamp);        
+
+        char date[50];
+        char time[50];
+
+        strftime(date, 50, "%m_%d_%y", &datetime);
+        strftime(time, 50, "%I:%M:%S_%p", &datetime);
+
+        // open the transactions.csv file in append mode
+        ofstream fout(database, ios::app);
+        if (!fout) {
+            cerr << "Error opening database for writing." << endl;
+            return;
+        }
+
+        // write the transaction details to the file
+        fout << operation << ","
+            << affectedEntry << ","
+            << date << ","
+            << time << ","
+            << adminName << endl;
+  
+        fout.close();
+    }
+
     // CRUD-Related Functions
     void addProduct(string database) {
         string productName, productSubCategory;
@@ -86,6 +125,7 @@ class POSAdmin {
 
             fout.close();
             cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
+            saveLogs("products", "ADD", productName, "Admin");
         }
 
         // wait for 1.2 seconds to go back to the main menu
@@ -127,6 +167,7 @@ class POSAdmin {
 
             fout.close();
             cout << "Successfully added user " << username << endl;
+            saveLogs("accounts", "ADD", username, "Admin");
         }
         // wait for 1.2 seconds before going back to the menu
         Sleep(1200);
@@ -180,7 +221,7 @@ class POSAdmin {
         }
     }
 
-    void deleteInformation(string filename){
+    void deleteInformation(string type, string filename){
         string deleteProductInput;
 
         cout << "Enter the entry name you want to delete (type 0 to return): ";
@@ -218,6 +259,12 @@ class POSAdmin {
             } 
             output_file.close();
 
+            if(type == "accounts"){ // save to the account logs
+                saveLogs("accounts", "DELETE", deleteProductInput, "Admin");
+            } else if(type == "products"){ // save to the product logs
+                saveLogs("products", "DELETE", deleteProductInput, "Admin");
+            }
+
             cout << "Successfully deleted " << deleteProductInput << endl;
         }
         Sleep(1200);
@@ -240,7 +287,9 @@ class POSAdmin {
             getline(ss, indexTwo, ',');
             getline(ss, indexThree, ',');
             getline(ss, indexFour, ',');
-            getline(ss, indexFive, ',');
+            if(type.find("product") != string::npos){ // if the type contains the word "product"
+                getline(ss, indexFive, ',');
+            }
 
             // modify the entry if it matches the query
             if (indexTwo == query) {
@@ -266,7 +315,11 @@ class POSAdmin {
                 found = true;
             }
             // write back to the file content
-            fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "," + indexFive + "\n";
+            if(type.find("product") != string::npos){
+                fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "," + indexFive + "\n";
+            } else {
+                fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "\n";
+            }
         }
         fileIn.close();
 
@@ -280,6 +333,27 @@ class POSAdmin {
 
             fileOut << fileContent;
             fileOut.close();
+
+            // we will log EVERY action made by the admin
+            if(type.find("account") != string::npos){ // check if the type contains the word "account"
+                if(type == "accountPassword"){
+                    saveLogs("accounts", "UPDATE", query + "_PW_to_" + newValue, "Admin");
+                } else {
+                    saveLogs("accounts", "UPDATE", query + "_to_" + newValue, "Admin");
+                }
+            } else if(type.find("product") != string::npos){
+                if(type == "productName"){
+                    saveLogs("products", "UPDATE", query + "_to_" + newValue, "Admin");
+                } else {
+                    if(type == "productPrice"){
+                        saveLogs("products", "UPDATE", query + "_Price_to_" + newValue, "Admin");
+                    } else if(type == "productQuantity"){
+                        saveLogs("products", "UPDATE", query + "_Quantity_to_" + newValue, "Admin");
+                    } else if(type == "productSubCategory"){
+                        saveLogs("products", "UPDATE", query + "_SubCategory_to_" + newValue, "Admin");
+                    }
+                }
+            }
 
             return 1;
         }

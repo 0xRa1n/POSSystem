@@ -209,11 +209,11 @@ class PointOfSale {
                             }
                             case 5: // delete product
                                 showHeader("Delete product");
-                                POS.admin.deleteInformation(productsDatabase);
+                                POS.admin.deleteInformation("products", productsDatabase);
                                 break;
                             case 6: // delete account
                                 showHeader("Delete account");
-                                POS.admin.deleteInformation(usersDatabase);
+                                POS.admin.deleteInformation("accounts", usersDatabase);
                                 break;
                             case 7:
                                 // Go back to admin main menu

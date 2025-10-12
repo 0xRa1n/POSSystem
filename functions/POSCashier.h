@@ -47,6 +47,7 @@ class POSCashier {
     }
 
     void saveTransaction(string productNames, string productQuantities, int totalAmount, string cashierName){
+        string database = "database/transactions/cashierTransactions.csv";
         // get the current date and time
         time_t timestamp = time(NULL);
         struct tm datetime = *localtime(&timestamp);        
@@ -58,12 +59,12 @@ class POSCashier {
         strftime(time, 50, "%I:%M:%S_%p", &datetime);
 
         // generate an id based on the previous id 
-        int newId = getLastId("database/transactions.csv") + 1;
+        int newId = getLastId(database) + 1;
 
         // open the transactions.csv file in append mode
-        ofstream fout("database/transactions.csv", ios::app);
+        ofstream fout(database, ios::app);
         if (!fout) {
-            cerr << "Error opening transactions.csv for writing." << endl;
+            cerr << "Error opening database for writing." << endl;
             return;
         }
 
