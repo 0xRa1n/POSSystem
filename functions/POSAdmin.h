@@ -223,25 +223,25 @@ class POSAdmin {
         }
         Sleep(1200);
     }
-        
-    void updateInformation(string filename, string query, string type, string newValue) {
-        ifstream fileIn(filename);
+    
+    int updateInformation(string filename, string query, string type, string newValue) {
+        ifstream fileIn(filename); // open an input file stream, since we are reading the file first, then, writing it back
         if (!fileIn) {
-            cout << "Cannot open file " << filename << endl;
+            return 0;
         }
 
         string fileContent, line;
         bool found = false;
 
         while (getline(fileIn, line)) {
-            stringstream ss(line);
+            stringstream ss(line); // create a string stream from the line
             string indexOne, indexTwo, indexThree, indexFour, indexFive;
             // get a copy of each entries
             getline(ss, indexOne, ',');
             getline(ss, indexTwo, ',');
             getline(ss, indexThree, ',');
             getline(ss, indexFour, ',');
-            getline(ss, indexFive, ','); // in case there are more commas, just get the rest of the line
+            getline(ss, indexFive, ',');
 
             // modify the entry if it matches the query
             if (indexTwo == query) {
@@ -272,7 +272,7 @@ class POSAdmin {
         fileIn.close();
 
         if (!found) {
-            cout << "Error: product '" << query << "' not found.\n";
+            return 0;
         } else {
             ofstream fileOut(filename);
             if (!fileOut) {
@@ -282,11 +282,9 @@ class POSAdmin {
             fileOut << fileContent;
             fileOut.close();
 
-            cout << "Updated successfully.\n";
+            return 1;
         }
-        Sleep(1200);
     }
-    
     void updateProductFields(string type, string database, string field){
         system("cls");
         cout << "---------------------------------" << endl;
@@ -301,12 +299,41 @@ class POSAdmin {
         if(originalInputName == "0") return;
         string newInputField;
 
+        // validate first if the query exists in the database
+        ifstream file(database);
+        string line;
+        bool found = false;
+        while (getline(file, line)) { // reads the file and saves the output in the variable "line"
+            stringstream ss(line); // create a string stream from the line
+            // stringstream helps us read a string as if it were a stream (like cin)
+            // stream are the foundation of i/o operations in C++
+            string token;
+            getline(ss, token, ',');     // first read the id (not used) | the third parameter is the delimiter
+            getline(ss, token, ',');     // second read the username or product name | the value of the second getline is saved in the variable "token"
+            if(token == originalInputName){
+                found = true;
+                break;
+            }
+        }
+        file.close();
+
+        if (!found) {
+            cout << "The product " + type + " was not found.\n";
+            Sleep(1200);
+            return;
+        }
+
         cout << "Enter the new " + type + " " + field + ": ";
         cin >> newInputField;
 
-        field[0] = toupper(field[0]);
+        field[0] = toupper(field[0]); // capitalize the first letter of the field
 
-        updateInformation(database, originalInputName, type + field, newInputField);
+        if(updateInformation(database, originalInputName, type + field, newInputField) == 1){ // since I am only using this function one time inside this function
+            cout << "Updated successfully.\n";
+        } else {
+            cout << "The product " + type + " was not found.\n";
+        }
+        Sleep(1200);
     }
 
 };

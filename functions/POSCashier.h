@@ -10,6 +10,7 @@ using namespace std;
 
 class POSCashier {
     public:
+    POSAdmin admin;
     
     // this part is related to adding an a product
     int getLastId(string filename) {
@@ -102,6 +103,32 @@ class POSCashier {
         }
         system("pause");
 
+
+        // first, find the product in the database, then, update the quantity using the function updateInformation
+        const string productsDatabase = "database/products.csv";
+        // get the value of the quantity from the database, then, subtract it with the quantity purchased
+        ifstream fileIn(productsDatabase);
+        
+        string fileContent, line;
+        while(getline(fileIn, line)){
+            stringstream ss(line);
+            string productName, productQuantity, token;
+            getline(ss, token, ',');
+            getline(ss, productName, ','); // get the product name
+            getline(ss, token, ','); // skip the sub-category
+            getline(ss, productQuantity, ','); // get the quantity
+
+            // since there are multiple products, we need to loop through the vector of product names
+            for(size_t i = 0; i < productNames.size(); i++){ // iterate through the cart
+                if(productName == productNames[i]){
+                    int updatedQuantity = stoi(productQuantity) - productQuantities[i]; // subtract the quantity purchased | stoi means string to integer
+                    // update the quantity in the database
+                    admin.updateInformation(productsDatabase, productName, "productQuantity", to_string(updatedQuantity)); // use the previous function to update the quantity | we used to_string since we are not only using the function for products
+                }
+            }
+
+        }
+        
         // clear the cart after the transaction
         cartProducts.clear();
         cartQuantities.clear();
@@ -176,11 +203,17 @@ class POSCashier {
                 productQuantity = stoi(row[3]);
                 productPrice = stoi(row[4]);
 
-                cout << "\nSelected Product:\n";
-                cout << "Product Name: " << productName << "\n";
-                cout << "Price: " << productPrice << "\n";
-                found = true;
-                break;
+                if (productQuantity == 0){
+                    cout << "Product is out of stock!\n";
+                    system("pause");
+                    return;
+                } else {
+                    cout << "\nSelected Product:\n";
+                    cout << "Product Name: " << productName << "\n";
+                    cout << "Price: " << productPrice << "\n";
+                    found = true;
+                    break;
+                }   
             }
         }
 
