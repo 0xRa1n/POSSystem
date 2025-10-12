@@ -50,7 +50,7 @@ class POSAdmin {
         if(type == "accounts"){
             database = "database/logs/adminUserLogs.csv";
         } else if(type == "products"){
-            database = "database/logs/adminProductsLogs.csv";
+            database = "database/logs/productsLogs.csv";
         } else {
             cout << "Invalid log type specified." << endl;
             return;
@@ -84,7 +84,7 @@ class POSAdmin {
     }
 
     // CRUD-Related Functions
-    void addProduct(string database) {
+    void addProduct(string database, string username) {
         string productName, productSubCategory;
         int quantity, price;
 
@@ -125,19 +125,24 @@ class POSAdmin {
 
             fout.close();
             cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
-            saveLogs("products", "ADD", productName, "Admin");
+            saveLogs("products", "ADD", productName, username);
         }
 
         // wait for 1.2 seconds to go back to the main menu
         Sleep(1200);
     }
 
-    void addUser(string database){
+    void addUser(string database, string accessingUsername){
         string username, password, role;
                                 
         // ask the user for the username (if 0 is entered, it will go back to the menu)
         cout << "Enter the username you want to add (type 0 to return): ";
         cin >> username;
+
+        // use the function to check if the entry is already in the database
+        if(isAlreadyInCsv(database, username)){
+            cout << "User is already in the database!";
+        }
 
         // just somehow if the user decides to change his mind
         if (username == "0") return;
@@ -148,27 +153,23 @@ class POSAdmin {
         cout << "What is the role of the user? (Admin/Manager/Cashier): ";
         cin >> role;
 
-        // use the function to check if the entry is already in the database
-        if(isAlreadyInCsv(database, username)){
-            cout << "User is already in the database!";
-        } else {
-            // get the last user id from the dtabase
-            int lastUserId = getLastId(database);
-            int newUserId = lastUserId + 1;
+        // get the last user id from the dtabase
+        int lastUserId = getLastId(database);
+        int newUserId = lastUserId + 1;
 
-            fstream fout;
-            fout.open(database, ios::out | ios::app);
+        fstream fout;
+        fout.open(database, ios::out | ios::app);
 
-            // open the database file, and add the new product
-            fout << newUserId << ","
-                << username << ","
-                << password << ","
-                << role << "\n";
+        // open the database file, and add the new product
+        fout << newUserId << ","
+            << username << ","
+            << password << ","
+            << role << "\n";
 
-            fout.close();
-            cout << "Successfully added user " << username << endl;
-            saveLogs("accounts", "ADD", username, "Admin");
-        }
+        fout.close();
+        cout << "Successfully added user " << username << endl;
+        saveLogs("accounts", "ADD", username, accessingUsername);
+    
         // wait for 1.2 seconds before going back to the menu
         Sleep(1200);
     }
@@ -221,7 +222,7 @@ class POSAdmin {
         }
     }
 
-    void deleteInformation(string type, string filename){
+    void deleteInformation(string type, string filename, string username){
         string deleteProductInput;
 
         cout << "Enter the entry name you want to delete (type 0 to return): ";
@@ -260,9 +261,9 @@ class POSAdmin {
             output_file.close();
 
             if(type == "accounts"){ // save to the account logs
-                saveLogs("accounts", "DELETE", deleteProductInput, "Admin");
+                saveLogs("accounts", "DELETE", deleteProductInput, username);
             } else if(type == "products"){ // save to the product logs
-                saveLogs("products", "DELETE", deleteProductInput, "Admin");
+                saveLogs("products", "DELETE", deleteProductInput, username);
             }
 
             cout << "Successfully deleted " << deleteProductInput << endl;
@@ -270,7 +271,7 @@ class POSAdmin {
         Sleep(1200);
     }
     
-    int updateInformation(string filename, string query, string type, string newValue) {
+    int updateInformation(string filename, string query, string type, string newValue, string username) {
         ifstream fileIn(filename); // open an input file stream, since we are reading the file first, then, writing it back
         if (!fileIn) {
             return 0;
@@ -337,20 +338,20 @@ class POSAdmin {
             // we will log EVERY action made by the admin
             if(type.find("account") != string::npos){ // check if the type contains the word "account"
                 if(type == "accountPassword"){
-                    saveLogs("accounts", "UPDATE", query + "_PW_to_" + newValue, "Admin");
+                    saveLogs("accounts", "UPDATE", query + "_PW_to_" + newValue, username);
                 } else {
-                    saveLogs("accounts", "UPDATE", query + "_to_" + newValue, "Admin");
+                    saveLogs("accounts", "UPDATE", query + "_to_" + newValue, username);
                 }
             } else if(type.find("product") != string::npos){
                 if(type == "productName"){
-                    saveLogs("products", "UPDATE", query + "_to_" + newValue, "Admin");
+                    saveLogs("products", "UPDATE", query + "_to_" + newValue, username);
                 } else {
                     if(type == "productPrice"){
-                        saveLogs("products", "UPDATE", query + "_Price_to_" + newValue, "Admin");
+                        saveLogs("products", "UPDATE", query + "_Price_to_" + newValue, username);
                     } else if(type == "productQuantity"){
-                        saveLogs("products", "UPDATE", query + "_Quantity_to_" + newValue, "Admin");
+                        saveLogs("products", "UPDATE", query + "_Quantity_to_" + newValue, username);
                     } else if(type == "productSubCategory"){
-                        saveLogs("products", "UPDATE", query + "_SubCategory_to_" + newValue, "Admin");
+                        saveLogs("products", "UPDATE", query + "_SubCategory_to_" + newValue, username);
                     }
                 }
             }
@@ -358,7 +359,7 @@ class POSAdmin {
             return 1;
         }
     }
-    void updateProductFields(string type, string database, string field){
+    void updateProductFields(string type, string database, string field, string username){
         system("cls");
         cout << "---------------------------------" << endl;
         cout << "Update " + type + " " + field << endl;
@@ -401,7 +402,7 @@ class POSAdmin {
 
         field[0] = toupper(field[0]); // capitalize the first letter of the field
 
-        if(updateInformation(database, originalInputName, type + field, newInputField) == 1){ // since I am only using this function one time inside this function
+        if(updateInformation(database, originalInputName, type + field, newInputField, username) == 1){ // since I am only using this function one time inside this function
             cout << "Updated successfully.\n";
         } else {
             cout << "The product " + type + " was not found.\n";

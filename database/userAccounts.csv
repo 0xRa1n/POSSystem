@@ -1,5 +1,5 @@
 UserID,Username,Password,Role
 1,admin,admin,Admin
-3,rainCashier,rain,Cashier
-4,rainManager,manager,Manager
-5,cashier,cashier,Cashier
+3,cashier,cashier,Cashier
+4,manager,manager,Manager
+5,rian,rain,Admin

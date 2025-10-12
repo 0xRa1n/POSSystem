@@ -6,3 +6,10 @@ UPDATE,Sync_PW_to_One,10_12_25,05:09:28_PM,Admin
 UPDATE,Sync_to_AdminRain,10_12_25,05:09:35_PM,Admin
 UPDATE,AdminRain_PW_to_rain,10_12_25,05:09:48_PM,Admin
 DELETE,AdminRain,10_12_25,05:10:03_PM,Admin
+ADD,rian,10_13_25,07:47:21_AM,admin
+ADD,TestAccount,10_13_25,07:48:04_AM,rian
+UPDATE,TestAccount_to_demo,10_13_25,07:49:09_AM,rian
+UPDATE,demo_PW_to_onetwothree,10_13_25,07:49:17_AM,rian
+UPDATE,demo_to_Cashier,10_13_25,07:49:29_AM,rian
+UPDATE,demo_to_Admin,10_13_25,07:49:38_AM,rian
+DELETE,demo,10_13_25,07:49:59_AM,rian

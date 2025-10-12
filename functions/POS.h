@@ -90,7 +90,7 @@ class PointOfSale {
         return false;
     }
 
-    void adminMenu(PointOfSale& POS) {
+    void adminMenu(PointOfSale& POS, string username) {
         const string productsDatabase = "database/products.csv";
         const string usersDatabase = "database/userAccounts.csv";
 
@@ -121,11 +121,11 @@ class PointOfSale {
                         switch (inventoryInput) {
                             case 1: // add product
                                 showHeader("Add a product");
-                                POS.admin.addProduct(productsDatabase);
+                                POS.admin.addProduct(productsDatabase, username);
                                 break;
-                            case 2: // add account                
-                                showHeader("Add an account");              
-                                POS.admin.addUser(usersDatabase);
+                            case 2: // add account
+                                showHeader("Add an account");
+                                POS.admin.addUser(usersDatabase, username);
                                 break;
                             case 3: // view products
                                 showHeader("View all products");
@@ -156,16 +156,16 @@ class PointOfSale {
 
                                             switch(updateProductInput){
                                                 case 1:  // update product name
-                                                    POS.admin.updateProductFields("product", productsDatabase, "name");
+                                                    POS.admin.updateProductFields("product", productsDatabase, "name", username);
                                                     break;
                                                 case 2:  // update product sub-category
-                                                    POS.admin.updateProductFields("product", productsDatabase, "subCategory");
+                                                    POS.admin.updateProductFields("product", productsDatabase, "subCategory", username);
                                                     break;
                                                 case 3:  // update product quantity
-                                                    POS.admin.updateProductFields("product", productsDatabase, "quantity");
+                                                    POS.admin.updateProductFields("product", productsDatabase, "quantity", username);
                                                     break;
                                                 case 4:  // update product price
-                                                    POS.admin.updateProductFields("product", productsDatabase, "price");
+                                                    POS.admin.updateProductFields("product", productsDatabase, "price", username);
                                                     break;
                                                 default: // fallback
                                                     cout << "Invalid selection";
@@ -185,13 +185,13 @@ class PointOfSale {
 
                                             switch(updateAccountInput){
                                                 case 1:  // update username
-                                                    POS.admin.updateProductFields("account", usersDatabase, "username");
+                                                    POS.admin.updateProductFields("account", usersDatabase, "username", username);
                                                     break;
                                                 case 2:  // update password
-                                                    POS.admin.updateProductFields("account", usersDatabase, "password");
+                                                    POS.admin.updateProductFields("account", usersDatabase, "password", username);
                                                     break;
                                                 case 3:  // update role
-                                                    POS.admin.updateProductFields("account", usersDatabase, "role");
+                                                    POS.admin.updateProductFields("account", usersDatabase, "role", username);
                                                     break;
                                                 default:
                                                     cout << "Invalid selection";
@@ -209,11 +209,11 @@ class PointOfSale {
                             }
                             case 5: // delete product
                                 showHeader("Delete product");
-                                POS.admin.deleteInformation("products", productsDatabase);
+                                POS.admin.deleteInformation("products", productsDatabase, username);
                                 break;
                             case 6: // delete account
                                 showHeader("Delete account");
-                                POS.admin.deleteInformation("accounts", usersDatabase);
+                                POS.admin.deleteInformation("accounts", usersDatabase, username);
                                 break;
                             case 7:
                                 // Go back to admin main menu
@@ -243,11 +243,109 @@ class PointOfSale {
         }
     }
 
-    void managerMenu(PointOfSale& POS) {
-        cout << "Welcome MANAGER\n";
-        // Add manager-related options here
+    void managerMenu(PointOfSale& POS, string username) {
+        const string productsDatabase = "database/products.csv";
+        const string usersDatabase = "database/userAccounts.csv";
+
+        // initalize a loop, where it contains the menu Inventory, Monitoring, and Logout
+        while (true) {
+            system("cls");
+            string menu[] = {"Utilities", "Monitoring", "Logout"};
+            int adminSelection = showMenu("P.O.S. (Manager)", menu);
+            system("cls");
+
+            switch (adminSelection) {
+                case 1: {  // Inventory submenu
+                    // intialize another loop that contains the menu of the admin menu
+                    while (true) {
+                        system("cls");
+                        string inventoryMenu[] = {
+                            "Add products",
+                            "View all products",
+                            "Update product",
+                            "Delete a product",
+                            "Go back"
+                        };
+                        int inventoryInput = showMenu("Admin utilities", inventoryMenu);
+                        system("cls");
+
+                        switch (inventoryInput) {
+                            case 1: // add product
+                                showHeader("Add a product");
+                                POS.admin.addProduct(productsDatabase, username);
+                                break;
+                            case 2: // view products
+                                showHeader("View all products");
+                                // since the terminal would not clear if it expects an input to the user
+                                // and we aim to let the inventory stay for a little while until the user wants to go back
+                                POS.admin.readProducts(productsDatabase);
+
+                                system("pause");
+                                break;
+                            case 3: { // update
+                                // initialize a loop to update the information of a product                          
+                                while(true){
+                                    string updateProductMenu[] = {"Product name", "Product Sub-Category", "Product quantity", "Product price", "Go back"};
+                                    int updateProductInput = showMenu("Update product", updateProductMenu);
+
+                                    if(updateProductInput == 5){
+                                        // this will end the loop, and will return to the previous loop
+                                        break;
+                                    }
+
+                                    switch(updateProductInput){
+                                        case 1:  // update product name
+                                            POS.admin.updateProductFields("product", productsDatabase, "name", username);
+                                            break;
+                                        case 2:  // update product sub-category
+                                            POS.admin.updateProductFields("product", productsDatabase, "subCategory", username);
+                                            break;
+                                        case 3:  // update product quantity
+                                            POS.admin.updateProductFields("product", productsDatabase, "quantity", username);
+                                            break;
+                                        case 4:  // update product price
+                                            POS.admin.updateProductFields("product", productsDatabase, "price", username);
+                                            break;
+                                        default: // fallback
+                                            cout << "Invalid selection";
+                                            break;
+                                    }
+                                }
+                                break;
+                            }
+                            case 4: // delete product
+                                showHeader("Delete product");
+                                POS.admin.deleteInformation("products", productsDatabase, username);
+                                break;
+                            case 5:
+                                // Go back to admin main menu
+                                goto endInventoryLoop;
+                            default:
+                                cout << "Invalid selection.\n";
+                                Sleep(1200);
+                                break;
+                        }
+                    }
+                    // this serves as an exit point for the second while loop
+                    endInventoryLoop: ;
+                    break;
+                }
+                case 2:
+                    POS.admin.readProducts(productsDatabase);
+                    system("pause");
+                    break;
+                case 3:
+                    cout << "Goodbye.\n";
+                    exit(0);
+                default:
+                    cout << "Invalid option\n";
+                    Sleep(1000);
+                    break;
+            }
+        }
     }
-    void cashierMenu(PointOfSale& POS) {
+
+    void cashierMenu(PointOfSale& POS, string username) {
         const string productsDatabase = "database/products.csv";
         while(true){
             system("cls");
@@ -267,17 +365,17 @@ class PointOfSale {
                     switch(topsSelection){
                         case 1: 
                             showHeader("T-Shirts");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "T_Shirts");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "T_Shirts", username);
                             break;
                             
                         case 2:
                             showHeader("Polo Shirts");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Polo_Shirts");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Polo_Shirts", username);
                             break;
 
                         case 3:
                             showHeader("Jackets");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Jackets");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Jackets", username);
                             break;
                         default:
                             cout << "Invalid option\n";
@@ -298,17 +396,17 @@ class PointOfSale {
                     switch(bottomsSelection){
                         case 1: 
                             showHeader("Jeans");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Jeans");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Jeans", username);
                             break;
                             
                         case 2:
                             showHeader("Shorts");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Shorts");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Shorts", username);
                             break;
 
                         case 3:
                             showHeader("Skirts");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Skirts");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Skirts", username);
                             break;
                         default:
                             cout << "Invalid option\n";
@@ -330,17 +428,17 @@ class PointOfSale {
                     switch(accessoriesSelection){
                         case 1: 
                             showHeader("Bags");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Bags");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Bags", username);
                             break;
                             
                         case 2:
                             showHeader("Headware");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Headware");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Headware", username);
                             break;
 
                         case 3:
                             showHeader("Wallets");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Wallets");
+                            POS.cashier.readProductsBySubcategory(productsDatabase, "Wallets", username);
                             break;
                         default:
                             cout << "Invalid option\n";

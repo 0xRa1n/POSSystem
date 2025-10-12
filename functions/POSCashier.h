@@ -81,7 +81,7 @@ class POSCashier {
     }
 
     // CRUD-Related Functions
-    void processTransaction(vector<string> productNames, vector<int> productQuantities, vector<int> productPrices) {
+    void processTransaction(vector<string> productNames, vector<int> productQuantities, vector<int> productPrices, string username) {
         char confirmation;
         // make a function that will first print the order summary
         system("cls");
@@ -157,7 +157,7 @@ class POSCashier {
                 if(productName == productNames[i]){
                     int updatedQuantity = stoi(productQuantity) - productQuantities[i]; // subtract the quantity purchased | stoi means string to integer
                     // update the quantity in the database
-                    admin.updateInformation(productsDatabase, productName, "productQuantity", to_string(updatedQuantity)); // use the previous function to update the quantity | we used to_string since we are not only using the function for products
+                    admin.updateInformation(productsDatabase, productName, "productQuantity", to_string(updatedQuantity), username); // use the previous function to update the quantity | we used to_string since we are not only using the function for products
                 }
             }
 
@@ -183,8 +183,7 @@ class POSCashier {
     vector<string> cartProducts;
     vector<int> cartQuantities;
     vector<int> cartPrices;
-    void readProductsBySubcategory(string productsDatabase, string subCategory){
-
+    void readProductsBySubcategory(string productsDatabase, string subCategory, string username){
         int quantityToPurchase;
         ifstream file(productsDatabase);
               
@@ -283,6 +282,6 @@ class POSCashier {
             return;
         }        
 
-        processTransaction(cartProducts, cartQuantities, cartPrices);
+        processTransaction(cartProducts, cartQuantities, cartPrices, username);
     }
 };
