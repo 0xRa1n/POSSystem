@@ -1,6 +1,6 @@
 ProductNumber,ProductName,ProductSubCategory,Quantity,Price
-1,Graphic_Tee,T_Shirts,12,75
-2,Plain_Oversized_Tee,T_Shirts,10,60
+1,Graphic_Tee,T_Shirts,11,75
+2,Plain_Oversized_Tee,T_Shirts,8,60
 3,Vintage_Print_Tee,T_Shirts,9,85
 4,Striped_Polo,Polo_Shirts,6,65
 5,Checkered_Polo,Polo_Shirts,5,75
@@ -20,7 +20,7 @@ ProductNumber,ProductName,ProductSubCategory,Quantity,Price
 19,Shoulder_Bag,Bags,6,45
 20,Mini_Backpack,Bags,10,55
 21,Tote_Bag,Bags,17,30
-22,Baseball_Cap,Headware,4,40
+22,Baseball_Cap,Headware,3,40
 23,Bucket_Hat,Headware,17,35
 24,Sun_Hat,Headware,15,30
 25,Leather_Wallet,Wallets,9,35

@@ -46,6 +46,39 @@ class POSCashier {
         return false;
     }
 
+    void saveTransaction(string productNames, string productQuantities, int totalAmount, string cashierName){
+        // get the current date and time
+        time_t timestamp = time(NULL);
+        struct tm datetime = *localtime(&timestamp);        
+
+        char date[50];
+        char time[50];
+
+        strftime(date, 50, "%m_%d_%y", &datetime);
+        strftime(time, 50, "%I:%M:%S_%p", &datetime);
+
+        // generate an id based on the previous id 
+        int newId = getLastId("database/transactions.csv") + 1;
+
+        // open the transactions.csv file in append mode
+        ofstream fout("database/transactions.csv", ios::app);
+        if (!fout) {
+            cerr << "Error opening transactions.csv for writing." << endl;
+            return;
+        }
+
+        // write the transaction details to the file
+        fout << newId << ","
+             << productNames << ","
+             << productQuantities << ","
+             << totalAmount << ","
+             << date << ","
+             << time << ","
+             << cashierName << endl;
+
+        fout.close();
+    }
+
     // CRUD-Related Functions
     void processTransaction(vector<string> productNames, vector<int> productQuantities, vector<int> productPrices) {
         char confirmation;
@@ -129,6 +162,17 @@ class POSCashier {
 
         }
         
+        // pass the vector of product names and quantities to a single string, separated by semicolons
+        stringstream namesStream, quantitiesStream;
+        for(size_t i = 0; i < productNames.size(); i++){ // iterate through the cart
+            namesStream << productNames[i]; // append the product name to the stream
+            quantitiesStream << productQuantities[i]; // append the product quantity to the stream
+            if(i < productNames.size() - 1){ // append semicolon everywhere except the last item
+                namesStream << ";";
+                quantitiesStream << ";";
+            }
+        }
+        saveTransaction(namesStream.str(), quantitiesStream.str(), totalAmount + (totalAmount * 0.12), "Cashier");
         // clear the cart after the transaction
         cartProducts.clear();
         cartQuantities.clear();

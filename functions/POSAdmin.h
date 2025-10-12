@@ -72,8 +72,7 @@ class POSAdmin {
             cout << "Product '" << productName << "' is already in the CSV.\n";
         } else {
             // get the last product id from the database
-            int lastId = getLastId(database);
-            int newId = lastId + 1;
+            int newId = getLastId(database) +  1;
 
             // open the database file, and add the new product
             fstream fout;

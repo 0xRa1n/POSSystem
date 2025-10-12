@@ -248,8 +248,6 @@ class PointOfSale {
         // Add manager-related options here
     }
     void cashierMenu(PointOfSale& POS) {
-
-
         const string productsDatabase = "database/products.csv";
         while(true){
             system("cls");
@@ -257,7 +255,7 @@ class PointOfSale {
             int cashierSelection = showMenu("P.O.S. (Cashier)", menu);
 
             switch (cashierSelection) {
-                case 1 : {
+                case 1: {
                     string topsSubCategory[] = {"T-Shirts", "Polo Shirts", "Jackets", "Go back"};
                     int topsSelection = showMenu("Tops", topsSubCategory);
 

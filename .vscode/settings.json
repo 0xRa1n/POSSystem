@@ -6,7 +6,8 @@
     "tuple": "cpp",
     "iosfwd": "cpp",
     "stdexcept": "cpp",
-    "cstddef": "cpp"
+    "cstddef": "cpp",
+    "sstream": "cpp"
   },
   "C_Cpp.errorSquiggles": "enabled"
 }
