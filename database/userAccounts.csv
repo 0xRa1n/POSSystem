@@ -3,3 +3,4 @@ UserID,Username,Password,Role
 3,cashier,cashier,Cashier
 4,manager,manager,Manager
 5,rian,rain,Admin
+6,cashier_one,cashier1,Cashier

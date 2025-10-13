@@ -32,3 +32,9 @@ UPDATE,SubjectProduct_Quantity_to_9,10_13_25,07:48:39_AM,rian
 UPDATE,SubjectProduct_Price_to_9,10_13_25,07:48:45_AM,rian
 DELETE,Test,10_13_25,07:49:50_AM,rian
 DELETE,SubjectProduct,10_13_25,07:50:12_AM,rian
+UPDATE,Plain_Oversized_Tee_Quantity_to_9,10_13_25,07:43:54_PM,cashier
+UPDATE,Baseball_Cap_Quantity_to_2,10_13_25,07:43:54_PM,cashier
+UPDATE,Plain_Oversized_Tee_Quantity_to_8,10_13_25,07:50:36_PM,cashier_one
+UPDATE,Baseball_Cap_Quantity_to_1,10_13_25,07:51:49_PM,cashier_one
+UPDATE,Cargo_Shorts_Quantity_to_9,10_13_25,07:52:54_PM,cashier_one
+UPDATE,Leather_Wallet_Quantity_to_8,10_13_25,07:52:54_PM,cashier_one

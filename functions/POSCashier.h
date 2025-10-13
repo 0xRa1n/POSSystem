@@ -173,7 +173,7 @@ class POSCashier {
                 quantitiesStream << ";";
             }
         }
-        saveTransaction(namesStream.str(), quantitiesStream.str(), totalAmount + (totalAmount * 0.12), "Cashier");
+        saveTransaction(namesStream.str(), quantitiesStream.str(), totalAmount + (totalAmount * 0.12), username);
         // clear the cart after the transaction
         cartProducts.clear();
         cartQuantities.clear();

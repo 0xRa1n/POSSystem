@@ -13,3 +13,4 @@ UPDATE,demo_PW_to_onetwothree,10_13_25,07:49:17_AM,rian
 UPDATE,demo_to_Cashier,10_13_25,07:49:29_AM,rian
 UPDATE,demo_to_Admin,10_13_25,07:49:38_AM,rian
 DELETE,demo,10_13_25,07:49:59_AM,rian
+ADD,cashier_one,10_13_25,07:50:18_PM,admin
