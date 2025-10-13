@@ -90,12 +90,12 @@ class POSCashier {
         cout << "---------------------------------" << endl;
 
         cout << "Order Summary" << endl;
-        int totalAmount = 0;
+        double totalAmount = 0.0;
         int userMoney;
         for(size_t i = 0; i < productNames.size(); i++){ // use size_t to avoid signed/unsigned comparison warnings
             cout << "\n" <<productNames[i] << "\n";
             cout << "Quantity: " << productQuantities[i] << "\n";
-            cout << "Price: " << productPrices[i] * productQuantities[i] << "\n";
+            cout << "Price: P" << productPrices[i] * productQuantities[i] << "\n";
 
             totalAmount += productPrices[i] * productQuantities[i];
         }
@@ -114,12 +114,12 @@ class POSCashier {
             for(size_t i = 0; i < productNames.size(); i++){
                 cout << productNames[i] << "\n";
                 cout << "Quantity: " << productQuantities[i] << "\n";
-                cout << "Price: " << productPrices[i] * productQuantities[i] << "\n\n";
+                cout << "Price: P" << productPrices[i] * productQuantities[i] << "\n\n";
             }
 
-            cout << "Total Amount: " << totalAmount << endl;
-            cout << "VAT (12%): " << (totalAmount) * 0.12 << endl;
-            cout << "Amount Due: " << (totalAmount) + ((totalAmount) * 0.12) << endl;
+            cout << "Total Amount: P" << totalAmount << endl;
+            cout << "VAT (12%): P" << (totalAmount) * 0.12 << endl;
+            cout << "Amount Due: P" << (totalAmount) + ((totalAmount) * 0.12) << endl;
         } else {
             cout << "Purchase cancelled." << endl;
             Sleep(1200);
@@ -227,7 +227,7 @@ class POSCashier {
             cout << left << setw(6) << row[0]        // ID
                 << setw(23) << row[1]               // Product Name
                 << setw(10) << row[3]               // Quantity
-                << row[4] << "\n";                  // Price
+                << "P" << row[4] << "\n";                  // Price
         }
 
         // Get user input for product ID
@@ -254,7 +254,7 @@ class POSCashier {
                 } else {
                     cout << "\nSelected Product:\n";
                     cout << "Product Name: " << productName << "\n";
-                    cout << "Price: " << productPrice << "\n";
+                    cout << "Price: P" << productPrice << "\n";
                     found = true;
                     break;
                 }   

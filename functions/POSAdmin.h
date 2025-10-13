@@ -410,4 +410,34 @@ class POSAdmin {
         Sleep(1200);
     }
 
+    void getTotalSales(string database){
+        string line;
+        int totalSales = 0;
+        // open the file
+        ifstream file(database);
+
+        // check if file exists
+        if(!file.is_open()){
+            cout << "Failed to open file\n";
+            return;
+        }
+
+        // loop through each line and get the amount
+        getline(file, line); // skip the header of the csv
+        while(getline(file, line)){
+            stringstream ss(line); // create a string stream, making us read the line as if it were a stream
+            string token;
+            // skip the first three tokens
+            getline(ss, token, ','); // skip id
+            getline(ss, token, ','); // skip product names
+            getline(ss, token, ','); // skip product quantities
+            getline(ss, token, ','); // get the amount
+            totalSales += stoi(token); // convert to integer and add to total sales
+        }
+
+        file.close();
+
+        cout << "Total Sales: P" << totalSales << endl;
+    }
+
 };

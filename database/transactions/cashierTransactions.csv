@@ -5,3 +5,4 @@ TransactionNumber,ProductNames,ProductQuantities,TotalAmount,Date,Time,CashierNa
 4,Plain_Oversized_Tee,1,67,10_13_25,07:50:36_PM,Cashier
 5,Baseball_Cap,1,44,10_13_25,07:51:49_PM,Cashier
 6,Cargo_Shorts;Leather_Wallet,1;1,100,10_13_25,07:52:54_PM,cashier_one
+7,Striped_Polo;Bucket_Hat;Slim_Fit_Jeans,1;2;1,257,10_13_25,08:33:09_PM,cashier
