@@ -287,6 +287,13 @@ class POSCashier {
         cout << "\nEnter quantity to purchase: ";
         cin >> quantityToPurchase;
 
+        // if the quantity is greater than the available quantity, show an error message
+        if (quantityToPurchase > productQuantity) {
+            cout << "Insufficient stock available!\n";
+            system("pause");
+            return;
+        }
+
         // ask if the user wants to add more products to the cart
         cout << "Do you want to add more? (Y/N): ";
         char addMore;
