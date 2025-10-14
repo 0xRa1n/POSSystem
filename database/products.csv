@@ -2,7 +2,7 @@ ProductNumber,ProductName,ProductSubCategory,Quantity,Price
 1,Graphic_Tee,T_Shirts,10,75
 2,Plain_Oversized_Tee,T_Shirts,8,60
 3,Vintage_Print_Tee,T_Shirts,8,85
-4,Striped_Polo,Polo_Shirts,5,65
+4,Striped_Polo,Polo_Shirts,3,65
 5,Checkered_Polo,Polo_Shirts,5,75
 6,Plain_White_Polo,Polo_Shirts,12,60
 7,Windbreaker,Jackets,7,110
@@ -15,12 +15,12 @@ ProductNumber,ProductName,ProductSubCategory,Quantity,Price
 14,Denim_Shorts,Shorts,11,50
 15,Corduroy_Shorts,Shorts,14,65
 16,Mini_Skirt,Skirts,18,65
-17,Long_Skirt,Skirts,6,85
+17,Long_Skirt,Skirts,3,85
 18,Pleated_Skirt,Skirts,9,60
 19,Shoulder_Bag,Bags,7,45
 20,Mini_Backpack,Bags,10,55
 21,Tote_Bag,Bags,17,30
-22,Baseball_Cap,Headware,8,40
+22,Baseball_Cap,Headware,7,40
 23,Bucket_Hat,Headware,15,35
 24,Sun_Hat,Headware,15,30
 25,Leather_Wallet,Wallets,8,35

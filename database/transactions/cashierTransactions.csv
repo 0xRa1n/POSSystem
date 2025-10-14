@@ -14,3 +14,5 @@ TransactionNumber,ProductNames,ProductQuantities,TotalAmount,Date,Time,CashierNa
 13,Vintage_Print_Tee,1,95,10_14_25,09:49:08_AM,cashier_one
 14,Slim_Fit_Jeans,1,106,10_14_25,09:51:29_AM,cashier_one
 15,,,106,10_14_25,09:51:31_AM,cashier_one
+16,Long_Skirt;Striped_Polo,3;2,431,10_14_25,12:55:55_PM,cashier_one
+17,Baseball_Cap,1,44,10_14_25,12:57:31_PM,cashier_one

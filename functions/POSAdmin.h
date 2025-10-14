@@ -33,11 +33,11 @@ class POSAdmin {
     }
 
     bool isAlreadyInCsv(string filename, string productNameToCheck) {
-        ifstream fin(filename);
+        ifstream fin(filename); // create an input file stream
         string line;
 
         while (getline(fin, line)) {
-            if (line.find(productNameToCheck) != string::npos) {
+            if (line.find(productNameToCheck) != string::npos) { // string::npos would return -1 if not found
                 return true;  // Product name found somewhere in the database
             }
         }
@@ -203,11 +203,16 @@ class POSAdmin {
 
         // Find max width of each column
         size_t cols = 0;
-        for (auto &r : rows) cols = max(cols, r.size()); // number of columns
+        for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in  the vector rows, so that the other parts will not overlap
         vector<size_t> widths(cols, 0); // initialize widths with 0
+
+        // after we get the maximum number, we will update the widths vector
+        // this will make sure that each value will not overlap with each other
+
         for (auto &r : rows) { 
             for (size_t c = 0; c < r.size(); ++c) // for each column in the row
                 widths[c] = max(widths[c], r[c].size()); // update max width
+                // there is no curly braces here because it is a single controlled statement
         }
 
         // Add a little padding for readability
@@ -216,7 +221,7 @@ class POSAdmin {
         // Print
         for (auto &r : rows) {
             for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
-                cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding
+                cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
             }
             cout << '\n';
         }

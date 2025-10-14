@@ -226,7 +226,7 @@ class POSCashier {
                 row.push_back(cell);
             }
             // Only add if ProductSubCategory is T_Shirts (index 2)
-            if (row.size() > 2 && row[2] == subCategory) { // only change this value if you want to search for a different subcategory
+            if (row.size() > 2 && row[2] == subCategory) {
                 tshirtRows.push_back(row);
             }
         }
