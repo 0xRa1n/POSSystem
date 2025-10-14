@@ -244,7 +244,7 @@ class PointOfSale {
                     exit(0);
                 default:
                     cout << "Invalid option\n";
-                    Sleep(1000);
+                    Sleep(1200);
                     break;
             }
         }

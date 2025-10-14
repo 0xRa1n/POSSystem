@@ -47,3 +47,15 @@ DELETE,Dummy_Product,10_13_25,08:11:11_PM,admin
 UPDATE,Striped_Polo_Quantity_to_6,10_13_25,08:33:09_PM,cashier
 UPDATE,Slim_Fit_Jeans_Quantity_to_7,10_13_25,08:33:09_PM,cashier
 UPDATE,Bucket_Hat_Quantity_to_15,10_13_25,08:33:09_PM,cashier
+UPDATE,Windbreaker_Quantity_to_6,10_13_25,10:34:20_PM,cashier
+UPDATE,Coin_Purse_Quantity_to_11,10_13_25,10:34:32_PM,cashier
+ADD,TestProduct,10_14_25,09:13:19_AM,manager
+DELETE,TestProduct,10_14_25,09:13:55_AM,manager
+UPDATE,Striped_Polo_Quantity_to_5,10_14_25,09:16:56_AM,cashier_one
+UPDATE,Baseball_Cap_Quantity_to_8,10_14_25,09:16:56_AM,cashier_one
+UPDATE,Graphic_Tee_Quantity_to_11,10_14_25,09:44:23_AM,cashier_one
+UPDATE,Graphic_Tee_Quantity_to_11,10_14_25,09:44:23_AM,cashier_one
+UPDATE,Graphic_Tee_Quantity_to_10,10_14_25,09:44:23_AM,cashier_one
+UPDATE,Graphic_Tee_Quantity_to_10,10_14_25,09:44:23_AM,cashier_one
+UPDATE,Vintage_Print_Tee_Quantity_to_8,10_14_25,09:49:08_AM,cashier_one
+UPDATE,Slim_Fit_Jeans_Quantity_to_6,10_14_25,09:51:29_AM,cashier_one

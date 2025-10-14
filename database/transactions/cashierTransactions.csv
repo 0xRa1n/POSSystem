@@ -6,3 +6,11 @@ TransactionNumber,ProductNames,ProductQuantities,TotalAmount,Date,Time,CashierNa
 5,Baseball_Cap,1,44,10_13_25,07:51:49_PM,Cashier
 6,Cargo_Shorts;Leather_Wallet,1;1,100,10_13_25,07:52:54_PM,cashier_one
 7,Striped_Polo;Bucket_Hat;Slim_Fit_Jeans,1;2;1,257,10_13_25,08:33:09_PM,cashier
+8,Windbreaker,1,123,10_13_25,10:34:20_PM,cashier
+9,Coin_Purse,1,22,10_13_25,10:34:32_PM,cashier
+10,Striped_Polo;Baseball_Cap,1;2,162,10_14_25,09:16:56_AM,cashier_one
+11,Graphic_Tee;Graphic_Tee,1;1,168,10_14_25,09:44:23_AM,cashier_one
+12,Graphic_Tee;Graphic_Tee,1;1,168,10_14_25,09:44:23_AM,cashier_one
+13,Vintage_Print_Tee,1,95,10_14_25,09:49:08_AM,cashier_one
+14,Slim_Fit_Jeans,1,106,10_14_25,09:51:29_AM,cashier_one
+15,,,106,10_14_25,09:51:31_AM,cashier_one

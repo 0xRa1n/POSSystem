@@ -27,7 +27,6 @@ int main(){
             } else if (role == "Cashier"){
                 POS.cashierMenu(POS, usernameInput);
             } else {
-                cout << role;
                 cout << "Invalid role received.";
                 break;
             }

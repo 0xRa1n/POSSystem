@@ -81,7 +81,7 @@ class POSCashier {
     }
 
     // CRUD-Related Functions
-    void processTransaction(vector<string> productNames, vector<int> productQuantities, vector<int> productPrices, string username) {
+    void processTransaction(vector<string>& productNames, vector<int>& productQuantities, vector<int>& productPrices, string username) {
         char confirmation;
         // make a function that will first print the order summary
         system("cls");
@@ -103,7 +103,7 @@ class POSCashier {
         cout << "\nProceed to purchase? (Y/N): ";
         cin >> confirmation;
 
-        if(toupper(confirmation) == 'Y'){
+        if(toupper(confirmation) == 'Y' || tolower(confirmation) == 'y'){
             system("cls");
             cout << "---------------------------------" << endl;
             cout << "P.O.S (Cashier)" << endl ;
@@ -121,6 +121,11 @@ class POSCashier {
             cout << "VAT (12%): P" << (totalAmount) * 0.12 << endl;
             cout << "Amount Due: P" << (totalAmount) + ((totalAmount) * 0.12) << endl;
         } else {
+            // clear the cart after cancelling the transaction
+            productNames.clear();
+            productQuantities.clear();
+            productPrices.clear();
+
             cout << "Purchase cancelled." << endl;
             Sleep(1200);
             return;
@@ -131,7 +136,21 @@ class POSCashier {
         cin >> userMoney;
 
         if(userMoney < (totalAmount) + ((totalAmount) * 0.12)){
-            cout << "Insufficient money. Transaction cancelled.\n";
+            string confirmation;
+            cout << "Insufficient money. Try again? (Y/N).\n";
+            cin >> confirmation;
+            if(toupper(confirmation[0]) == 'Y' || tolower(confirmation[0]) == 'y'){
+                processTransaction(productNames, productQuantities, productPrices, username);
+            } else {
+                // clear the cart after cancelling the transaction
+                productNames.clear();
+                productQuantities.clear();
+                productPrices.clear();
+
+                cout << "Transaction cancelled.\n";
+                Sleep(1200);
+                return;
+            }
         } else {
             cout << "Change: " << userMoney - ((totalAmount) + ((totalAmount) * 0.12)) << endl;
         }
@@ -278,7 +297,7 @@ class POSCashier {
         cartQuantities.push_back(quantityToPurchase);
         cartPrices.push_back(productPrice);
 
-        if(toupper(addMore) == 'Y'){
+        if(toupper(addMore) == 'Y' || tolower(addMore) == 'y'){
             return;
         }        
 

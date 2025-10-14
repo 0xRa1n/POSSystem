@@ -95,6 +95,11 @@ class POSAdmin {
         // if user changes his mind
         if (productName == "0") return;
 
+        // use the function to check if the entry is already in the database
+        if (isAlreadyInCsv(database, productName)) {
+            cout << "Product '" << productName << "' is already in the CSV.\n";
+        } 
+
         // ask the user if what product sub-category is the product
 
         cout << "Enter the product sub-category: ";
@@ -106,27 +111,22 @@ class POSAdmin {
         cout << "Enter the price: ";
         cin >> price;
 
-        // use the function to check if the entry is already in the database
-        if (isAlreadyInCsv(database, productName)) {
-            cout << "Product '" << productName << "' is already in the CSV.\n";
-        } else {
-            // get the last product id from the database
-            int newId = getLastId(database) +  1;
+        // get the last product id from the database
+        int newId = getLastId(database) +  1;
 
-            // open the database file, and add the new product
-            fstream fout;
-            fout.open(database, ios::out | ios::app); // append mode
+        // open the database file, and add the new product
+        fstream fout;
+        fout.open(database, ios::out | ios::app); // append mode
 
-            fout << newId << ","
-                << productName << ","
-                << productSubCategory << ","
-                << quantity << ","
-                << price << "\n";
+        fout << newId << ","
+            << productName << ","
+            << productSubCategory << ","
+            << quantity << ","
+            << price << "\n";
 
-            fout.close();
-            cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
-            saveLogs("products", "ADD", productName, username);
-        }
+        fout.close();
+        cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
+        saveLogs("products", "ADD", productName, username);
 
         // wait for 1.2 seconds to go back to the main menu
         Sleep(1200);
@@ -434,10 +434,8 @@ class POSAdmin {
             getline(ss, token, ','); // get the amount
             totalSales += stoi(token); // convert to integer and add to total sales
         }
-
         file.close();
 
         cout << "Total Sales: P" << totalSales << endl;
     }
-
 };
