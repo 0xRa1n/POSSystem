@@ -1,17 +1,20 @@
 #include <iostream>
-#include <string>
-#include <cctype>
-#include <sstream>
-#include <conio.h>
-#include <cstdlib>
-#include <windows.h>
-#include <bits/stdc++.h>
+#include <cctype> // for toupper() and tolower()
+#include <sstream> // for stringstream
+#include <cstdlib> // for exit()
+#include <windows.h> // for Sleep() and system("cls")
+#include <bits/stdc++.h> // this includes all standard libraries
 using namespace std;
 
 class POSCashier {
     public:
-    POSAdmin admin;
+    vector<string> cartProducts;
+    vector<int> cartQuantities;
+    vector<int> cartPrices;
     
+    POSAdmin admin;
+
+
     // this part is related to adding an a product
     int getLastId(string filename) {
         ifstream fin(filename);
@@ -44,6 +47,46 @@ class POSCashier {
             }
         }
         return false;
+    }
+
+    void viewCart(string username){
+        system("cls");
+        cout << "---------------------------------" << endl;
+        cout << "P.O.S (Cashier)" << endl ;
+        cout << "---------------------------------" << endl;
+
+        cout << "Cart Summary" << endl;
+        double totalAmount = 0.0;
+        // check if the cart is empty
+        if(cartProducts.empty()){
+            cout << "\nYour cart is empty.\n";
+            Sleep(1200);
+            return;
+        } else {
+            for(int i = 0; i < cartProducts.size(); i++){ // use size_t to avoid signed/unsigned comparison warnings
+                cout << "\n" << cartProducts[i] << "\n";
+                cout << "Quantity: " << cartQuantities[i] << "\n";
+                cout << "Price: P" << cartPrices[i] * cartQuantities[i] << "\n";
+
+                totalAmount += cartPrices[i] * cartQuantities[i];
+            }
+
+            cout << "\nTotal Amount: P" << totalAmount << endl;
+            cout << "VAT (12%): P" << (totalAmount) * 0.12 << endl;
+            cout << "Amount Due: P" << (totalAmount) + ((totalAmount) * 0.12) << endl;
+
+            cout << "Do you want to proceed to checkout? (Y/N): ";
+            char confirmation;
+            cin >> confirmation;
+
+            if(toupper(confirmation) == 'Y' || tolower(confirmation) == 'y'){
+                processTransaction(cartProducts, cartQuantities, cartPrices, username);
+            } else {
+                cout << "Returning to main menu.\n";
+                Sleep(1200);
+                return;
+            }
+        }
     }
 
     void saveTransaction(string productNames, string productQuantities, int totalAmount, string cashierName){
@@ -92,7 +135,7 @@ class POSCashier {
         cout << "Order Summary" << endl;
         double totalAmount = 0.0;
         int userMoney;
-        for(size_t i = 0; i < productNames.size(); i++){ // use size_t to avoid signed/unsigned comparison warnings
+        for(int i = 0; i < productNames.size(); i++){ // use size_t to avoid signed/unsigned comparison warnings
             cout << "\n" <<productNames[i] << "\n";
             cout << "Quantity: " << productQuantities[i] << "\n";
             cout << "Price: P" << productPrices[i] * productQuantities[i] << "\n";
@@ -111,7 +154,7 @@ class POSCashier {
 
             cout << "Order Receipt" << endl;
             cout << "\n";
-            for(size_t i = 0; i < productNames.size(); i++){
+            for(int i = 0; i < productNames.size(); i++){
                 cout << productNames[i] << "\n";
                 cout << "Quantity: " << productQuantities[i] << "\n";
                 cout << "Price: P" << productPrices[i] * productQuantities[i] << "\n\n";
@@ -152,56 +195,51 @@ class POSCashier {
                 return;
             }
         } else {
+            // first, find the product in the database, then, update the quantity using the function updateInformation
+            const string productsDatabase = "database/products.csv";
+            // get the value of the quantity from the database, then, subtract it with the quantity purchased
+            ifstream fileIn(productsDatabase);
+            
+            string fileContent, line;
+            while(getline(fileIn, line)){
+                stringstream ss(line);
+                string productName, productQuantity, token;
+                getline(ss, token, ',');
+                getline(ss, productName, ','); // get the product name
+                getline(ss, token, ','); // skip the sub-category
+                getline(ss, productQuantity, ','); // get the quantity
+
+                // since there are multiple products, we need to loop through the vector of product names
+                for(int i = 0; i < productNames.size(); i++){ // iterate through the cart
+                    if(productName == productNames[i]){
+                        int updatedQuantity = stoi(productQuantity) - productQuantities[i]; // subtract the quantity purchased | stoi means string to integer
+                        // update the quantity in the database
+                        admin.updateInformation(productsDatabase, productName, "productQuantity", to_string(updatedQuantity), username); // use the previous function to update the quantity | we used to_string since we are not only using the function for products
+                    }
+                }
+            }
+            
+            // pass the vector of product names and quantities to a single string, separated by semicolons
+            stringstream namesStream, quantitiesStream;
+            for(int i = 0; i < productNames.size(); i++){ // iterate through the cart
+                namesStream << productNames[i]; // append the product name to the stream
+                quantitiesStream << productQuantities[i]; // append the product quantity to the stream
+                if(i < productNames.size() - 1){ // append semicolon everywhere except the last item
+                    namesStream << ";";
+                    quantitiesStream << ";";
+                }
+            }
+            saveTransaction(namesStream.str(), quantitiesStream.str(), totalAmount + (totalAmount * 0.12), username);
+            // clear the cart after the transaction
+            cartProducts.clear();
+            cartQuantities.clear();
+            cartPrices.clear();
+
             cout << "Change: " << userMoney - ((totalAmount) + ((totalAmount) * 0.12)) << endl;
         }
         system("pause");
-
-
-        // first, find the product in the database, then, update the quantity using the function updateInformation
-        const string productsDatabase = "database/products.csv";
-        // get the value of the quantity from the database, then, subtract it with the quantity purchased
-        ifstream fileIn(productsDatabase);
-        
-        string fileContent, line;
-        while(getline(fileIn, line)){
-            stringstream ss(line);
-            string productName, productQuantity, token;
-            getline(ss, token, ',');
-            getline(ss, productName, ','); // get the product name
-            getline(ss, token, ','); // skip the sub-category
-            getline(ss, productQuantity, ','); // get the quantity
-
-            // since there are multiple products, we need to loop through the vector of product names
-            for(size_t i = 0; i < productNames.size(); i++){ // iterate through the cart
-                if(productName == productNames[i]){
-                    int updatedQuantity = stoi(productQuantity) - productQuantities[i]; // subtract the quantity purchased | stoi means string to integer
-                    // update the quantity in the database
-                    admin.updateInformation(productsDatabase, productName, "productQuantity", to_string(updatedQuantity), username); // use the previous function to update the quantity | we used to_string since we are not only using the function for products
-                }
-            }
-
-        }
-        
-        // pass the vector of product names and quantities to a single string, separated by semicolons
-        stringstream namesStream, quantitiesStream;
-        for(size_t i = 0; i < productNames.size(); i++){ // iterate through the cart
-            namesStream << productNames[i]; // append the product name to the stream
-            quantitiesStream << productQuantities[i]; // append the product quantity to the stream
-            if(i < productNames.size() - 1){ // append semicolon everywhere except the last item
-                namesStream << ";";
-                quantitiesStream << ";";
-            }
-        }
-        saveTransaction(namesStream.str(), quantitiesStream.str(), totalAmount + (totalAmount * 0.12), username);
-        // clear the cart after the transaction
-        cartProducts.clear();
-        cartQuantities.clear();
-        cartPrices.clear();
     }
 
-    vector<string> cartProducts;
-    vector<int> cartQuantities;
-    vector<int> cartPrices;
     void readProductsBySubcategory(string productsDatabase, string subCategory, string username){
         int quantityToPurchase;
         ifstream file(productsDatabase);
@@ -241,8 +279,8 @@ class POSCashier {
         // Display T-Shirts with proper formatting
         cout << "ID    Product Name           Quantity  Price\n";
         cout << "----  --------------------   --------  -----\n";
-        
-        for (auto &row : tshirtRows) {
+
+        for (auto row : tshirtRows) {
             cout << left << setw(6) << row[0]        // ID
                 << setw(23) << row[1]               // Product Name
                 << setw(10) << row[3]               // Quantity
@@ -260,7 +298,8 @@ class POSCashier {
         string productName;
         int productQuantity, productPrice;
         bool found = false;
-        for (auto &row : tshirtRows) {
+
+        for (auto row : tshirtRows) {
             if (stoi(row[0]) == selectedId) {
                 productName = row[1];
                 productQuantity = stoi(row[3]);

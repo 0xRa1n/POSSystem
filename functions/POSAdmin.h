@@ -1,11 +1,10 @@
 #include <iostream>
-#include <string>
-#include <cctype>
-#include <sstream>
-#include <conio.h>
-#include <cstdlib>
-#include <windows.h>
-#include <bits/stdc++.h>
+#include <cctype> // for toupper() and tolower()
+#include <sstream> // for stringstream
+#include <cstdlib> // for exit()
+#include <windows.h> // for Sleep() and system("cls")
+#include <bits/stdc++.h> // this includes all standard libraries
+#include <algorithm> // used for find
 using namespace std;
 
 class POSAdmin {
@@ -98,35 +97,56 @@ class POSAdmin {
         // use the function to check if the entry is already in the database
         if (isAlreadyInCsv(database, productName)) {
             cout << "Product '" << productName << "' is already in the CSV.\n";
-        } 
+        } else {
+            // ask the user if what product sub-category is the product
 
-        // ask the user if what product sub-category is the product
+            cout << "Enter the product sub-category: ";
+            cin >> productSubCategory;
 
-        cout << "Enter the product sub-category: ";
-        cin >> productSubCategory;
+            // ask the user for the product's quantity and price
+            cout << "Enter the quantity: ";
+            cin >> quantity;
 
-        // ask the user for the product's quantity and price
-        cout << "Enter the quantity: ";
-        cin >> quantity;
-        cout << "Enter the price: ";
-        cin >> price;
+            if(cin.fail()){
+                cin.clear(); // clear the fail state
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // the numeric_limits basically ignores everything until the next newline character
+                cout << "Invalid quantity input. Please enter a valid integer." << endl;
+                Sleep(1200);
+                return;
+            }
 
-        // get the last product id from the database
-        int newId = getLastId(database) +  1;
+            // to do: make sure the quantity is an int
 
-        // open the database file, and add the new product
-        fstream fout;
-        fout.open(database, ios::out | ios::app); // append mode
+            cout << "Enter the price: ";
+            cin >> price;
 
-        fout << newId << ","
-            << productName << ","
-            << productSubCategory << ","
-            << quantity << ","
-            << price << "\n";
+            if(cin.fail()){
+                cin.clear(); // clear the fail state
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // the numeric_limits basically ignores everything until the next newline character
+                cout << "Invalid price input. Please enter a valid integer." << endl;
+                Sleep(1200);
+                return;
+            }
 
-        fout.close();
-        cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
-        saveLogs("products", "ADD", productName, username);
+            // to do: make sure the price is an int
+
+            // get the last product id from the database
+            int newId = getLastId(database) +  1;
+
+            // open the database file, and add the new product
+            fstream fout;
+            fout.open(database, ios::out | ios::app); // append mode
+
+            fout << newId << ","
+                << productName << ","
+                << productSubCategory << ","
+                << quantity << ","
+                << price << "\n";
+
+            fout.close();
+            cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
+            saveLogs("products", "ADD", productName, username);
+        }  
 
         // wait for 1.2 seconds to go back to the main menu
         Sleep(1200);
@@ -152,24 +172,33 @@ class POSAdmin {
         cin >> password;
         cout << "What is the role of the user? (Admin/Manager/Cashier): ";
         cin >> role;
+        role[0] = toupper(role[0]); // capitalize the first letter
 
-        // get the last user id from the dtabase
-        int lastUserId = getLastId(database);
-        int newUserId = lastUserId + 1;
+        vector<string> roles = {"Admin", "Manager", "Cashier"};
+        auto lookFor = find(roles.begin(), roles.end(), role);
 
-        fstream fout;
-        fout.open(database, ios::out | ios::app);
+        if(lookFor == roles.end()){
+            cout << "Invalid role. Please enter Admin, Manager, or Cashier only.\n";
+            Sleep(1200);
+            return;
+        } else {
+            // get the last user id from the dtabase
+            int lastUserId = getLastId(database);
+            int newUserId = lastUserId + 1;
 
-        // open the database file, and add the new product
-        fout << newUserId << ","
-            << username << ","
-            << password << ","
-            << role << "\n";
+            fstream fout;
+            fout.open(database, ios::out | ios::app); // output and append mode
 
-        fout.close();
-        cout << "Successfully added user " << username << endl;
-        saveLogs("accounts", "ADD", username, accessingUsername);
-    
+            // open the database file, and add the new product
+            fout << newUserId << ","
+                << username << ","
+                << password << ","
+                << role << "\n";
+
+            fout.close();
+            cout << "Successfully added user " << username << endl;
+            saveLogs("accounts", "ADD", username, accessingUsername);
+        }
         // wait for 1.2 seconds before going back to the menu
         Sleep(1200);
     }
@@ -203,7 +232,7 @@ class POSAdmin {
 
         // Find max width of each column
         size_t cols = 0;
-        for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in  the vector rows, so that the other parts will not overlap
+        for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
         vector<size_t> widths(cols, 0); // initialize widths with 0
 
         // after we get the maximum number, we will update the widths vector
@@ -211,7 +240,7 @@ class POSAdmin {
 
         for (auto &r : rows) { 
             for (size_t c = 0; c < r.size(); ++c) // for each column in the row
-                widths[c] = max(widths[c], r[c].size()); // update max width
+                widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
                 // there is no curly braces here because it is a single controlled statement
         }
 
@@ -330,7 +359,7 @@ class POSAdmin {
         fileIn.close();
 
         if (!found) {
-            return 0;
+            return 0; // query not found
         } else {
             ofstream fileOut(filename);
             if (!fileOut) {
@@ -357,15 +386,17 @@ class POSAdmin {
                         saveLogs("products", "UPDATE", query + "_Quantity_to_" + newValue, username);
                     } else if(type == "productSubCategory"){
                         saveLogs("products", "UPDATE", query + "_SubCategory_to_" + newValue, username);
+                    } else {
+                        saveLogs("products", "UPDATE", query + "_to_" + newValue, username);
                     }
                 }
             }
-
             return 1;
         }
     }
     void updateProductFields(string type, string database, string field, string username){
-        system("cls");
+        system("cls"); // clear the console
+
         cout << "---------------------------------" << endl;
         cout << "Update " + type + " " + field << endl;
         cout << "---------------------------------" << endl;
@@ -400,17 +431,17 @@ class POSAdmin {
             cout << "The product " + type + " was not found.\n";
             Sleep(1200);
             return;
-        }
-
-        cout << "Enter the new " + type + " " + field + ": ";
-        cin >> newInputField;
-
-        field[0] = toupper(field[0]); // capitalize the first letter of the field
-
-        if(updateInformation(database, originalInputName, type + field, newInputField, username) == 1){ // since I am only using this function one time inside this function
-            cout << "Updated successfully.\n";
         } else {
-            cout << "The product " + type + " was not found.\n";
+            cout << "Enter the new " + type + " " + field + ": ";
+            cin >> newInputField;
+
+            field[0] = toupper(field[0]); // capitalize the first letter of the field
+
+            if(updateInformation(database, originalInputName, type + field, newInputField, username) == 1){ // since I am only using this function one time inside this function
+                cout << "Updated successfully.\n";
+            } else {
+                cout << "The product " + type + " was not found.\n";
+            }
         }
         Sleep(1200);
     }

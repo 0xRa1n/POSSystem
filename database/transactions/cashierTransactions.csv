@@ -16,3 +16,5 @@ TransactionNumber,ProductNames,ProductQuantities,TotalAmount,Date,Time,CashierNa
 15,,,106,10_14_25,09:51:31_AM,cashier_one
 16,Long_Skirt;Striped_Polo,3;2,431,10_14_25,12:55:55_PM,cashier_one
 17,Baseball_Cap,1,44,10_14_25,12:57:31_PM,cashier_one
+18,Striped_Polo,1,72,10_16_25,08:22:16_PM,cashier
+19,Striped_Polo,1,72,10_16_25,08:31:56_PM,cashier

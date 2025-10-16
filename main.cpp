@@ -21,11 +21,11 @@ int main(){
         if (POS.login(usernameInput, passwordInput, role)) {
             // check if the user's account is admin, manager, or cashier
             if(role == "Admin"){
-                POS.adminMenu(POS, usernameInput);
+                POS.adminMenu(usernameInput);
             } else if(role == "Manager"){
-                POS.managerMenu(POS, usernameInput);
+                POS.managerMenu(usernameInput);
             } else if (role == "Cashier"){
-                POS.cashierMenu(POS, usernameInput);
+                POS.cashierMenu(usernameInput);
             } else {
                 cout << "Invalid role received.";
                 break;

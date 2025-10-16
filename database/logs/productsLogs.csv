@@ -62,3 +62,6 @@ UPDATE,Slim_Fit_Jeans_Quantity_to_6,10_14_25,09:51:29_AM,cashier_one
 UPDATE,Striped_Polo_Quantity_to_3,10_14_25,12:55:55_PM,cashier_one
 UPDATE,Long_Skirt_Quantity_to_3,10_14_25,12:55:55_PM,cashier_one
 UPDATE,Baseball_Cap_Quantity_to_7,10_14_25,12:57:31_PM,cashier_one
+ADD,test,10_16_25,08:09:58_PM,admin
+UPDATE,Striped_Polo_Quantity_to_2,10_16_25,08:22:16_PM,cashier
+UPDATE,Striped_Polo_Quantity_to_1,10_16_25,08:31:56_PM,cashier

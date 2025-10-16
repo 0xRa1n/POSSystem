@@ -24,10 +24,14 @@ template<size_t N>
 // for example: string updateAccountMenu[] = {"Username", "Password", "Role", "Go back"};
 // the size of this array is 4, so N will be 4. and will print 4 options
 int showMenu(string headerTitle, string (&menu)[N]) {  // pass array by reference to retain size information
+    // the (&menu) in the string (&menu)[N] is used to pass the array by reference
+    // meaning that the array passed here will not be a copy of the original array, and it will retain the SIZE
     showHeader(headerTitle);
 
     // print menu
     int i = 1;
+    // in here, the N is not explicitly used, but, the variable menu uses the size of the array passed to it to know where to end
+    // its just the same as (size_t t = 0; t < N; t++)
     for (string menuOptions : menu) { // iterate through each option in the menu array
         cout << "[" << i++ << "] " << menuOptions << endl;
     }
@@ -70,14 +74,18 @@ class PointOfSale {
 
         while (getline(file, line)) {
             // finds the position of each value after the comma
-            size_t pos1 = line.find(','); // first comma
-            size_t pos2 = line.find(',', pos1 + 1); // second comma
-            size_t pos3 = line.find(',', pos2 + 1); // third comma
+            int pos1 = line.find(','); // first comma
+            int pos2 = line.find(',', pos1 + 1); // second comma
+            int pos3 = line.find(',', pos2 + 1); // third comma
 
             // substrings the previous values, and gets the username, password, and role
+            // 1 is given to remove the comma
             string csvUsername = line.substr(pos1 + 1, pos2 - pos1 - 1); // username
+            // subtract the position of the second comma to the first comma to get the length of the username
             string csvPassword = line.substr(pos2 + 1, pos3 - pos2 - 1); // password
+            // subtract the position of the third comma to the second comma to get the length of the role
             string csvRole = line.substr(pos3 + 1); // role
+            // no length is given since it will get the rest of the string since there are no more commas
 
             if (csvUsername == username && csvPassword == password) {
                 outRole = csvRole;
@@ -90,7 +98,7 @@ class PointOfSale {
         return false;
     }
 
-    void adminMenu(PointOfSale& POS, string username) {
+    void adminMenu(string username) {
         const string productsDatabase = "database/products.csv";
         const string usersDatabase = "database/userAccounts.csv";
 
@@ -122,23 +130,23 @@ class PointOfSale {
                         switch (inventoryInput) {
                             case 1: // add product
                                 showHeader("Add a product");
-                                POS.admin.addProduct(productsDatabase, username);
+                                admin.addProduct(productsDatabase, username);
                                 break;
                             case 2: // add account
                                 showHeader("Add an account");
-                                POS.admin.addUser(usersDatabase, username);
+                                admin.addUser(usersDatabase, username);
                                 break;
                             case 3: // view products
                                 showHeader("View all products");
                                 // since the terminal would not clear if it expects an input to the user
                                 // and we aim to let the inventory stay for a little while until the user wants to go back
-                                POS.admin.readProducts(productsDatabase);
+                                admin.readProducts(productsDatabase);
 
                                 system("pause");
                                 break;
                             case 4: // view total sales
                                 showHeader("View total sales");
-                                POS.admin.getTotalSales("database/transactions/cashierTransactions.csv");
+                                admin.getTotalSales("database/transactions/cashierTransactions.csv");
 
                                 system("pause");
                                 break;
@@ -163,19 +171,20 @@ class PointOfSale {
 
                                             switch(updateProductInput){
                                                 case 1:  // update product name
-                                                    POS.admin.updateProductFields("product", productsDatabase, "name", username);
+                                                    admin.updateProductFields("product", productsDatabase, "name", username);
                                                     break;
                                                 case 2:  // update product sub-category
-                                                    POS.admin.updateProductFields("product", productsDatabase, "subCategory", username);
+                                                    admin.updateProductFields("product", productsDatabase, "subCategory", username);
                                                     break;
                                                 case 3:  // update product quantity
-                                                    POS.admin.updateProductFields("product", productsDatabase, "quantity", username);
+                                                    admin.updateProductFields("product", productsDatabase, "quantity", username);
                                                     break;
                                                 case 4:  // update product price
-                                                    POS.admin.updateProductFields("product", productsDatabase, "price", username);
+                                                    admin.updateProductFields("product", productsDatabase, "price", username);
                                                     break;
                                                 default: // fallback
                                                     cout << "Invalid selection";
+                                                    Sleep(1200);
                                                     break;
                                             }
                                         }
@@ -192,16 +201,17 @@ class PointOfSale {
 
                                             switch(updateAccountInput){
                                                 case 1:  // update username
-                                                    POS.admin.updateProductFields("account", usersDatabase, "username", username);
+                                                    admin.updateProductFields("account", usersDatabase, "username", username);
                                                     break;
                                                 case 2:  // update password
-                                                    POS.admin.updateProductFields("account", usersDatabase, "password", username);
+                                                    admin.updateProductFields("account", usersDatabase, "password", username);
                                                     break;
                                                 case 3:  // update role
-                                                    POS.admin.updateProductFields("account", usersDatabase, "role", username);
+                                                    admin.updateProductFields("account", usersDatabase, "role", username);
                                                     break;
                                                 default:
                                                     cout << "Invalid selection";
+                                                    Sleep(1200);
                                                     break;
                                             }
                                         }
@@ -210,17 +220,18 @@ class PointOfSale {
                                         break;
                                     } else {
                                         cout << "Invalid selection";
+                                        Sleep(1200);
                                     }
                                 }
                                 break;
                             }
                             case 6: // delete product
                                 showHeader("Delete product");
-                                POS.admin.deleteInformation("products", productsDatabase, username);
+                                admin.deleteInformation("products", productsDatabase, username);
                                 break;
                             case 7: // delete account
                                 showHeader("Delete account");
-                                POS.admin.deleteInformation("accounts", usersDatabase, username);
+                                admin.deleteInformation("accounts", usersDatabase, username);
                                 break;
                             case 8:
                                 // Go back to admin main menu
@@ -236,7 +247,7 @@ class PointOfSale {
                     break;
                 }
                 case 2:
-                    POS.admin.readProducts(productsDatabase);
+                    admin.readProducts(productsDatabase);
                     system("pause");
                     break;
                 case 3:
@@ -250,7 +261,7 @@ class PointOfSale {
         }
     }
 
-    void managerMenu(PointOfSale& POS, string username) {
+    void managerMenu(string username) {
         const string productsDatabase = "database/products.csv";
         const string usersDatabase = "database/userAccounts.csv";
 
@@ -279,13 +290,13 @@ class PointOfSale {
                         switch (inventoryInput) {
                             case 1: // add product
                                 showHeader("Add a product");
-                                POS.admin.addProduct(productsDatabase, username);
+                                admin.addProduct(productsDatabase, username);
                                 break;
                             case 2: // view products
                                 showHeader("View all products");
                                 // since the terminal would not clear if it expects an input to the user
                                 // and we aim to let the inventory stay for a little while until the user wants to go back
-                                POS.admin.readProducts(productsDatabase);
+                                admin.readProducts(productsDatabase);
 
                                 system("pause");
                                 break;
@@ -302,19 +313,20 @@ class PointOfSale {
 
                                     switch(updateProductInput){
                                         case 1:  // update product name
-                                            POS.admin.updateProductFields("product", productsDatabase, "name", username);
+                                            admin.updateProductFields("product", productsDatabase, "name", username);
                                             break;
                                         case 2:  // update product sub-category
-                                            POS.admin.updateProductFields("product", productsDatabase, "subCategory", username);
+                                            admin.updateProductFields("product", productsDatabase, "subCategory", username);
                                             break;
                                         case 3:  // update product quantity
-                                            POS.admin.updateProductFields("product", productsDatabase, "quantity", username);
+                                            admin.updateProductFields("product", productsDatabase, "quantity", username);
                                             break;
                                         case 4:  // update product price
-                                            POS.admin.updateProductFields("product", productsDatabase, "price", username);
+                                            admin.updateProductFields("product", productsDatabase, "price", username);
                                             break;
                                         default: // fallback
                                             cout << "Invalid selection";
+                                            Sleep(1200);
                                             break;
                                     }
                                 }
@@ -322,7 +334,7 @@ class PointOfSale {
                             }
                             case 4: // delete product
                                 showHeader("Delete product");
-                                POS.admin.deleteInformation("products", productsDatabase, username);
+                                admin.deleteInformation("products", productsDatabase, username);
                                 break;
                             case 5:
                                 // Go back to admin main menu
@@ -338,7 +350,7 @@ class PointOfSale {
                     break;
                 }
                 case 2:
-                    POS.admin.readProducts(productsDatabase);
+                    admin.readProducts(productsDatabase);
                     system("pause");
                     break;
                 case 3:
@@ -346,17 +358,17 @@ class PointOfSale {
                     exit(0);
                 default:
                     cout << "Invalid option\n";
-                    Sleep(1000);
+                    Sleep(1200);
                     break;
             }
         }
     }
 
-    void cashierMenu(PointOfSale& POS, string username) {
+    void cashierMenu(string username) {
         const string productsDatabase = "database/products.csv";
         while(true){
             system("cls");
-            string menu[] = {"Tops", "Bottoms", "Accessories", "Exit"};
+            string menu[] = {"Tops", "Bottoms", "Accessories", "View Cart", "Exit"};
             int cashierSelection = showMenu("P.O.S. (Cashier)", menu);
 
             switch (cashierSelection) {
@@ -372,17 +384,17 @@ class PointOfSale {
                     switch(topsSelection){
                         case 1: 
                             showHeader("T-Shirts");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "T_Shirts", username);
+                            cashier.readProductsBySubcategory(productsDatabase, "T_Shirts", username);
                             break;
                             
                         case 2:
                             showHeader("Polo Shirts");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Polo_Shirts", username);
+                            cashier.readProductsBySubcategory(productsDatabase, "Polo_Shirts", username);
                             break;
 
                         case 3:
                             showHeader("Jackets");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Jackets", username);
+                            cashier.readProductsBySubcategory(productsDatabase, "Jackets", username);
                             break;
                         default:
                             cout << "Invalid option\n";
@@ -403,17 +415,17 @@ class PointOfSale {
                     switch(bottomsSelection){
                         case 1: 
                             showHeader("Jeans");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Jeans", username);
+                            cashier.readProductsBySubcategory(productsDatabase, "Jeans", username);
                             break;
                             
                         case 2:
                             showHeader("Shorts");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Shorts", username);
+                            cashier.readProductsBySubcategory(productsDatabase, "Shorts", username);
                             break;
 
                         case 3:
                             showHeader("Skirts");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Skirts", username);
+                            cashier.readProductsBySubcategory(productsDatabase, "Skirts", username);
                             break;
                         default:
                             cout << "Invalid option\n";
@@ -435,17 +447,17 @@ class PointOfSale {
                     switch(accessoriesSelection){
                         case 1: 
                             showHeader("Bags");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Bags", username);
+                            cashier.readProductsBySubcategory(productsDatabase, "Bags", username);
                             break;
                             
                         case 2:
                             showHeader("Headware");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Headware", username);
+                            cashier.readProductsBySubcategory(productsDatabase, "Headware", username);
                             break;
 
                         case 3:
                             showHeader("Wallets");
-                            POS.cashier.readProductsBySubcategory(productsDatabase, "Wallets", username);
+                            cashier.readProductsBySubcategory(productsDatabase, "Wallets", username);
                             break;
                         default:
                             cout << "Invalid option\n";
@@ -454,7 +466,11 @@ class PointOfSale {
                     }
                     break;
                 }
-                case 4:
+                case 4: {
+                    cashier.viewCart(username);
+                    break;
+                }
+                case 5:
                     cout << "Goodbye.\n";
                     exit(0);
                 default:
