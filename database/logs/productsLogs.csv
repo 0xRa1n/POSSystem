@@ -73,3 +73,7 @@ ADD,testProduccc,10_17_25,08:44:01_AM,admin
 ADD,tesing,10_17_25,08:47:58_AM,admin
 ADD,asdasdasd,10_17_25,01:47:36_PM,admin
 UPDATE,test_to_!!!!,10_17_25,01:52:56_PM,admin
+UPDATE,Plain_Oversized_Tee_Quantity_to_7,10_17_25,04:38:17_PM,cashier
+UPDATE,Striped_Polo_Quantity_to_0,10_17_25,04:48:19_PM,cashier
+UPDATE,Mini_Skirt_Quantity_to_17,10_17_25,04:49:23_PM,cashier
+UPDATE,Baseball_Cap_Quantity_to_6,10_17_25,04:49:23_PM,cashier

@@ -19,3 +19,6 @@ TransactionNumber,ProductNames,ProductQuantities,TotalAmount,Date,Time,CashierNa
 18,Striped_Polo,1,72,10_16_25,08:22:16_PM,cashier
 19,Striped_Polo,1,72,10_16_25,08:31:56_PM,cashier
 20,Tote_B@g,1,25,10_17_25,08:26:45_AM,cashier
+21,Plain_Oversized_Tee,1,67,10_17_25,04:38:17_PM,cashier
+22,Striped_Polo,1,72,10_17_25,04:48:19_PM,cashier
+23,Mini_Skirt;Baseball_Cap,1;1,117,10_17_25,04:49:23_PM,cashier

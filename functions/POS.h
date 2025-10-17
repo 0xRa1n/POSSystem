@@ -1,11 +1,12 @@
 #include <iostream>
-#include <string>
-#include <sstream>
-#include <conio.h>
-#include <cctype>
-#include <cstdlib>
-#include <windows.h>
-#include <bits/stdc++.h>
+#include <sstream> // for stringstream
+#include <cctype> // for toupper() and tolower()
+#include <cstdlib> // for exit()
+#include <windows.h> // for Sleep() and system("cls")
+#include <bits/stdc++.h> // this includes all standard libraries
+#include <chrono> // for date and time
+#include <thread> // for sleep_for
+#include <conio.h> // for _kbhit() and _getch()
 using namespace std;
 
 #include "POSAdmin.h"
@@ -86,6 +87,9 @@ class PointOfSale {
             // subtract the position of the third comma to the second comma to get the length of the role
             string csvRole = line.substr(pos3 + 1); // role
             // no length is given since it will get the rest of the string since there are no more commas
+
+            // .find == find the position
+            // .substr == using the position of the .find, remove the commas, and get the value between them
 
             if (csvUsername == username && csvPassword == password) {
                 outRole = csvRole;

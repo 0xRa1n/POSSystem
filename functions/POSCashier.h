@@ -124,6 +124,12 @@ class POSCashier {
 
     // CRUD-Related Functions
     void processTransaction(vector<string>& productNames, vector<int>& productQuantities, vector<int>& productPrices, string username) {
+        if(productNames.empty()){
+            cout << "Your cart is empty. Cannot process transaction.\n";
+            Sleep(1200);
+            return;
+        }
+
         char confirmation;
         // make a function that will first print the order summary
         system("cls");
@@ -205,6 +211,43 @@ class POSCashier {
                 return;
             }
         } else {
+            // power outtage might happen here after the user had paid, so we need to have a backup that will log the transaction even if the program crashes
+            // in this manner, if the power outtage happens right after the user had paid, we can still recover the transaction from the backup file
+
+            // get the current date and time
+            time_t timestamp = time(NULL);
+            struct tm datetime = *localtime(&timestamp);        
+
+            char date[50];
+            char time[50];
+
+            strftime(date, 50, "%m_%d_%y", &datetime);
+            strftime(time, 50, "%I:%M:%S_%p", &datetime);
+
+            ofstream backupFile("database/transactions/backup.csv", ios::app); // open in append mode
+            if (!backupFile) {
+                cerr << "Error opening backup file for writing." << endl;
+                return;
+            }
+
+            // convert productNames vector to a semicolon-separated string
+            stringstream productNamesToString;
+            for(int i = 0; i < productNames.size(); i++){
+                productNamesToString << productNames[i]; // append the product name to the variable productNamesToString
+                if(i < productNames.size() - 1){ // only add semicolon if it's not the last item
+                    productNamesToString << ";"; // append semicolon everywhere except the last item || append a semicolon to the next item
+                }
+            }
+
+            backupFile << productNamesToString.str() << ","
+                       << totalAmount + (totalAmount * 0.12) << ","
+                       << userMoney << ","
+                       << date << ","
+                       << time << ","
+                       << username << "\n";
+
+            backupFile.close();
+
             // first, find the product in the database, then, update the quantity using the function updateInformation
             const string productsDatabase = "database/products.csv";
             // get the value of the quantity from the database, then, subtract it with the quantity purchased
