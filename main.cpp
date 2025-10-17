@@ -8,9 +8,10 @@ int main(){
     int retries = 0;
     string usernameInput, passwordInput, role;
 
-    system("cls");
-    showHeader("Threads and Charms");
+
     while(true){
+        system("cls");
+        showHeader("Threads and Charms");
         cout << "Enter your username: ";
         cin >> usernameInput;
 
@@ -36,6 +37,7 @@ int main(){
                 break;
             }
             cout << "Invalid credentials" << endl;
+            Sleep(1200);
             retries++;
         }
     }

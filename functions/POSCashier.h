@@ -6,14 +6,13 @@
 #include <bits/stdc++.h> // this includes all standard libraries
 using namespace std;
 
-class POSCashier {
+class POSCashier {  
     public:
     vector<string> cartProducts;
     vector<int> cartQuantities;
     vector<int> cartPrices;
     
     POSAdmin admin;
-
 
     // this part is related to adding an a product
     int getLastId(string filename) {
@@ -132,6 +131,7 @@ class POSCashier {
         cout << "P.O.S (Cashier)" << endl ;
         cout << "---------------------------------" << endl;
 
+        // to do: if the product quantities are more than 10, add a 10% discount
         cout << "Order Summary" << endl;
         double totalAmount = 0.0;
         int userMoney;
@@ -164,14 +164,24 @@ class POSCashier {
             cout << "VAT (12%): P" << (totalAmount) * 0.12 << endl;
             cout << "Amount Due: P" << (totalAmount) + ((totalAmount) * 0.12) << endl;
         } else {
-            // clear the cart after cancelling the transaction
-            productNames.clear();
-            productQuantities.clear();
-            productPrices.clear();
+            // ask if the user wants to cancel or add more items
+            string choice;
+            cout << "Do you want to cancel the transaction? (Y/N): ";
+            cin >> choice;
+            if(toupper(choice[0]) == 'Y' || tolower(choice[0]) == 'y'){
+                // clear the cart after cancelling the transaction
+                productNames.clear();
+                productQuantities.clear();
+                productPrices.clear();
 
-            cout << "Purchase cancelled." << endl;
-            Sleep(1200);
-            return;
+                cout << "Transaction cancelled.\n";
+                Sleep(1200);
+                return;
+            } else {
+                cout << "Returning to main menu.\n";
+                Sleep(1200);
+                return;
+            }
         }
 
         cout << "---------------------------------" << endl;

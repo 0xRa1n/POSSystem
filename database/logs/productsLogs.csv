@@ -65,3 +65,11 @@ UPDATE,Baseball_Cap_Quantity_to_7,10_14_25,12:57:31_PM,cashier_one
 ADD,test,10_16_25,08:09:58_PM,admin
 UPDATE,Striped_Polo_Quantity_to_2,10_16_25,08:22:16_PM,cashier
 UPDATE,Striped_Polo_Quantity_to_1,10_16_25,08:31:56_PM,cashier
+ADD,admintest,10_16_25,10:13:01_PM,admin
+ADD,productone,10_17_25,08:13:41_AM,admin
+ADD,Tote_B@g,10_17_25,08:26:23_AM,admin
+UPDATE,Tote_B@g_Quantity_to_9,10_17_25,08:26:45_AM,cashier
+ADD,testProduccc,10_17_25,08:44:01_AM,admin
+ADD,tesing,10_17_25,08:47:58_AM,admin
+ADD,asdasdasd,10_17_25,01:47:36_PM,admin
+UPDATE,test_to_!!!!,10_17_25,01:52:56_PM,admin

@@ -5,10 +5,12 @@
 #include <windows.h> // for Sleep() and system("cls")
 #include <bits/stdc++.h> // this includes all standard libraries
 #include <algorithm> // used for find
+#include <regex> // for regex
 using namespace std;
 
 class POSAdmin {
     public:
+    inline static const regex disallowed{R"([^A-Za-z0-9_@#&])"};
     // this part is related to adding an a product
     int getLastId(string filename) {
         ifstream fin(filename);
@@ -73,6 +75,7 @@ class POSAdmin {
         }
 
         // write the transaction details to the file
+        // to do: make sure that the product name modified should be the same as cashierTransactions if possible
         fout << operation << ","
             << affectedEntry << ","
             << date << ","
@@ -91,17 +94,32 @@ class POSAdmin {
         cout << "Enter the product name (type 0 to return): ";
         cin >> productName;
 
+        // check for invalid characters
+        if(regex_search(productName, disallowed)){
+            cout << "Product name cannot contain spaces or commas, or any special character besides: _ @ # &\n";
+            Sleep(1200);
+            return;
+        }
+
         // if user changes his mind
         if (productName == "0") return;
 
         // use the function to check if the entry is already in the database
         if (isAlreadyInCsv(database, productName)) {
             cout << "Product '" << productName << "' is already in the CSV.\n";
+            Sleep(1200);
+            return;
         } else {
             // ask the user if what product sub-category is the product
 
             cout << "Enter the product sub-category: ";
             cin >> productSubCategory;
+
+            if(regex_search(productSubCategory, disallowed)){
+                cout << "Product sub-category cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+                Sleep(1200);
+                return;
+            }
 
             // ask the user for the product's quantity and price
             cout << "Enter the quantity: ";
@@ -113,43 +131,55 @@ class POSAdmin {
                 cout << "Invalid quantity input. Please enter a valid integer." << endl;
                 Sleep(1200);
                 return;
+            } if(quantity == 0){ // quantity cannot be zero
+                cout << "Quantity cannot be zero. Please enter a valid integer." << endl;
+                Sleep(1200);
+                return;
+            } else if(quantity < 0){ // quantity cannot be negative
+                cout << "Quantity cannot be negative. Please enter a valid integer." << endl;
+                Sleep(1200);
+                return;
             }
 
             // to do: make sure the quantity is an int
 
             cout << "Enter the price: ";
             cin >> price;
-
+            
             if(cin.fail()){
                 cin.clear(); // clear the fail state
                 cin.ignore(numeric_limits<streamsize>::max(), '\n'); // the numeric_limits basically ignores everything until the next newline character
                 cout << "Invalid price input. Please enter a valid integer." << endl;
                 Sleep(1200);
                 return;
+            } else if(price == 0){ // price cannot be zero
+                cout << "Price cannot be zero. Please enter a valid integer." << endl;
+                Sleep(1200);
+                return;
+            } else if(price < 0){ // price cannot be negative
+                cout << "Price cannot be negative. Please enter a valid integer." << endl;
+                Sleep(1200);
+                return;
+            } else {
+                    // get the last product id from the database
+                    int newId = getLastId(database) +  1;
+
+                    // open the database file, and add the new product
+                    fstream fout;
+                    fout.open(database, ios::out | ios::app); // append mode
+
+                    fout << newId << ","
+                        << productName << ","
+                        << productSubCategory << ","
+                        << quantity << ","
+                        << price << "\n";
+
+                    fout.close();                    
+                    saveLogs("products", "ADD", productName, username);
+                    cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
+                    Sleep(1200);
+                }  
             }
-
-            // to do: make sure the price is an int
-
-            // get the last product id from the database
-            int newId = getLastId(database) +  1;
-
-            // open the database file, and add the new product
-            fstream fout;
-            fout.open(database, ios::out | ios::app); // append mode
-
-            fout << newId << ","
-                << productName << ","
-                << productSubCategory << ","
-                << quantity << ","
-                << price << "\n";
-
-            fout.close();
-            cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
-            saveLogs("products", "ADD", productName, username);
-        }  
-
-        // wait for 1.2 seconds to go back to the main menu
-        Sleep(1200);
     }
 
     void addUser(string database, string accessingUsername){
@@ -164,12 +194,24 @@ class POSAdmin {
             cout << "User is already in the database!";
         }
 
+        if(regex_search(username, disallowed)){
+            cout << "Username cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+            Sleep(1200);
+            return;
+        }
+
         // just somehow if the user decides to change his mind
         if (username == "0") return;
 
         // ask for the password and role
         cout << "Enter the password: ";
         cin >> password;
+
+        if(regex_search(password, disallowed)){
+            cout << "Password cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+            Sleep(1200);
+            return;
+        }
         cout << "What is the role of the user? (Admin/Manager/Cashier): ";
         cin >> role;
         role[0] = toupper(role[0]); // capitalize the first letter
@@ -261,6 +303,12 @@ class POSAdmin {
 
         cout << "Enter the entry name you want to delete (type 0 to return): ";
         cin >> deleteProductInput;
+
+        if(regex_search(deleteProductInput, disallowed)){
+            cout << "Entry name cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+            Sleep(1200);
+            return;
+        }
 
         if (deleteProductInput == "0") return;
 
@@ -407,6 +455,12 @@ class POSAdmin {
 
         // just somehow if the user decides to change his mind
         if(originalInputName == "0") return;
+
+        if(regex_search(originalInputName, disallowed)){
+            cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+            Sleep(1200);
+            return;
+        }
         string newInputField;
 
         // validate first if the query exists in the database
@@ -434,6 +488,12 @@ class POSAdmin {
         } else {
             cout << "Enter the new " + type + " " + field + ": ";
             cin >> newInputField;
+
+            if(regex_search(newInputField, disallowed)){
+                cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+                Sleep(1200);
+                return;
+            }
 
             field[0] = toupper(field[0]); // capitalize the first letter of the field
 

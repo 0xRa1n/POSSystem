@@ -251,8 +251,7 @@ class PointOfSale {
                     system("pause");
                     break;
                 case 3:
-                    cout << "Goodbye.\n";
-                    exit(0);
+                    return;
                 default:
                     cout << "Invalid option\n";
                     Sleep(1200);
@@ -354,8 +353,7 @@ class PointOfSale {
                     system("pause");
                     break;
                 case 3:
-                    cout << "Goodbye.\n";
-                    exit(0);
+                    return;
                 default:
                     cout << "Invalid option\n";
                     Sleep(1200);
@@ -368,7 +366,7 @@ class PointOfSale {
         const string productsDatabase = "database/products.csv";
         while(true){
             system("cls");
-            string menu[] = {"Tops", "Bottoms", "Accessories", "View Cart", "Exit"};
+            string menu[] = {"Tops", "Bottoms", "Accessories", "View Cart", "Logout"};
             int cashierSelection = showMenu("P.O.S. (Cashier)", menu);
 
             switch (cashierSelection) {
@@ -471,8 +469,7 @@ class PointOfSale {
                     break;
                 }
                 case 5:
-                    cout << "Goodbye.\n";
-                    exit(0);
+                    return;
                 default:
                     cout << "Invalid option\n";
                     Sleep(1000);
