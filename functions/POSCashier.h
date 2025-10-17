@@ -397,7 +397,7 @@ class POSCashier {
         cartPrices.push_back(productPrice);
 
         if(toupper(addMore) == 'Y' || tolower(addMore) == 'y'){
-            return;
+            return; // go back to the products catalog
         }        
 
         processTransaction(cartProducts, cartQuantities, cartPrices, username);

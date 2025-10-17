@@ -534,4 +534,47 @@ class POSAdmin {
 
         cout << "Total Sales: P" << totalSales << endl;
     }
+
+    void getTodaysSales(string database){
+        // we should first read the csv, then get the current date and the date from the csv. Then, starting there, get the amount
+        string line;
+        int todaysSales = 0;
+
+        // open the file
+        ifstream file(database);
+
+        // get the current date
+        time_t timestamp = time(NULL);
+        struct tm datetime = *localtime(&timestamp);
+        char date[50]; // since it points to a char array
+        strftime(date, 50, "%m_%d_%y", &datetime);
+        string currentDate(date);
+        
+        // check if file exists
+        if(!file.is_open()){
+            cout << "Failed to open file\n";
+            return;
+        }
+
+        // loop through each line and get the amount
+        getline(file, line); // skip the header of the csv
+        while(getline(file, line)){
+            stringstream ss(line); // create a string stream, making us read the line as if it were a stream
+            string token;
+            // skip the first four tokens
+            getline(ss, token, ','); // skip id
+            getline(ss, token, ','); // skip product names
+            getline(ss, token, ','); // skip product quantities
+            getline(ss, token, ','); // get the amount
+            string amount = token;
+            getline(ss, token, ','); // get the date
+            string transactionDate = token;
+
+            if(transactionDate == currentDate){
+                todaysSales += stoi(amount); // convert to integer and add to today's sales
+            }
+        }
+        file.close();
+        cout << "Today's Sales: P" << todaysSales << endl;
+    }
 };

@@ -123,6 +123,7 @@ class PointOfSale {
                             "Add an account",
                             "View all products",
                             "View total sales",
+                            "View today's sales",
                             "Update account or product",
                             "Delete a product",
                             "Delete an account",
@@ -154,7 +155,13 @@ class PointOfSale {
 
                                 system("pause");
                                 break;
-                            case 5: { // update
+                            case 5: // view today's sales
+                                showHeader("View today's sales");
+                                admin.getTodaysSales("database/transactions/cashierTransactions.csv");
+
+                                system("pause");
+                                break;
+                            case 6: { // update
                                 // initialize a loop where it contains the menu Product, Account, and Go back
                                 while(true){
                                     system("cls");
@@ -229,15 +236,15 @@ class PointOfSale {
                                 }
                                 break;
                             }
-                            case 6: // delete product
+                            case 7: // delete product
                                 showHeader("Delete product");
                                 admin.deleteInformation("products", productsDatabase, username);
                                 break;
-                            case 7: // delete account
+                            case 8: // delete account
                                 showHeader("Delete account");
                                 admin.deleteInformation("accounts", usersDatabase, username);
                                 break;
-                            case 8:
+                            case 9:
                                 // Go back to admin main menu
                                 goto endInventoryLoop;
                             default:
