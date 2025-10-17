@@ -304,7 +304,7 @@ class POSCashier {
         }
 
         // Read and filter T-Shirts products
-        vector<vector<string>> tshirtRows;
+        vector<vector<string>> subCategoryRows;
         string line;
         
         // Skip header and read all lines
@@ -316,24 +316,24 @@ class POSCashier {
             while (getline(ss, cell, ',')) {
                 row.push_back(cell);
             }
-            // Only add if ProductSubCategory is T_Shirts (index 2)
+            // Only add if ProductSubCategory is the desired sub-category (subCategory)
             if (row.size() > 2 && row[2] == subCategory) {
-                tshirtRows.push_back(row);
+                subCategoryRows.push_back(row);
             }
         }
         file.close();
 
-        if (tshirtRows.empty()) {
-            cout << "No T-Shirts available.\n";
+        if (subCategoryRows.empty()) {
+            cout << "No products available in this sub-category.\n";
             Sleep(1200);
             return;
         }
 
-        // Display T-Shirts with proper formatting
+        // Display products with proper formatting
         cout << "ID    Product Name           Quantity  Price\n";
         cout << "----  --------------------   --------  -----\n";
 
-        for (auto row : tshirtRows) {
+        for (auto row : subCategoryRows) {
             cout << left << setw(6) << row[0]        // ID
                 << setw(23) << row[1]               // Product Name
                 << setw(10) << row[3]               // Quantity
@@ -352,7 +352,7 @@ class POSCashier {
         int productQuantity, productPrice;
         bool found = false;
 
-        for (auto row : tshirtRows) {
+        for (auto row : subCategoryRows) {
             if (stoi(row[0]) == selectedId) {
                 productName = row[1];
                 productQuantity = stoi(row[3]);
