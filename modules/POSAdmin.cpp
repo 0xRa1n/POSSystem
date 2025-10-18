@@ -471,6 +471,14 @@ void POSAdmin::updateProductFields(string type, string database, string field, s
                 cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
                 Sleep(1200);
                 return;
+            } else if(field == "name" && isAlreadyInCsv(database, newInputField)){
+                cout << "Product name '" << newInputField << "' is already in the CSV.\n";
+                Sleep(1200);
+                return;
+            } else if(field == "username" && isAlreadyInCsv(database, newInputField)){
+                cout << "Username '" << newInputField << "' is already in the database!\n";
+                Sleep(1200);
+                return;
             }
         } else if(field == "price" || field == "quantity"){
             // make sure that the new input is a valid integer

@@ -28,3 +28,8 @@ UPDATE,adminNumberFour_PW_to_AdminFoor,10_18_25,10:29:32_AM,admin
 UPDATE,adminNumberFour_to_Cashier,10_18_25,10:29:43_AM,admin
 DELETE,adminNumberFour,10_18_25,10:30:17_AM,admin
 UPDATE,rian_to_@,10_18_25,02:44:09_PM,admin
+ADD,testAccountFive,10_18_25,05:14:55_PM,admin
+UPDATE,testAccountFive_to_DemoAccountOne,10_18_25,05:16:06_PM,admin
+UPDATE,DemoAccountOne_PW_to_Demo,10_18_25,05:16:13_PM,admin
+UPDATE,DemoAccountOne_to_Manager,10_18_25,05:16:22_PM,admin
+DELETE,DemoAccountOne,10_18_25,05:16:48_PM,admin

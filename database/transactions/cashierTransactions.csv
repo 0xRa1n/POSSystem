@@ -28,3 +28,4 @@ TransactionNumber,ProductNames,ProductQuantities,TotalAmount,Date,Time,CashierNa
 27,Pleated_Skirt,1,67,10_18_25,11:08:05_AM,cashier
 28,Faded_Denim_Jeans,1,112,10_18_25,11:08:28_AM,cashier
 29,Graphic_Tee;Striped_Polo;Windbreaker;Slim_Fit_Jeans;Cargo_Shorts;Mini_Skirt;Shoulder_Bag;Baseball_Cap;Leather_Wallet,1;1;1;1;1;1;1;1;1,655,10_18_25,11:12:34_AM,cashier
+30,Graphic_Tee;Plain_Oversized_Tee;Vintage_Print_Tee;Striped_Polo;Checkered_Polo;Plain_White_Polo;Windbreaker;Denim_Jacket;Old_School_Hoodie;Slim_Fit_Jeans;Baggy_Jeans;Faded_Denim_Jeans;Cargo_Shorts;Denim_Shorts;Corduroy_Shorts;Mini_Skirt;Long_Skirt;Pleated_Skirt;Shoulder_Bag;Mini_Backpack;Tote_Bag;Baseball_Cap;Bucket_Hat;Bucket_Hat;Sun_Hat;Leather_Wallet;Fabric_Wallet;Coin_Purse,1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1,2032,10_18_25,05:29:08_PM,cashier
