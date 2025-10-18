@@ -8,6 +8,7 @@ using namespace std;
 
 class POSCashier {  
     public:
+    // the cart
     vector<string> cartProducts;
     vector<int> cartQuantities;
     vector<int> cartPrices;
@@ -62,7 +63,7 @@ class POSCashier {
             Sleep(1200);
             return;
         } else {
-            for(int i = 0; i < cartProducts.size(); i++){ // use size_t to avoid signed/unsigned comparison warnings
+            for(int i = 0; i < cartProducts.size(); i++){
                 cout << "\n" << cartProducts[i] << "\n";
                 cout << "Quantity: " << cartQuantities[i] << "\n";
                 cout << "Price: P" << cartPrices[i] * cartQuantities[i] << "\n";
@@ -282,7 +283,12 @@ class POSCashier {
                     quantitiesStream << ";";
                 }
             }
+            // save the transaction to the main database
             saveTransaction(namesStream.str(), quantitiesStream.str(), totalAmount + (totalAmount * 0.12), username);
+
+            // remove the backup file after saving the transaction to the main database
+            remove("database/transactions/backup.csv");
+
             // clear the cart after the transaction
             cartProducts.clear();
             cartQuantities.clear();
@@ -317,8 +323,8 @@ class POSCashier {
                 row.push_back(cell);
             }
             // Only add if ProductSubCategory is the desired sub-category (subCategory)
-            if (row.size() > 2 && row[2] == subCategory) {
-                subCategoryRows.push_back(row);
+            if (row.size() > 2 && row[2] == subCategory) { // if row size is 2 to avoid out of range error since we are trying to get the 3rd index which is subcategory
+                subCategoryRows.push_back(row); // add the row to the subCategoryRows
             }
         }
         file.close();
@@ -350,7 +356,6 @@ class POSCashier {
         // Find and display selected product
         string productName;
         int productQuantity, productPrice;
-        bool found = false;
 
         for (auto row : subCategoryRows) {
             if (stoi(row[0]) == selectedId) {
@@ -366,18 +371,19 @@ class POSCashier {
                     cout << "\nSelected Product:\n";
                     cout << "Product Name: " << productName << "\n";
                     cout << "Price: P" << productPrice << "\n";
-                    found = true;
                     break;
                 }   
+            } else {
+                cout << "Invalid product ID or product ID from a different subcategory\n";
+                Sleep(1200);
+                return;
             }
         }
 
-        if (!found) {
-            cout << "Invalid product ID!\n";
-        }
-
-        cout << "\nEnter quantity to purchase: ";
+        cout << "\nEnter quantity to purchase (0 to go back): ";
         cin >> quantityToPurchase;
+
+        if (quantityToPurchase == 0) return;
 
         // if the quantity is greater than the available quantity, show an error message
         if (quantityToPurchase > productQuantity) {

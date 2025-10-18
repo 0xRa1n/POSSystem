@@ -8,9 +8,12 @@
 #include <regex> // for regex
 using namespace std;
 
+// ifstream == reading the file
+// offstream == writing to the file
+
 class POSAdmin {
     public:
-    inline static const regex disallowed{R"([^A-Za-z0-9_@#&])"};
+    inline static const regex disallowed{R"([^A-Za-z0-9_@#&])"}; // any character that is not A-Z, a-z, 0-9, _ @ # &
     // this part is related to adding an a product
     int getLastId(string filename) {
         ifstream fin(filename);
@@ -21,6 +24,7 @@ class POSAdmin {
             if (line.empty()) continue; // skip empty lines
             stringstream ss(line);
             string idStr;
+
             if (getline(ss, idStr, ',')) {
                 try {
                     int id = stoi(idStr);
@@ -91,7 +95,7 @@ class POSAdmin {
         int quantity, price;
 
         // ask the user for the product name (if 0 is entered, it will go back to the menu)
-        cout << "Enter the product name (type 0 to return): ";
+        cout << "Enter the product name (type 0 to go back): ";
         cin >> productName;
 
         // check for invalid characters
@@ -112,8 +116,10 @@ class POSAdmin {
         } else {
             // ask the user if what product sub-category is the product
 
-            cout << "Enter the product sub-category: ";
+            cout << "Enter the product sub-category (0 to go back): ";
             cin >> productSubCategory;
+
+            if(productSubCategory == "0") return;
 
             if(regex_search(productSubCategory, disallowed)){
                 cout << "Product sub-category cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
@@ -122,8 +128,10 @@ class POSAdmin {
             }
 
             // ask the user for the product's quantity and price
-            cout << "Enter the quantity: ";
+            cout << "Enter the quantity (0 to go back): "; // and quantity SHOULD not be zero
             cin >> quantity;
+
+            if (quantity == 0) return;
 
             if(cin.fail()){
                 cin.clear(); // clear the fail state
@@ -143,8 +151,10 @@ class POSAdmin {
 
             // to do: make sure the quantity is an int
 
-            cout << "Enter the price: ";
+            cout << "Enter the price (0 to go back): "; // price also should NOT be zero
             cin >> price;
+            
+            if (price == 0) return;
             
             if(cin.fail()){
                 cin.clear(); // clear the fail state
@@ -186,7 +196,7 @@ class POSAdmin {
         string username, password, role;
                                 
         // ask the user for the username (if 0 is entered, it will go back to the menu)
-        cout << "Enter the username you want to add (type 0 to return): ";
+        cout << "Enter the username you want to add (type 0 to go back): ";
         cin >> username;
 
         // use the function to check if the entry is already in the database
@@ -204,16 +214,21 @@ class POSAdmin {
         if (username == "0") return;
 
         // ask for the password and role
-        cout << "Enter the password: ";
+        cout << "Enter the password (0 to go back): ";
         cin >> password;
+
+        if (password == "0") return;
 
         if(regex_search(password, disallowed)){
             cout << "Password cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
             Sleep(1200);
             return;
         }
-        cout << "What is the role of the user? (Admin/Manager/Cashier): ";
+        cout << "What is the role of the user? (Admin/Manager/Cashier, 0 to go back): ";
         cin >> role;
+
+        if (role == "0") return;
+
         role[0] = toupper(role[0]); // capitalize the first letter
 
         vector<string> roles = {"Admin", "Manager", "Cashier"};
@@ -256,16 +271,16 @@ class POSAdmin {
         }
 
         // Read all rows first
-        vector<vector<string>> rows; // 2D vector to hold rows and columns
+        vector<vector<string>> rows; // 2D vector to hold rows and columns || the output should looks like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "SubCat1", "10", "100"}, ...}
         string line;
         while (getline(file, line)) {
             stringstream ss(line);
             string cell;
             vector<string> row; 
             while (getline(ss, cell, ',')) { // split by comma
-                row.push_back(cell); // add each cell to the row
+                row.push_back(cell); // add each cell to the row || row will look like this: {"ID", "ProductName", "SubCategory", "Quantity", "Price"
             }
-            rows.push_back(row); // add the row to the list of rows
+            rows.push_back(row); // add the row to the list of rows || rows will look like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "SubCat1", "10", "100"}, ...
         }
         file.close(); // close the file
 
@@ -275,7 +290,9 @@ class POSAdmin {
         // Find max width of each column
         size_t cols = 0;
         for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
+        // no brackets since its a single controlled statement
         vector<size_t> widths(cols, 0); // initialize widths with 0
+        // initially: widths is {0, 0, 0, 0, 0} for 5 columns
 
         // after we get the maximum number, we will update the widths vector
         // this will make sure that each value will not overlap with each other
@@ -283,6 +300,7 @@ class POSAdmin {
         for (auto &r : rows) { 
             for (size_t c = 0; c < r.size(); ++c) // for each column in the row
                 widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
+                // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
                 // there is no curly braces here because it is a single controlled statement
         }
 
@@ -293,6 +311,7 @@ class POSAdmin {
         for (auto &r : rows) {
             for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
                 cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
+                // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
             }
             cout << '\n';
         }
@@ -301,7 +320,7 @@ class POSAdmin {
     void deleteInformation(string type, string filename, string username){
         string deleteProductInput;
 
-        cout << "Enter the entry name you want to delete (type 0 to return): ";
+        cout << "Enter the entry name you want to delete (type 0 to go back): ";
         cin >> deleteProductInput;
 
         if(regex_search(deleteProductInput, disallowed)){
@@ -486,8 +505,10 @@ class POSAdmin {
             Sleep(1200);
             return;
         } else {
-            cout << "Enter the new " + type + " " + field + ": ";
+            cout << "Enter the new " + type + " " + field + " (0 to go back): ";
             cin >> newInputField;
+
+            if (newInputField == "0") return;
 
             if(regex_search(newInputField, disallowed)){
                 cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
