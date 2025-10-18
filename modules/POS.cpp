@@ -204,10 +204,44 @@ void PointOfSale::adminMenu(string username) {
                 endInventoryLoop: ;
                 break;
             }
-            case 2:
-                admin.readProducts(productsDatabase);
-                system("pause");
+            case 2: {
+                while(true){
+                    system("cls");
+                    string monitoringMenu[] = {"View all products", "View today's sales", "View total sales", "Go back"};
+                    int monitoringSelection = showMenu("Monitoring", monitoringMenu);
+                    system("cls");
+
+                    switch(monitoringSelection){
+                        case 1:
+                            showHeader("View all products");
+                            admin.readProducts(productsDatabase);
+
+                            system("pause");
+                            break;
+                        case 2:
+                            showHeader("View today's sales");
+                            admin.getTodaysSales("database/transactions/cashierTransactions.csv");
+
+                            system("pause");
+                            break;
+                        case 3:
+                            showHeader("View total sales");
+                            admin.getTotalSales("database/transactions/cashierTransactions.csv");
+
+                            system("pause");
+                            break;
+                        case 4:
+                            // go back to the previous menu
+                            goto endMonitoringLoop; // it will break the current loop and go to the endMonitoringLoop label, because it is empty, it will just resort to the loop above it
+                        default:
+                            cout << "Invalid option\n";
+                            Sleep(1200);
+                            break;
+                    }
+                }
+                endMonitoringLoop: ;
                 break;
+            }
             case 3:
                 return;
             default:
@@ -306,10 +340,44 @@ void PointOfSale::managerMenu(string username) {
                 endInventoryLoop: ;
                 break;
             }
-            case 2:
-                admin.readProducts(productsDatabase);
-                system("pause");
+            case 2: {
+                while(true){
+                    system("cls");
+                    string monitoringMenu[] = {"View all products", "View today's sales", "View total sales", "Go back"};
+                    int monitoringSelection = showMenu("Monitoring", monitoringMenu);
+                    system("cls");
+
+                    switch(monitoringSelection){
+                        case 1:
+                            showHeader("View all products");
+                            admin.readProducts(productsDatabase);
+
+                            system("pause");
+                            break;
+                        case 2:
+                            showHeader("View today's sales");
+                            admin.getTodaysSales("database/transactions/cashierTransactions.csv");
+
+                            system("pause");
+                            break;
+                        case 3:
+                            showHeader("View total sales");
+                            admin.getTotalSales("database/transactions/cashierTransactions.csv");
+
+                            system("pause");
+                            break;
+                        case 4:
+                            // go back to the previous menu
+                            goto endMonitoringLoop; // it will break the current loop and go to the endMonitoringLoop label, because it is empty, it will just resort to the loop above it
+                        default:
+                            cout << "Invalid option\n";
+                            Sleep(1200);
+                            break;
+                    }
+                }
+                endMonitoringLoop: ;
                 break;
+            }
             case 3:
                 return;
             default:
