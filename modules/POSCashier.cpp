@@ -311,23 +311,25 @@ void POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
         Sleep(1200);
         return;
     }
+    cout << "Format: ID, ProductName, SubCategory, Quantity, Price\n" << endl;
 
     // Read and filter T-Shirts products
     vector<vector<string>> subCategoryRows;
     string line;
-    
-    // Skip header and read all lines
-    getline(file, line); // skip header
     while (getline(file, line)) {
         stringstream ss(line);
         string cell;
         vector<string> row;
         while (getline(ss, cell, ',')) {
-            row.push_back(cell);
+            row.push_back(cell); // add each cell to the row
+            // row will look like this: {"ID", "ProductName", "SubCategory", "Quantity", "Price"
         }
         // Only add if ProductSubCategory is the desired sub-category (subCategory)
         if (row.size() > 2 && row[2] == subCategory) { // if row size is 2 to avoid out of range error since we are trying to get the 3rd index which is subcategory
             subCategoryRows.push_back(row); // add the row to the subCategoryRows
+            // subCategoryRows will look like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "T-Shirts", "10", "100"}, ...
+            // the contents of the variable row will only be added if the sub-category matches
+            // this way, we only have the products that belong to the desired sub-category
         }
     }
     file.close();
@@ -338,15 +340,33 @@ void POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
         return;
     }
 
-    // Display products with proper formatting
-    cout << "ID    Product Name           Quantity  Price\n";
-    cout << "----  --------------------   --------  -----\n";
+    // print all the products in the said subcategory
+    // Find max width of each column
+    size_t cols = 0;
+    for (auto &r : subCategoryRows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
+    // no brackets since its a single controlled statement
+    vector<size_t> widths(cols, 0); // initialize a vector with widths of 0
+    // initially: widths is {0, 0, 0, 0, 0} for 5 columns
+    // then the following code will update the widths for each row
 
-    for (auto row : subCategoryRows) {
-        cout << left << setw(6) << row[0]        // ID
-            << setw(23) << row[1]               // Product Name
-            << setw(10) << row[3]               // Quantity
-            << "P" << row[4] << "\n";                  // Price
+    // after we get the maximum number, we will update the widths vector
+    for (auto &r : subCategoryRows) { 
+        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
+            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
+            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
+            // there is no curly braces here because it is a single controlled statement
+    }
+
+    // Add a little padding for readability
+    for (auto &w : widths) w += 2;
+
+    // Print
+    for (auto &r : subCategoryRows) {
+        for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
+            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
+            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
+        }
+        cout << '\n';
     }
 
     // Get user input for product ID

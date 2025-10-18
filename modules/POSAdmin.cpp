@@ -233,7 +233,10 @@ void POSAdmin::readProducts(string database) {
     file.close(); // close the file
 
     // stop if the rows are empty
-    if (rows.empty()) return;
+    if (rows.empty()){
+        cout << "No products found in the database.\n";
+        return;
+    }
 
     // Find max width of each column
     size_t cols = 0;
