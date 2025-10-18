@@ -100,3 +100,14 @@ UPDATE,Mini_Skirt_Quantity_to_16,10_18_25,11:12:34_AM,cashier
 UPDATE,Shoulder_Bag_Quantity_to_6,10_18_25,11:12:34_AM,cashier
 UPDATE,Baseball_Cap_Quantity_to_3,10_18_25,11:12:34_AM,cashier
 UPDATE,Leather_Wallet_Quantity_to_7,10_18_25,11:12:34_AM,cashier
+UPDATE,Coin_Purse_Quantity_to_Nigga,10_18_25,02:14:22_PM,admin
+UPDATE,Coin_Purse_Price_to_my,10_18_25,02:19:43_PM,admin
+UPDATE,Coin_Purse_Price_to_nigga,10_18_25,02:19:51_PM,admin
+UPDATE,Coin_Purse_Price_to_@,10_18_25,02:20:17_PM,admin
+UPDATE,Coin_Purse_Price_to_@,10_18_25,02:25:30_PM,admin
+UPDATE,Coin_Purse_Price_to_2,10_18_25,02:29:51_PM,admin
+UPDATE,Coin_Purse_Price_to_abcd,10_18_25,02:30:05_PM,admin
+UPDATE,Coin_Purse_Price_to_rain,10_18_25,02:32:12_PM,admin
+ADD,test,10_18_25,02:39:43_PM,admin
+UPDATE,test_to_demoProduct,10_18_25,02:43:30_PM,admin
+UPDATE,demoProduct_Quantity_to_100,10_18_25,02:43:53_PM,admin

@@ -96,8 +96,8 @@ void POSAdmin::addProduct(string database, string username) {
         cout << "Enter the quantity (0 to go back): "; // and quantity SHOULD not be zero
         cin >> quantity;
 
-        if (quantity == 0) return;
         if(handleInputError()) return; // handle invalid inputs
+        if (quantity == 0) return;
 
         if(quantity == 0){ // quantity cannot be zero
             cout << "Quantity cannot be zero. Please enter a valid integer." << endl;
@@ -114,8 +114,8 @@ void POSAdmin::addProduct(string database, string username) {
         cout << "Enter the price (0 to go back): "; // price also should NOT be zero
         cin >> price;
         
-        if (price == 0) return;
         if(handleInputError()) return; // handle invalid inputs
+        if (price == 0) return;
 
         if(price == 0){ // price cannot be zero
             cout << "Price cannot be zero. Please enter a valid integer." << endl;
@@ -465,12 +465,33 @@ void POSAdmin::updateProductFields(string type, string database, string field, s
 
         if (newInputField == "0") return;
 
-        if(regex_search(newInputField, disallowed)){
-            cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
-            Sleep(1200);
-            return;
-        }
-
+        // error handling for different fields
+        if(field == "name" || field == "subCategory" || field == "username" || field == "password" || field == "role"){
+            if(regex_search(newInputField, disallowed)){
+                cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+                Sleep(1200);
+                return;
+            }
+        } else if(field == "price" || field == "quantity"){
+            // make sure that the new input is a valid integer
+            // note that the function handleInputError() will only work for INTEGERS entered via cin
+            try {
+                int value = stoi(newInputField);
+                if(value < 0){
+                    cout << "The " + field + " cannot be negative.\n";
+                    Sleep(1200);
+                    return;
+                }
+            } catch (invalid_argument&) {
+                cout << "Invalid input, please enter a valid integer for " + field + ".\n";
+                Sleep(1200);
+                return;
+            } catch (out_of_range&) {
+                cout << "The number entered is out of range for " + field + ".\n";
+                Sleep(1200);
+                return;
+            }
+        } 
         field[0] = toupper(field[0]); // capitalize the first letter of the field
 
         if(updateInformation(database, originalInputName, type + field, newInputField, username) == 1){ // since I am only using this function one time inside this function
@@ -478,8 +499,9 @@ void POSAdmin::updateProductFields(string type, string database, string field, s
         } else {
             cout << "The product " + type + " was not found.\n";
         }
+        Sleep(1200);
+        return;
     }
-    Sleep(1200);
 }
 
 void POSAdmin::getTotalSales(string database){
