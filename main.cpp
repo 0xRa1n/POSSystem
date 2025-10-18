@@ -34,7 +34,7 @@ int main(){
         } else {
             if (retries == 2){
                 cout << "Maximum attempt reached.";
-                break;
+                return;
             }
             cout << "Invalid credentials" << endl;
             Sleep(1200);

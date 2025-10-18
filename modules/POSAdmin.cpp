@@ -105,8 +105,6 @@ void POSAdmin::addProduct(string database, string username) {
             return;
         }
 
-        // to do: make sure the quantity is an int
-
         cout << "Enter the price (0 to go back): "; // price also should NOT be zero
         cin >> price;
         
@@ -226,7 +224,7 @@ void POSAdmin::readProducts(string database) {
         string cell;
         vector<string> row; 
         while (getline(ss, cell, ',')) { // split by comma
-            row.push_back(cell); // add each cell to the row || row will look like this: {"ID", "ProductName", "SubCategory", "Quantity", "Price"
+            row.push_back(cell); // add each cell to the row || row will look like this: {"ID", "ProductName", "SubCategory", "Quantity", "Price"}
         }
         rows.push_back(row); // add the row to the list of rows || rows will look like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "SubCat1", "10", "100"}, ...
     }

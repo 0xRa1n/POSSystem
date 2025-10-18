@@ -31,7 +31,7 @@ void POSCashier::viewCart(string username){
         return;
     } else {
         for(int i = 0; i < cartProducts.size(); i++){
-            cout << "\n" << cartProducts[i] << "\n";
+            cout << "\nProduct name: " << cartProducts[i] << "\n";
             cout << "Quantity: " << cartQuantities[i] << "\n";
             cout << "Price: P" << cartPrices[i] * cartQuantities[i] << "\n";
 
@@ -39,8 +39,8 @@ void POSCashier::viewCart(string username){
         }
 
         cout << "\nTotal Amount: P" << totalAmount << endl;
-        cout << "VAT (12%): P" << (totalAmount) * 0.12 << endl;
-        cout << "Amount Due: P" << (totalAmount) + ((totalAmount) * 0.12) << endl;
+        // cout << "VAT (12%): P" << (totalAmount) * 0.12 << endl;
+        // cout << "Amount Due: P" << (totalAmount) + ((totalAmount) * 0.12) << endl;
 
         cout << "\nDo you want to proceed to checkout? (1/0): ";
         int confirmation;
@@ -118,7 +118,7 @@ void POSCashier::processTransaction(vector<string>& productNames, vector<int>& p
     double totalAmount = 0.0;
     int userMoney;
     for(int i = 0; i < productNames.size(); i++){ // use size_t to avoid signed/unsigned comparison warnings
-        cout << "\n" <<productNames[i] << "\n";
+        cout << "\nProduct name: " <<productNames[i] << "\n";
         cout << "Quantity: " << productQuantities[i] << "\n";
         cout << "Price: P" << productPrices[i] * productQuantities[i] << "\n";
 
@@ -140,7 +140,7 @@ void POSCashier::processTransaction(vector<string>& productNames, vector<int>& p
             cout << "Order Receipt" << endl;
             cout << "\n";
             for(int i = 0; i < productNames.size(); i++){
-                cout << productNames[i] << "\n";
+                cout << "Product name: " << productNames[i] << "\n";
                 cout << "Quantity: " << productQuantities[i] << "\n";
                 cout << "Price: P" << productPrices[i] * productQuantities[i] << "\n\n";
             }
@@ -183,7 +183,7 @@ void POSCashier::processTransaction(vector<string>& productNames, vector<int>& p
     }
 
     cout << "---------------------------------" << endl;
-    cout << "Enter the user's money: ";
+    cout << "Enter the customer's money: ";
     cin >> userMoney;
 
     if(handleInputError()) return; // handle invalid inputs
