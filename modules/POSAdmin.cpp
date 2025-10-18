@@ -99,11 +99,7 @@ void POSAdmin::addProduct(string database, string username) {
         if(handleInputError()) return; // handle invalid inputs
         if (quantity == 0) return;
 
-        if(quantity == 0){ // quantity cannot be zero
-            cout << "Quantity cannot be zero. Please enter a valid integer." << endl;
-            Sleep(1200);
-            return;
-        } else if(quantity < 0){ // quantity cannot be negative
+        if(quantity < 0){ // quantity cannot be negative
             cout << "Quantity cannot be negative. Please enter a valid integer." << endl;
             Sleep(1200);
             return;
@@ -117,34 +113,30 @@ void POSAdmin::addProduct(string database, string username) {
         if(handleInputError()) return; // handle invalid inputs
         if (price == 0) return;
 
-        if(price == 0){ // price cannot be zero
-            cout << "Price cannot be zero. Please enter a valid integer." << endl;
-            Sleep(1200);
-            return;
-        } else if(price < 0){ // price cannot be negative
+        if(price < 0){ // price cannot be negative
             cout << "Price cannot be negative. Please enter a valid integer." << endl;
             Sleep(1200);
             return;
         } else {
-                // get the last product id from the database
-                int newId = getLastId(database) +  1;
+            // get the last product id from the database
+            int newId = getLastId(database) +  1;
 
-                // open the database file, and add the new product
-                fstream fout;
-                fout.open(database, ios::out | ios::app); // append mode
+            // open the database file, and add the new product
+            fstream fout;
+            fout.open(database, ios::out | ios::app); // append mode
 
-                fout << newId << ","
-                    << productName << ","
-                    << productSubCategory << ","
-                    << quantity << ","
-                    << price << "\n";
+            fout << newId << ","
+                << productName << ","
+                << productSubCategory << ","
+                << quantity << ","
+                << price << "\n";
 
-                fout.close();                    
-                saveLogs("products", "ADD", productName, username);
-                cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
-                Sleep(1200);
-            }  
-        }
+            fout.close();                    
+            saveLogs("products", "ADD", productName, username);
+            cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
+            Sleep(1200);
+        }  
+    }
 }
 
 void POSAdmin::addUser(string database, string accessingUsername){
@@ -179,15 +171,16 @@ void POSAdmin::addUser(string database, string accessingUsername){
         Sleep(1200);
         return;
     }
+
     cout << "What is the role of the user? (Admin/Manager/Cashier, 0 to go back): ";
     cin >> role;
 
     if (role == "0") return;
 
-    role[0] = toupper(role[0]); // capitalize the first letter
+    role[0] = toupper(role[0]); // capitalize the first letter, if it wasn't capitalized
 
     vector<string> roles = {"Admin", "Manager", "Cashier"};
-    auto lookFor = find(roles.begin(), roles.end(), role);
+    auto lookFor = find(roles.begin(), roles.end(), role); // search for the role in the vector roles
 
     if(lookFor == roles.end()){
         cout << "Invalid role. Please enter Admin, Manager, or Cashier only.\n";
@@ -296,12 +289,13 @@ void POSAdmin::deleteInformation(string type, string filename, string username){
         stringstream ss(line);
         string token;
         getline(ss, token, ',');     // read id (not used)
-        getline(ss, token, ',');     // read username
+        getline(ss, token, ',');     // read the second entry
         if(token != deleteProductInput){
             rows.push_back(line); // keep the line if it doesn't match
         } else {
             found = true;
         }
+        // at this point, the vector rows now holds the value except the line that matches the query
     }
     input_file.close();
 
@@ -312,7 +306,7 @@ void POSAdmin::deleteInformation(string type, string filename, string username){
         ofstream output_file(filename, ios::trunc); // open in truncate mode
         // it avoids the line that has the query, and it rewrites the csv without it
         for (const auto& row : rows) { // write each remaining row
-            output_file << row << "\n"; // add newline
+            output_file << row << "\n"; // now, write the contents of the variable rows back to the file
         } 
         output_file.close();
 
@@ -372,6 +366,7 @@ int POSAdmin::updateInformation(string filename, string query, string type, stri
             found = true;
         }
         // write back to the file content
+        // create a copy of each line, then, modify the index that the user wants to change
         if(type.find("product") != string::npos){
             fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "," + indexFive + "\n";
         } else {
@@ -416,6 +411,7 @@ int POSAdmin::updateInformation(string filename, string query, string type, stri
         return 1;
     }
 }
+
 void POSAdmin::updateProductFields(string type, string database, string field, string username){
     system("cls"); // clear the console
 

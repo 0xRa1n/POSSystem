@@ -23,6 +23,7 @@ void POSCashier::viewCart(string username){
 
     cout << "Cart Summary" << endl;
     double totalAmount = 0.0;
+
     // check if the cart is empty
     if(cartProducts.empty()){
         cout << "\nYour cart is empty.\n";
@@ -41,7 +42,7 @@ void POSCashier::viewCart(string username){
         cout << "VAT (12%): P" << (totalAmount) * 0.12 << endl;
         cout << "Amount Due: P" << (totalAmount) + ((totalAmount) * 0.12) << endl;
 
-        cout << "Do you want to proceed to checkout? (1/0): ";
+        cout << "\nDo you want to proceed to checkout? (1/0): ";
         int confirmation;
         cin >> confirmation;
 
@@ -150,7 +151,7 @@ void POSCashier::processTransaction(vector<string>& productNames, vector<int>& p
             break;
         case 0:
             int choice;
-            cout << "Do you want to cancel the transaction? (1/0): ";
+            cout << "\nDo you want to cancel the transaction? (1/0): ";
             cin >> choice;
 
             if(handleInputError()) return; // handle invalid inputs
@@ -184,6 +185,8 @@ void POSCashier::processTransaction(vector<string>& productNames, vector<int>& p
     cout << "---------------------------------" << endl;
     cout << "Enter the user's money: ";
     cin >> userMoney;
+
+    if(handleInputError()) return; // handle invalid inputs
 
     // check if the user has sufficient money
     if(userMoney < (totalAmount) + ((totalAmount) * 0.12)){
@@ -352,11 +355,9 @@ void POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
     cin >> selectedId;
 
     if(handleInputError()) return; // handle invalid inputs
+    if (selectedId == 0) return;
 
     bool found = false;
-
-    if (selectedId == 0) return;
-    if(handleInputError()) return; // handle invalid inputs
 
     // Find and display selected product
     string productName;
@@ -411,8 +412,6 @@ void POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
     cartProducts.push_back(productName);
     cartQuantities.push_back(quantityToPurchase);
     cartPrices.push_back(productPrice);
-
-    if(handleInputError()) return; // handle invalid inputs
 
     switch(addMore){
         case 1:

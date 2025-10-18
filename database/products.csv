@@ -2,7 +2,7 @@ ProductNumber,ProductName,ProductSubCategory,Quantity,Price
 1,Graphic_Tee,T_Shirts,7,75
 2,Plain_Oversized_Tee,T_Shirts,6,60
 3,Vintage_Print_Tee,T_Shirts,7,85
-4,Striped_Polo,Polo_Shirts,8,65
+4,Striped_Polo,Polo_Shirts,7,65
 5,Checkered_Polo,Polo_Shirts,2,75
 6,Plain_White_Polo,Polo_Shirts,11,60
 7,Windbreaker,Jackets,5,110
@@ -11,7 +11,7 @@ ProductNumber,ProductName,ProductSubCategory,Quantity,Price
 10,Slim_Fit_Jeans,Jeans,3,95
 11,Baggy_Jeans,Jeans,15,110
 12,Faded_Denim_Jeans,Jeans,7,100
-13,Cargo_Shorts,Shorts,7,55
+13,Cargo_Shorts,Shorts,6,55
 14,Denim_Shorts,Shorts,10,50
 15,Corduroy_Shorts,Shorts,13,65
 16,Mini_Skirt,Skirts,15,65

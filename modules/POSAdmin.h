@@ -1,7 +1,6 @@
-#pragma once // Use pragma once instead of manual include guards
+#pragma once // Ensure the header is only included once
 
 #include <iostream>
-// ... other necessary includes ...
 #include "utilities.h"
 
 class POSAdmin {
@@ -24,5 +23,4 @@ public:
 
     // DELETE
     void deleteInformation(string type, string filename, string username);
-    // ... any other method declarations ...
 };

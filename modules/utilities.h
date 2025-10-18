@@ -1,4 +1,4 @@
-#pragma once
+#pragma once // Ensure the header is only included once
 
 #include <iostream>
 #include <cctype> // for toupper() and tolower()

@@ -9,7 +9,6 @@ int main(){
     int retries = 0;
     string usernameInput, passwordInput, role;
 
-
     while(true){
         system("cls");
         showHeader("Threads and Charms");

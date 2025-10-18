@@ -1,4 +1,4 @@
-#pragma once
+#pragma once // Ensure the header is only included once
 
 #include <string>
 #include "POSAdmin.h"
@@ -10,7 +10,6 @@ private:
     POSCashier cashier;
 
 public:
-    // --- DECLARATIONS ONLY ---
     bool login(string username, string password, string& outRole);
     void adminMenu(string username);
     void managerMenu(string username);
