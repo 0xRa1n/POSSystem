@@ -1,5 +1,6 @@
 #include <iostream>
-#include "functions/POS.h"
+#include "modules/POS.h"
+#include "modules/utilities.h"
 using namespace std;
 
 int main(){

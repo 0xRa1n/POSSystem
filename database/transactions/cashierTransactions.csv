@@ -22,3 +22,9 @@ TransactionNumber,ProductNames,ProductQuantities,TotalAmount,Date,Time,CashierNa
 21,Plain_Oversized_Tee,1,67,10_17_25,04:38:17_PM,cashier
 22,Striped_Polo,1,72,10_17_25,04:48:19_PM,cashier
 23,Mini_Skirt;Baseball_Cap,1;1,117,10_17_25,04:49:23_PM,cashier
+24,Graphic_Tee;Slim_Fit_Jeans;Baseball_Cap,1;1;1,235,10_18_25,10:31:04_AM,cashier
+25,Checkered_Polo;Baseball_Cap,1;1,128,10_18_25,11:04:00_AM,cashier
+26,Checkered_Polo,1,84,10_18_25,11:05:33_AM,cashier
+27,Pleated_Skirt,1,67,10_18_25,11:08:05_AM,cashier
+28,Faded_Denim_Jeans,1,112,10_18_25,11:08:28_AM,cashier
+29,Graphic_Tee;Striped_Polo;Windbreaker;Slim_Fit_Jeans;Cargo_Shorts;Mini_Skirt;Shoulder_Bag;Baseball_Cap;Leather_Wallet,1;1;1;1;1;1;1;1;1,655,10_18_25,11:12:34_AM,cashier
