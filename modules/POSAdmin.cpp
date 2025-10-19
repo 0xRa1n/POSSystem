@@ -266,6 +266,136 @@ void POSAdmin::readProducts(string database) {
     }
 }
 
+void POSAdmin::getAllAccounts(string database) {
+    // Open the file
+    ifstream file(database);
+
+    // check if file exists
+    if (!file.is_open()) {
+        cout << "Failed to open file\n";
+        return;
+    }
+
+    // Read all rows first
+    vector<vector<string>> rows; // 2D vector to hold rows and columns || the output should looks like this: {{"ID", "Username", "Password", "Role"}, {"1", "User1", "Pass1", "Admin"}, ...}
+    string line;
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string cell;
+        vector<string> row; 
+        while (getline(ss, cell, ',')) { // split by comma
+            row.push_back(cell); // add each cell to the row || row will look like this: {"ID", "Username", "Password", "Role"}
+        }
+        rows.push_back(row); // add the row to the list of rows || rows will look like this: {{"ID", "Username", "Password", "Role"}, {"1", "User1", "Pass1", "Admin"}, ...
+    }
+    file.close(); // close the file
+
+    // stop if the rows are empty
+    if (rows.empty()){
+        cout << "No accounts found in the database.\n";
+        return;
+    }
+
+    // Find max width of each column
+    size_t cols = 0;
+    for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
+    // no brackets since its a single controlled statement
+    vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
+    // initially: widths is {0, 0, 0, 0} for 4 columns
+
+    // after we get the maximum number, we will update the widths vector
+    // this will make sure that each value will not overlap with each other
+
+    for (auto &r : rows) { 
+        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
+            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
+            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
+            // there is no curly braces here because it is a single controlled statement
+    }
+    // Add a little padding for readability
+    for (auto &w : widths) w += 2;
+    // Print
+    for (auto &r : rows) {
+        for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
+            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
+            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
+        }
+        cout << '\n';
+    }
+}
+
+void POSAdmin::getTotalSales(string database){
+    string line;
+    int totalSales = 0;
+    // open the file
+    ifstream file(database);
+
+    // check if file exists
+    if(!file.is_open()){
+        cout << "Failed to open file\n";
+        return;
+    }
+
+    // loop through each line and get the amount
+    getline(file, line); // skip the header of the csv
+    while(getline(file, line)){
+        stringstream ss(line); // create a string stream, making us read the line as if it were a stream
+        string token;
+        // skip the first three tokens
+        getline(ss, token, ','); // skip id
+        getline(ss, token, ','); // skip product names
+        getline(ss, token, ','); // skip product quantities
+        getline(ss, token, ','); // get the amount
+        totalSales += stoi(token); // convert to integer and add to total sales
+    }
+    file.close();
+
+    cout << "Total Sales: P" << totalSales << endl;
+}
+
+void POSAdmin::getTodaysSales(string database){
+    // we should first read the csv, then get the current date and the date from the csv. Then, starting there, get the amount
+    string line;
+    int todaysSales = 0;
+
+    // open the file
+    ifstream file(database);
+
+    // get the current date
+    time_t timestamp = time(NULL);
+    struct tm datetime = *localtime(&timestamp);
+    char date[50]; // since it points to a char array
+    strftime(date, 50, "%m_%d_%y", &datetime);
+    string currentDate(date);
+    
+    // check if file exists
+    if(!file.is_open()){
+        cout << "Failed to open file\n";
+        return;
+    }
+
+    // loop through each line and get the amount
+    getline(file, line); // skip the header of the csv
+    while(getline(file, line)){
+        stringstream ss(line); // create a string stream, making us read the line as if it were a stream
+        string token;
+        // skip the first four tokens
+        getline(ss, token, ','); // skip id
+        getline(ss, token, ','); // skip product names
+        getline(ss, token, ','); // skip product quantities
+        getline(ss, token, ','); // get the amount
+        string amount = token;
+        getline(ss, token, ','); // get the date
+        string transactionDate = token;
+
+        if(transactionDate == currentDate){
+            todaysSales += stoi(amount); // convert to integer and add to today's sales
+        }
+    }
+    file.close();
+    cout << "Today's Sales: P" << todaysSales << endl;
+}
+
 void POSAdmin::deleteInformation(string type, string filename, string username){
     string deleteProductInput;
 
@@ -507,76 +637,4 @@ void POSAdmin::updateProductFields(string type, string database, string field, s
         Sleep(1200);
         return;
     }
-}
-
-void POSAdmin::getTotalSales(string database){
-    string line;
-    int totalSales = 0;
-    // open the file
-    ifstream file(database);
-
-    // check if file exists
-    if(!file.is_open()){
-        cout << "Failed to open file\n";
-        return;
-    }
-
-    // loop through each line and get the amount
-    getline(file, line); // skip the header of the csv
-    while(getline(file, line)){
-        stringstream ss(line); // create a string stream, making us read the line as if it were a stream
-        string token;
-        // skip the first three tokens
-        getline(ss, token, ','); // skip id
-        getline(ss, token, ','); // skip product names
-        getline(ss, token, ','); // skip product quantities
-        getline(ss, token, ','); // get the amount
-        totalSales += stoi(token); // convert to integer and add to total sales
-    }
-    file.close();
-
-    cout << "Total Sales: P" << totalSales << endl;
-}
-
-void POSAdmin::getTodaysSales(string database){
-    // we should first read the csv, then get the current date and the date from the csv. Then, starting there, get the amount
-    string line;
-    int todaysSales = 0;
-
-    // open the file
-    ifstream file(database);
-
-    // get the current date
-    time_t timestamp = time(NULL);
-    struct tm datetime = *localtime(&timestamp);
-    char date[50]; // since it points to a char array
-    strftime(date, 50, "%m_%d_%y", &datetime);
-    string currentDate(date);
-    
-    // check if file exists
-    if(!file.is_open()){
-        cout << "Failed to open file\n";
-        return;
-    }
-
-    // loop through each line and get the amount
-    getline(file, line); // skip the header of the csv
-    while(getline(file, line)){
-        stringstream ss(line); // create a string stream, making us read the line as if it were a stream
-        string token;
-        // skip the first four tokens
-        getline(ss, token, ','); // skip id
-        getline(ss, token, ','); // skip product names
-        getline(ss, token, ','); // skip product quantities
-        getline(ss, token, ','); // get the amount
-        string amount = token;
-        getline(ss, token, ','); // get the date
-        string transactionDate = token;
-
-        if(transactionDate == currentDate){
-            todaysSales += stoi(amount); // convert to integer and add to today's sales
-        }
-    }
-    file.close();
-    cout << "Today's Sales: P" << todaysSales << endl;
 }

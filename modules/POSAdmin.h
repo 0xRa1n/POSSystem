@@ -16,6 +16,7 @@ public:
     void readProducts(string database);
     void getTotalSales(string database);
     void getTodaysSales(string database);
+    void getAllAccounts(string database);
 
     // UPDATE
     int updateInformation(string filename, string query, string type, string newValue, string username);

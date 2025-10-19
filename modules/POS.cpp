@@ -69,8 +69,7 @@ void PointOfSale::adminMenu(string username) {
                         "Add products",
                         "Add an account",
                         "View all products",
-                        "View total sales",
-                        "View today's sales",
+                        "View all accounts",
                         "Update account or product",
                         "Delete a product",
                         "Delete an account",
@@ -96,19 +95,13 @@ void PointOfSale::adminMenu(string username) {
 
                             system("pause");
                             break;
-                        case 4: // view total sales
-                            showHeader("View total sales");
-                            admin.getTotalSales("database/transactions/cashierTransactions.csv");
+                        case 4: // view all accounts
+                            showHeader("View all accounts");
+                            admin.getAllAccounts(usersDatabase);
 
                             system("pause");
                             break;
-                        case 5: // view today's sales
-                            showHeader("View today's sales");
-                            admin.getTodaysSales("database/transactions/cashierTransactions.csv");
-
-                            system("pause");
-                            break;
-                        case 6: { // update
+                        case 5: { // update
                             // initialize a loop where it contains the menu Product, Account, and Go back
                             while(true){
                                 system("cls");
@@ -183,15 +176,15 @@ void PointOfSale::adminMenu(string username) {
                             }
                             break;
                         }
-                        case 7: // delete product
+                        case 6: // delete product
                             showHeader("Delete product");
                             admin.deleteInformation("products", productsDatabase, username);
                             break;
-                        case 8: // delete account
+                        case 7: // delete account
                             showHeader("Delete account");
                             admin.deleteInformation("accounts", usersDatabase, username);
                             break;
-                        case 9:
+                        case 8:
                             // Go back to admin main menu
                             goto endInventoryLoop;
                         default:

@@ -124,6 +124,7 @@ void POSCashier::processTransaction(vector<string>& productNames, vector<int>& p
 
         totalAmount += productPrices[i] * productQuantities[i];
     }
+    cout << "\nTotal Amount: P" << totalAmount << endl;
 
     cout << "\nProceed to purchase? (1/0): ";
     cin >> confirmation;
@@ -191,7 +192,7 @@ void POSCashier::processTransaction(vector<string>& productNames, vector<int>& p
     // check if the user has sufficient money
     if(userMoney < (totalAmount) + ((totalAmount) * 0.12)){
         int confirmation;
-        cout << "Insufficient money. Try again? (1/0).\n";
+        cout << "Insufficient money. Try again? (1/0): ";
         cin >> confirmation;
 
         if(handleInputError()) return; // handle invalid inputs
@@ -422,7 +423,7 @@ void POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
     }
 
     // ask if the user wants to add more products to the cart
-    cout << "Do you want to add more? (1/0): ";
+    cout << "Product added succcessfully. Do you want to add more? (1/0): ";
     int addMore;
     cin >> addMore;
 
