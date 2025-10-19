@@ -32,3 +32,7 @@ TransactionNumber,ProductNames,ProductQuantities,TotalAmount,Date,Time,CashierNa
 31,Striped_Polo;Cargo_Shorts,1;1,134,10_18_25,08:56:46_PM,cashier
 32,Graphic_Tee,1,84,10_18_25,11:29:26_PM,cashier
 33,Graphic_Tee,1,84,10_19_25,05:27:24_PM,cashier
+34,Plain_Oversized_Tee,1,67,10_19_25,11:33:48_PM,cashier
+35,Plain_Oversized_Tee,1,67,10_19_25,11:36:07_PM,cashier
+36,Striped_Polo,1,72,10_19_25,11:47:00_PM,cashier
+37,Baseball_Cap,1,44,10_19_25,11:49:30_PM,cashier

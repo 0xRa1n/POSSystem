@@ -301,16 +301,17 @@ void POSCashier::processTransaction(vector<string>& productNames, vector<int>& p
         cout << "Change: " << userMoney - ((totalAmount) + ((totalAmount) * 0.12)) << endl;
     }
     system("pause");
+    return;
 }
 
-void POSCashier::readProductsBySubcategory(string productsDatabase, string subCategory, string username){
+bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCategory, string username){
     int quantityToPurchase;
     ifstream file(productsDatabase);
             
     if (!file.is_open()) {
         cout << "Failed to open file\n";
         Sleep(1200);
-        return;
+        return false;
     }
     cout << "Format: ID, ProductName, SubCategory, Quantity, Price\n" << endl;
 
@@ -338,7 +339,7 @@ void POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
     if (subCategoryRows.empty()) {
         cout << "No products available in this sub-category.\n";
         Sleep(1200);
-        return;
+        return false;
     }
 
     // print all the products in the said subcategory
@@ -378,8 +379,8 @@ void POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
     cout << "\nEnter product ID to select (0 to go back): ";
     cin >> selectedId;
 
-    if (handleInputError()) return; // handle invalid inputs
-    if (selectedId == 0) return;
+    if (handleInputError()) return false; // handle invalid inputs
+    if (selectedId == 0) return false;
 
     // Find and display selected product
     bool found = false;
@@ -393,7 +394,7 @@ void POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
             if (productQuantity == 0){
                 cout << "Product is out of stock!\n";
                 system("pause");
-                return;
+                return false;
             } else {
                 found = true;
                 cout << "\nSelected Product:\n";
@@ -406,20 +407,20 @@ void POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
     if(!found){
         cout << "Invalid product ID\n";
         Sleep(1200);
-        return;
+        return false;
     }
 
     cout << "\nEnter quantity to purchase (0 to go back): ";
     cin >> quantityToPurchase;
 
-    if(handleInputError()) return; // handle invalid inputs
-    if (quantityToPurchase == 0) return;
+    if(handleInputError()) return false; // handle invalid inputs
+    if (quantityToPurchase == 0) return false;
 
     // if the quantity is greater than the available quantity, show an error message
     if (quantityToPurchase > productQuantity) {
         cout << "Insufficient stock available!\n";
         system("pause");
-        return;
+        return false;
     }
 
     // ask if the user wants to add more products to the cart
@@ -427,7 +428,7 @@ void POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
     int addMore;
     cin >> addMore;
 
-    if(handleInputError()) return; // handle invalid inputs
+    if(handleInputError()) return false; // handle invalid inputs
 
     // save or append the previous product
     cartProducts.push_back(productName);
@@ -436,16 +437,16 @@ void POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
 
     switch(addMore){
         case 1:
-            return;
+            return false; // return to the previous menu to add more products
         case 0:
             // do nothing just proceed to the next step
             break;
         default:
             cout << "Invalid selection.\n"; // fallback, but cin.fail() should catch this
             Sleep(1200);
-            return;
+            return false;
     }
 
     processTransaction(cartProducts, cartQuantities, cartPrices, username);
-    return;
+    return true;
 };

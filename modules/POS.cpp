@@ -390,121 +390,131 @@ void PointOfSale::cashierMenu(string username) {
         system("cls"); // if an error input was received, it will reach this part, so that it will print the error and go back to the menu
 
         switch (cashierSelection) {
-            case 1: {
+            case 1: { // Tops
+                bool transactionMade = false; // Declare before the switch
                 while(true){
                     system("cls");
                     string topsSubCategory[] = {"T-Shirts", "Polo Shirts", "Jackets", "Go back"};
                     int topsSelection = showMenu("Tops", topsSubCategory);
-                    system("cls"); // clear the screen again after selecting a sub-category, also acts that if an error arise, it will clear the screen again
+                    system("cls");
 
                     if(topsSelection == 4){
-                        // go back to the previous menu
-                        break;
+                        break; // Go back to the main cashier menu
                     }
 
                     switch(topsSelection){
                         case 1: 
                             showHeader("T-Shirts");
-                            cashier.readProductsBySubcategory(productsDatabase, "T_Shirts", username);
+                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "T_Shirts", username);
                             break;
                             
                         case 2:
                             showHeader("Polo Shirts");
-                            cashier.readProductsBySubcategory(productsDatabase, "Polo_Shirts", username);
+                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Polo_Shirts", username);
                             break;
 
                         case 3:
                             showHeader("Jackets");
-                            cashier.readProductsBySubcategory(productsDatabase, "Jackets", username);
+                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Jackets", username);
                             break;
                         default:
                             cout << "Invalid selection\n";
                             Sleep(1200);
                             break;
                     }
+                    // If a transaction was completed, break out of the sub-category loop
+                    // because if a transaction was made, we want to go back to the main cashier menu
+                    // otherwise after the transaction, it will still be in the sub-category menu
+                    if(transactionMade) break;
                 }
                 break;
             }
-            case 2: {
+            case 2: { // Bottoms
+                bool transactionMade = false; // Declare before the switch
                 while(true){
                     system("cls");
                     string bottomsSubCategory[] = {"Jeans", "Shorts", "Skirts", "Go back"};
                     int bottomsSelection = showMenu("Bottoms", bottomsSubCategory);
-                    system("cls"); // clear the screen again after selecting a sub-category, also acts that if an error arise, it will clear the screen again
+                    system("cls");
 
                     if(bottomsSelection == 4){
-                        // go back to the previous menu
-                        break;
+                        break; // Go back to the main cashier menu
                     }
 
                     switch(bottomsSelection){
                         case 1: 
                             showHeader("Jeans");
-                            cashier.readProductsBySubcategory(productsDatabase, "Jeans", username);
+                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Jeans", username);
                             break;
                             
                         case 2:
                             showHeader("Shorts");
-                            cashier.readProductsBySubcategory(productsDatabase, "Shorts", username);
+                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Shorts", username);
                             break;
 
                         case 3:
                             showHeader("Skirts");
-                            cashier.readProductsBySubcategory(productsDatabase, "Skirts", username);
+                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Skirts", username);
                             break;
                         default:
                             cout << "Invalid option\n";
                             Sleep(1200);
                             break;
                     }
+                    // If a transaction was completed, break out of the sub-category loop
+                    if(transactionMade) break;
                 }
                 break;
             }
-            case 3: {
+            case 3: { // Accessories
+                bool transactionMade = false; // Declare before the switch
                 while(true){
                     system("cls");
                     string accessoriesSubCategory[] = {"Bags", "Headware", "Wallets", "Go back"};
                     int accessoriesSelection = showMenu("Accessories", accessoriesSubCategory);
-                    system("cls"); // clear the screen again after selecting a sub-category, also acts that if an error arise, it will clear the screen again
+                    system("cls");
                     
                     if(accessoriesSelection == 4){
-                        // go back to the previous menu
-                        break;
+                        break; // Go back to the main cashier menu
                     }
 
                     switch(accessoriesSelection){
                         case 1: 
                             showHeader("Bags");
-                            cashier.readProductsBySubcategory(productsDatabase, "Bags", username);
+                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Bags", username);
                             break;
                             
                         case 2:
                             showHeader("Headware");
-                            cashier.readProductsBySubcategory(productsDatabase, "Headware", username);
+                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Headware", username);
                             break;
 
                         case 3:
                             showHeader("Wallets");
-                            cashier.readProductsBySubcategory(productsDatabase, "Wallets", username);
+                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Wallets", username);
                             break;
                         default:
                             cout << "Invalid selection\n";
                             Sleep(1200);
                             break;
                     }
+                    // If a transaction was completed, break out of the sub-category loop
+                    if(transactionMade) break;
                 }
                 break;
             }
             case 4: {
+                // Assuming viewCart is also updated to return a bool
                 cashier.viewCart(username);
                 break;
             }
             case 5:
-                return;
+                return; // Logout
             default:
                 cout << "Invalid option\n";
                 Sleep(1000);
                 break;
         }
     }
-};
+}
+// ...existing code...
