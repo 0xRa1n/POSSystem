@@ -391,101 +391,107 @@ void PointOfSale::cashierMenu(string username) {
 
         switch (cashierSelection) {
             case 1: {
-                system("cls");
-                string topsSubCategory[] = {"T-Shirts", "Polo Shirts", "Jackets", "Go back"};
-                int topsSelection = showMenu("Tops", topsSubCategory);
-                system("cls"); // clear the screen again after selecting a sub-category, also acts that if an error arise, it will clear the screen again
+                while(true){
+                    system("cls");
+                    string topsSubCategory[] = {"T-Shirts", "Polo Shirts", "Jackets", "Go back"};
+                    int topsSelection = showMenu("Tops", topsSubCategory);
+                    system("cls"); // clear the screen again after selecting a sub-category, also acts that if an error arise, it will clear the screen again
 
-                if(topsSelection == 4){
-                    // go back to the previous menu
-                    break;
-                }
+                    if(topsSelection == 4){
+                        // go back to the previous menu
+                        break;
+                    }
 
-                switch(topsSelection){
-                    case 1: 
-                        showHeader("T-Shirts");
-                        cashier.readProductsBySubcategory(productsDatabase, "T_Shirts", username);
-                        break;
-                        
-                    case 2:
-                        showHeader("Polo Shirts");
-                        cashier.readProductsBySubcategory(productsDatabase, "Polo_Shirts", username);
-                        break;
+                    switch(topsSelection){
+                        case 1: 
+                            showHeader("T-Shirts");
+                            cashier.readProductsBySubcategory(productsDatabase, "T_Shirts", username);
+                            break;
+                            
+                        case 2:
+                            showHeader("Polo Shirts");
+                            cashier.readProductsBySubcategory(productsDatabase, "Polo_Shirts", username);
+                            break;
 
-                    case 3:
-                        showHeader("Jackets");
-                        cashier.readProductsBySubcategory(productsDatabase, "Jackets", username);
-                        break;
-                    default:
-                        cout << "Invalid selection\n";
-                        Sleep(1200);
-                        break;
+                        case 3:
+                            showHeader("Jackets");
+                            cashier.readProductsBySubcategory(productsDatabase, "Jackets", username);
+                            break;
+                        default:
+                            cout << "Invalid selection\n";
+                            Sleep(1200);
+                            break;
+                    }
                 }
                 break;
             }
             case 2: {
-                system("cls");
-                string bottomsSubCategory[] = {"Jeans", "Shorts", "Skirts", "Go back"};
-                int bottomsSelection = showMenu("Bottoms", bottomsSubCategory);
-                system("cls"); // clear the screen again after selecting a sub-category, also acts that if an error arise, it will clear the screen again
+                while(true){
+                    system("cls");
+                    string bottomsSubCategory[] = {"Jeans", "Shorts", "Skirts", "Go back"};
+                    int bottomsSelection = showMenu("Bottoms", bottomsSubCategory);
+                    system("cls"); // clear the screen again after selecting a sub-category, also acts that if an error arise, it will clear the screen again
 
-                if(bottomsSelection == 4){
-                    // go back to the previous menu
-                    break;
-                }
+                    if(bottomsSelection == 4){
+                        // go back to the previous menu
+                        break;
+                    }
 
-                switch(bottomsSelection){
-                    case 1: 
-                        showHeader("Jeans");
-                        cashier.readProductsBySubcategory(productsDatabase, "Jeans", username);
-                        break;
-                        
-                    case 2:
-                        showHeader("Shorts");
-                        cashier.readProductsBySubcategory(productsDatabase, "Shorts", username);
-                        break;
+                    switch(bottomsSelection){
+                        case 1: 
+                            showHeader("Jeans");
+                            cashier.readProductsBySubcategory(productsDatabase, "Jeans", username);
+                            break;
+                            
+                        case 2:
+                            showHeader("Shorts");
+                            cashier.readProductsBySubcategory(productsDatabase, "Shorts", username);
+                            break;
 
-                    case 3:
-                        showHeader("Skirts");
-                        cashier.readProductsBySubcategory(productsDatabase, "Skirts", username);
-                        break;
-                    default:
-                        cout << "Invalid option\n";
-                        Sleep(1200);
-                        break;
+                        case 3:
+                            showHeader("Skirts");
+                            cashier.readProductsBySubcategory(productsDatabase, "Skirts", username);
+                            break;
+                        default:
+                            cout << "Invalid option\n";
+                            Sleep(1200);
+                            break;
+                    }
                 }
                 break;
             }
             case 3: {
-                system("cls");
-                string accessoriesSubCategory[] = {"Bags", "Headware", "Wallets", "Go back"};
-                int accessoriesSelection = showMenu("Accessories", accessoriesSubCategory);
-                system("cls"); // clear the screen again after selecting a sub-category, also acts that if an error arise, it will clear the screen again
-                
-                if(accessoriesSelection == 4){
-                    // go back to the previous menu
-                    break;
-                }
+                while(true){
+                    system("cls");
+                    string accessoriesSubCategory[] = {"Bags", "Headware", "Wallets", "Go back"};
+                    int accessoriesSelection = showMenu("Accessories", accessoriesSubCategory);
+                    system("cls"); // clear the screen again after selecting a sub-category, also acts that if an error arise, it will clear the screen again
+                    
+                    if(accessoriesSelection == 4){
+                        // go back to the previous menu
+                        break;
+                    }
 
-                switch(accessoriesSelection){
-                    case 1: 
-                        showHeader("Bags");
-                        cashier.readProductsBySubcategory(productsDatabase, "Bags", username);
-                        break;
-                        
-                    case 2:
-                        showHeader("Headware");
-                        cashier.readProductsBySubcategory(productsDatabase, "Headware", username);
-                        break;
+                    switch(accessoriesSelection){
+                        case 1: 
+                            showHeader("Bags");
+                            cashier.readProductsBySubcategory(productsDatabase, "Bags", username);
+                            break;
+                            
+                        case 2:
+                            showHeader("Headware");
+                            cashier.readProductsBySubcategory(productsDatabase, "Headware", username);
+                            break;
 
-                    case 3:
-                        showHeader("Wallets");
-                        cashier.readProductsBySubcategory(productsDatabase, "Wallets", username);
-                        break;
-                    default:
-                        cout << "Invalid selection\n";
-                        Sleep(1200);
-                        break;
+                        case 3:
+                            showHeader("Wallets");
+                            cashier.readProductsBySubcategory(productsDatabase, "Wallets", username);
+                            break;
+                        default:
+                            cout << "Invalid selection\n";
+                            Sleep(1200);
+                            break;
+                    }
                 }
                 break;
             }

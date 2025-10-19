@@ -370,19 +370,19 @@ void POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
         cout << '\n';
     }
 
-    // Get user input for product ID
-    cout << "\nEnter product ID to select (0 to go back): ";
-    int selectedId;
-    cin >> selectedId;
-
-    if(handleInputError()) return; // handle invalid inputs
-    if (selectedId == 0) return;
-
-    bool found = false;
-
-    // Find and display selected product
     string productName;
     int productQuantity, productPrice;
+
+    // Get user input for product ID
+    int selectedId;
+    cout << "\nEnter product ID to select (0 to go back): ";
+    cin >> selectedId;
+
+    if (handleInputError()) return; // handle invalid inputs
+    if (selectedId == 0) return;
+
+    // Find and display selected product
+    bool found = false;
 
     for (auto row : subCategoryRows) {
         if (stoi(row[0]) == selectedId) {
@@ -447,4 +447,5 @@ void POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
     }
 
     processTransaction(cartProducts, cartQuantities, cartPrices, username);
+    return;
 };
