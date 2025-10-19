@@ -412,8 +412,8 @@ void POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
     cout << "\nEnter quantity to purchase (0 to go back): ";
     cin >> quantityToPurchase;
 
-    if (quantityToPurchase == 0) return;
     if(handleInputError()) return; // handle invalid inputs
+    if (quantityToPurchase == 0) return;
 
     // if the quantity is greater than the available quantity, show an error message
     if (quantityToPurchase > productQuantity) {

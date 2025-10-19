@@ -260,7 +260,7 @@ void PointOfSale::managerMenu(string username) {
             case 1: {  // Inventory submenu
                 // intialize another loop that contains the menu of the admin menu
                 while (true) {
-                    system("cls");
+                    system("cls"); // initial clearing for this loop
                     string inventoryMenu[] = {
                         "Add products",
                         "View all products",
@@ -269,7 +269,7 @@ void PointOfSale::managerMenu(string username) {
                         "Go back"
                     };
                     int inventoryInput = showMenu("Admin utilities", inventoryMenu);
-                    system("cls");
+                    system("cls"); // if an error arise, it will reach this part to clear the screen again
 
                     switch (inventoryInput) {
                         case 1: // add product
@@ -384,14 +384,17 @@ void PointOfSale::managerMenu(string username) {
 void PointOfSale::cashierMenu(string username) {
     const string productsDatabase = "database/products.csv";
     while(true){
-        system("cls");
+        system("cls"); // initial clearing, usually starts when logging in as cashier or when going back to this menu
         string menu[] = {"Tops", "Bottoms", "Accessories", "View Cart", "Logout"};
         int cashierSelection = showMenu("P.O.S. (Cashier)", menu);
+        system("cls"); // if an error input was received, it will reach this part, so that it will print the error and go back to the menu
 
         switch (cashierSelection) {
             case 1: {
+                system("cls");
                 string topsSubCategory[] = {"T-Shirts", "Polo Shirts", "Jackets", "Go back"};
                 int topsSelection = showMenu("Tops", topsSubCategory);
+                system("cls"); // clear the screen again after selecting a sub-category, also acts that if an error arise, it will clear the screen again
 
                 if(topsSelection == 4){
                     // go back to the previous menu
@@ -414,15 +417,17 @@ void PointOfSale::cashierMenu(string username) {
                         cashier.readProductsBySubcategory(productsDatabase, "Jackets", username);
                         break;
                     default:
-                        cout << "Invalid option\n";
+                        cout << "Invalid selection\n";
                         Sleep(1200);
                         break;
                 }
                 break;
             }
             case 2: {
+                system("cls");
                 string bottomsSubCategory[] = {"Jeans", "Shorts", "Skirts", "Go back"};
                 int bottomsSelection = showMenu("Bottoms", bottomsSubCategory);
+                system("cls"); // clear the screen again after selecting a sub-category, also acts that if an error arise, it will clear the screen again
 
                 if(bottomsSelection == 4){
                     // go back to the previous menu
@@ -452,9 +457,11 @@ void PointOfSale::cashierMenu(string username) {
                 break;
             }
             case 3: {
+                system("cls");
                 string accessoriesSubCategory[] = {"Bags", "Headware", "Wallets", "Go back"};
                 int accessoriesSelection = showMenu("Accessories", accessoriesSubCategory);
-
+                system("cls"); // clear the screen again after selecting a sub-category, also acts that if an error arise, it will clear the screen again
+                
                 if(accessoriesSelection == 4){
                     // go back to the previous menu
                     break;
@@ -477,7 +484,7 @@ void PointOfSale::cashierMenu(string username) {
                         cashier.readProductsBySubcategory(productsDatabase, "Wallets", username);
                         break;
                     default:
-                        cout << "Invalid option\n";
+                        cout << "Invalid selection\n";
                         Sleep(1200);
                         break;
                 }

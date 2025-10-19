@@ -240,7 +240,7 @@ void POSAdmin::readProducts(string database) {
     size_t cols = 0;
     for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
     // no brackets since its a single controlled statement
-    vector<size_t> widths(cols, 0); // initialize widths with 0
+    vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
     // initially: widths is {0, 0, 0, 0, 0} for 5 columns
 
     // after we get the maximum number, we will update the widths vector
