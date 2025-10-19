@@ -466,7 +466,6 @@ void PointOfSale::cashierMenu(string username) {
                     // go back to the previous menu
                     break;
                 }
-                system("cls");
 
                 switch(accessoriesSelection){
                     case 1: 
