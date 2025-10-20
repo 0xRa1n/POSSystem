@@ -173,3 +173,7 @@ UPDATE,Plain_Oversized_Tee_Quantity_to_2,10_20_25,05:54:09_PM,cashier
 UPDATE,Vintage_Print_Tee_Quantity_to_6,10_20_25,05:54:09_PM,cashier
 UPDATE,Graphic_Tee_Quantity_to_1,10_20_25,08:24:37_PM,cashier
 UPDATE,Graphic_Tee_Quantity_to_1,10_20_25,08:24:37_PM,cashier
+ADD,Classic_Polo,10_20_25,09:29:45_PM,admin
+UPDATE,Graphic_Tee_Quantity_to_7,10_20_25,09:32:20_PM,newcashier
+ADD,Test,10_20_25,09:47:33_PM,admin
+DELETE,Test,10_20_25,09:47:38_PM,admin

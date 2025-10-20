@@ -35,3 +35,4 @@ UPDATE,DemoAccountOne_to_Manager,10_18_25,05:16:22_PM,admin
 DELETE,DemoAccountOne,10_18_25,05:16:48_PM,admin
 ADD,newcashier,10_19_25,10:08:36_PM,admin
 UPDATE,newcashier_PW_to_newpass456,10_19_25,10:08:56_PM,admin
+ADD,newcashier,10_20_25,09:29:36_PM,admin

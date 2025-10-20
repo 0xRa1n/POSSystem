@@ -79,13 +79,30 @@ void POSAdmin::addProduct(string database, string username) {
         Sleep(1200);
         return;
     } else {
+        cout << "Enter the product category (Tops/Bottoms/Accessories, 0 to go back): ";
+        string productCategory;
+        cin >> productCategory;
+        if (productCategory == "0") return;
+        if(regex_search(productCategory, disallowed)){
+            cout << "Product category cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+            Sleep(1200);
+            return;
+        }
+        productCategory[0] = toupper(productCategory[0]); // capitalize the first letter, if it wasn't capitalized
+        vector<string> categories = {"Tops", "Bottoms", "Accessories"};
+        auto lookFor = find(categories.begin(), categories.end(), productCategory); // search for the category in the vector categories
+        if(lookFor == categories.end()){
+            cout << "Invalid category. Please enter Tops, Bottoms, or Accessories only.\n";
+            Sleep(1200);
+            return;
+        }
+
         // ask the user if what product sub-category is the product
 
         cout << "Enter the product sub-category (0 to go back): ";
         cin >> productSubCategory;
 
         if(productSubCategory == "0") return;
-
         if(regex_search(productSubCategory, disallowed)){
             cout << "Product sub-category cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
             Sleep(1200);
@@ -125,6 +142,7 @@ void POSAdmin::addProduct(string database, string username) {
 
             fout << newId << ","
                 << productName << ","
+                << productCategory << ","
                 << productSubCategory << ","
                 << quantity << ","
                 << price << "\n";

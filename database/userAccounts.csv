@@ -7,3 +7,4 @@ UserID,Username,Password,Role
 7,00test,testing,Admin
 8,adminthree,admin3,Admin
 9,newcashier,newpass456,Cashier
+10,newcashier,password123,Cashier
