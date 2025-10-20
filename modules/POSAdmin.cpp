@@ -463,14 +463,15 @@ int POSAdmin::updateInformation(string filename, string query, string type, stri
 
     while (getline(fileIn, line)) {
         stringstream ss(line); // create a string stream from the line
-        string indexOne, indexTwo, indexThree, indexFour, indexFive;
+        string indexOne, indexTwo, indexThree, indexFour, indexFive, indexSix;
         // get a copy of each entries
-        getline(ss, indexOne, ',');
-        getline(ss, indexTwo, ',');
-        getline(ss, indexThree, ',');
-        getline(ss, indexFour, ',');
+        getline(ss, indexOne, ','); // read the id (not used)
+        getline(ss, indexTwo, ','); // read the second entry (username or product name)
+        getline(ss, indexThree, ','); // read the product category or password
+        getline(ss, indexFour, ','); // read the product subcategory or role
+        getline(ss, indexFive, ','); // get the product quantity
         if(type.find("product") != string::npos){ // if the type contains the word "product"
-            getline(ss, indexFive, ',');
+            getline(ss, indexSix, ','); // get the product price
         }
 
         // modify the entry if it matches the query
@@ -480,12 +481,14 @@ int POSAdmin::updateInformation(string filename, string query, string type, stri
             if(type == "productName"){
                 indexTwo = newValue;
             } else if(type == "productQuantity"){
-                indexFour = newValue;
-            } else if(type == "productPrice"){
                 indexFive = newValue;
+            } else if(type == "productPrice"){
+                indexSix = newValue;
             }  else if(type == "productSubCategory"){
+                indexFour = newValue;
+            } else if(type == "productCategory"){
                 indexThree = newValue;
-            } 
+            }
             // account
             else if(type == "accountUsername"){
                 indexTwo = newValue;
@@ -499,7 +502,7 @@ int POSAdmin::updateInformation(string filename, string query, string type, stri
         // write back to the file content
         // create a copy of each line, then, modify the index that the user wants to change
         if(type.find("product") != string::npos){
-            fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "," + indexFive + "\n";
+            fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "," + indexFive + "," + indexSix + "\n";
         } else {
             fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "\n";
         }

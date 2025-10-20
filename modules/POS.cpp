@@ -505,7 +505,7 @@ void PointOfSale::cashierMenu(string username) {
             }
             case 4: {
                 // Assuming viewCart is also updated to return a bool
-                cashier.viewCart(username);
+                bool transactionMade = cashier.viewCart(username);
                 break;
             }
             case 5:

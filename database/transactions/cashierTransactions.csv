@@ -36,3 +36,11 @@ TransactionNumber,ProductNames,ProductQuantities,TotalAmount,Date,Time,CashierNa
 35,Plain_Oversized_Tee,1,67,10_19_25,11:36:07_PM,cashier
 36,Striped_Polo,1,72,10_19_25,11:47:00_PM,cashier
 37,Baseball_Cap,1,44,10_19_25,11:49:30_PM,cashier
+38,Striped_Polo,1,72,10_20_25,04:43:35_PM,cashier
+39,Plain_Oversized_Tee,1,67,10_20_25,04:47:51_PM,cashier
+40,Striped_Polo,1,72,10_20_25,04:50:39_PM,cashier
+41,Graphic_Tee,1,84,10_20_25,04:52:16_PM,cashier
+42,Coin_Purse,2,44,10_20_25,04:52:31_PM,cashier
+43,Plain_Oversized_Tee;Denim_Jacket;Baseball_Cap,1;1;1,257,10_20_25,05:17:21_PM,cashier
+44,Graphic_Tee;Plain_Oversized_Tee;Vintage_Print_Tee,1;1;1,246,10_20_25,05:54:09_PM,cashier
+45,Graphic_Tee;Graphic_Tee,1;1,168,10_20_25,08:24:37_PM,cashier

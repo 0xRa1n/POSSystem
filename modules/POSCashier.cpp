@@ -8,14 +8,14 @@
 #include <bits/stdc++.h>
 
 using namespace std;
+
 // the cart
-vector<string> cartProducts;
-vector<int> cartQuantities;
-vector<int> cartPrices;
+vector<vector<string>> cart; // 2D vector to hold cart items: { {productName, productCategory, quantity, price}, ... }
 
 class POSAdmin admin;
 
-void POSCashier::viewCart(string username){
+bool POSCashier::viewCart(string username){ // view cart is also bool since if the user proceeds to checkout, we need to know in the main menu to not break the loop
+    // and if the user cancels the transaction and he went with the view cart, it will just return to the main menu
     system("cls");
     cout << "---------------------------------" << endl;
     cout << "P.O.S (Cashier)" << endl ;
@@ -25,17 +25,18 @@ void POSCashier::viewCart(string username){
     double totalAmount = 0.0;
 
     // check if the cart is empty
-    if(cartProducts.empty()){
+    if(cart.empty()){
         cout << "\nYour cart is empty.\n";
         Sleep(1200);
-        return;
+        return false;
     } else {
-        for(int i = 0; i < cartProducts.size(); i++){
-            cout << "\nProduct name: " << cartProducts[i] << "\n";
-            cout << "Quantity: " << cartQuantities[i] << "\n";
-            cout << "Price: P" << cartPrices[i] * cartQuantities[i] << "\n";
+        for(const auto& item : cart){
+            cout << "\nProduct name: " << item[0] << "\n";
+            cout << "Category: " << item[1] << "\n";
+            cout << "Quantity: " << item[2] << "\n";
+            cout << "Price: P" << item[3] << "\n";
 
-            totalAmount += cartPrices[i] * cartQuantities[i];
+            totalAmount += stoi(item[3]) * stoi(item[2]);
         }
 
         cout << "\nTotal Amount: P" << totalAmount << endl;
@@ -46,22 +47,22 @@ void POSCashier::viewCart(string username){
         int confirmation;
         cin >> confirmation;
 
-        if(handleInputError()) return; // handle invalid inputs
+        if(handleInputError()) return false; // handle invalid inputs
 
         switch(confirmation){
             case 1:
-                processTransaction(cartProducts, cartQuantities, cartPrices, username);
-                break;
+                return processTransaction(username);
             case 0:
                 cout << "Returning to main menu.\n";
                 Sleep(1200);
-                return;
+                return false; // go back to main menu without breaking the whole loop
             default:
                 cout << "Invalid selection. Returning to main menu.\n";
                 Sleep(1200);
-                return;
+                return false;
         }
     }
+    return false; // just to satisfy the compiler, this line will never be reached
 }
 
 void POSCashier::saveTransaction(string productNames, string productQuantities, int totalAmount, string cashierName){
@@ -99,11 +100,12 @@ void POSCashier::saveTransaction(string productNames, string productQuantities, 
 }
 
 // CRUD-Related Functions
-void POSCashier::processTransaction(vector<string>& productNames, vector<int>& productQuantities, vector<int>& productPrices, string username) {
-    if(productNames.empty()){
+bool POSCashier::processTransaction(string username) { // processTransaction is bool to indicate if the transaction was successful, if yes, it will go back to the main menu after the user had paid
+    // also, if the user decided to cancel the transaction, it will return false to go back to the main menu without breaking the loop
+    if(cart.empty()){
         cout << "Your cart is empty. Cannot process transaction.\n";
         Sleep(1200);
-        return;
+        return false;
     }
 
     int confirmation;
@@ -113,23 +115,78 @@ void POSCashier::processTransaction(vector<string>& productNames, vector<int>& p
     cout << "P.O.S (Cashier)" << endl ;
     cout << "---------------------------------" << endl;
 
-    // to do: if the product quantities are more than 10, add a 10% discount
     cout << "Order Summary" << endl;
-    double totalAmount = 0.0;
+    double itemTotal = 0.0;
+    double discountAmount = 0.0;
     int userMoney;
-    for(int i = 0; i < productNames.size(); i++){ // use size_t to avoid signed/unsigned comparison warnings
-        cout << "\nProduct name: " <<productNames[i] << "\n";
-        cout << "Quantity: " << productQuantities[i] << "\n";
-        cout << "Price: P" << productPrices[i] * productQuantities[i] << "\n";
 
-        totalAmount += productPrices[i] * productQuantities[i];
+    for (const auto& item : cart) {
+        itemTotal += stoi(item[3]) * stoi(item[2]); // price * quantity
     }
-    cout << "\nTotal Amount: P" << totalAmount << endl;
+    // we opted for the for loop instead of calculating the total inside the for loop because we need to get the total of each item first before applying discounts
+    // this way, we can get the discount if the user bought 3 different items from the same category
+    // or if the user bought the same item multiple times, it will still count as 1 towards the 3 different items requirement
+
+    map<string, int> categoryCounts; // store in a map the total quantity per category 
+    // the expected output of this is: {"Tops": 3, "Bottoms": 2, ...}
+    for (const auto& item : cart) { // loop through each item in the cart and the quantity
+        string category = item[1]; // Category is at index 1
+        int quantity = stoi(item[2]); // Quantity is at index 2
+        categoryCounts[category] += quantity; // append the quantity to the category in the map
+        // if the category does not exist yet, it will create it with 0 as default, then add the quantity
+        // it will look like this after adding: {"Tops": 3, "Bottoms": 2, ...}
+    }
+
+    for(auto const& [category, count] : categoryCounts){ // the const here means that we are not modifying the values in the map
+        // it gets the category name and count from the map categoryCounts
+        if(count == 3){ // check if the user bought exactly 3 items from the same category
+            double categorySubtotal = 0.0;
+
+            for (const auto& item : cart){
+                if (item[1] == category) { // if the item's category matches the current category, calculate the subtotal for that category (even if the user bought distinct items, it will still count towards the subtotal for the discount)
+                    // or if the user bought the same item multiple times, it will still count towards the subtotal for the discount
+                    categorySubtotal += stoi(item[3]) * stoi(item[2]); // price * quantity
+                }
+            }
+
+            // Now, find the discount percentage for this category and apply it.
+            ifstream discountFile("database/discounts.csv");
+            if (discountFile.is_open()) {
+                string line;
+                getline(discountFile, line); // Skip header
+
+                while (getline(discountFile, line)) {
+                    stringstream ss(line);
+                    string disc_category, discountPercentageStr;
+                    getline(ss, disc_category, ','); // category
+                    getline(ss, discountPercentageStr, ','); // discount percentage
+
+                    if (disc_category == category) { // check if the discount category matches the current category
+                        double discountPercentage = stod(discountPercentageStr) / 100.0; // get the decimal of the percentage
+                        discountAmount += categorySubtotal * discountPercentage; // calculate the discount amount for this category and add it to the total discount amount
+                        break; // Found the discount, move to the next category.
+                    }
+                }
+                discountFile.close();
+            }
+        }
+    }
+
+    for(const auto& item : cart){
+        cout << "\nProduct name: " << item[0] << "\n";
+        cout << "Product category: " << item[1] << "\n";
+        cout << "Quantity: " << item[2] << "\n";
+        cout << "Price: P" << stoi(item[3]) * stoi(item[2]) << "\n";
+    }
+
+    cout << "\nTotal Amount: P" << itemTotal << endl;
+    cout << "Discounts Applied: P" << discountAmount << endl;
+    cout << "Amount Due: P" << itemTotal - discountAmount << endl;
 
     cout << "\nProceed to purchase? (1/0): ";
     cin >> confirmation;
 
-    if(handleInputError()) return; // handle invalid inputs
+    if(handleInputError()) return false; // handle invalid inputs
 
     switch(confirmation){
         case 1:
@@ -140,80 +197,78 @@ void POSCashier::processTransaction(vector<string>& productNames, vector<int>& p
 
             cout << "Order Receipt" << endl;
             cout << "\n";
-            for(int i = 0; i < productNames.size(); i++){
-                cout << "Product name: " << productNames[i] << "\n";
-                cout << "Quantity: " << productQuantities[i] << "\n";
-                cout << "Price: P" << productPrices[i] * productQuantities[i] << "\n\n";
+            for(const auto& item : cart){
+                cout << "Product name: " << item[0] << "\n";
+                cout << "Product category: " << item[1] << "\n";
+                cout << "Quantity: " << item[2] << "\n";
+                cout << "Price: P" << item[3] << "\n\n";
             }
 
-            cout << "Total Amount: P" << totalAmount << endl;
-            cout << "VAT (12%): P" << (totalAmount) * 0.12 << endl;
-            cout << "Amount Due: P" << (totalAmount) + ((totalAmount) * 0.12) << endl;
+            cout << "Total Amount: P" << itemTotal << endl;
+            cout << "Discounts Applied: P" << discountAmount << endl;
+            cout << "VAT (12%): P" << (itemTotal) * 0.12 << endl;
+            cout << "Amount Due: P" << (itemTotal) - discountAmount + ((itemTotal) * 0.12) << endl;
             break;
         case 0:
             int choice;
             cout << "\nDo you want to cancel the transaction? (1/0): ";
             cin >> choice;
 
-            if(handleInputError()) return; // handle invalid inputs
+            if(handleInputError()) return false; // handle invalid inputs
 
             switch(choice){
                 case 1:
                     // clear the cart after cancelling the transaction
-                    productNames.clear();
-                    productQuantities.clear();
-                    productPrices.clear();
+                    cart.clear();
 
                     cout << "Transaction cancelled.\n";
                     Sleep(1200);
-                    return;
+                    return true; // since the user cancelled the transaction, we return true to go back to the main menu
+                    // technically this is incorrect since in the POS.cpp, we break if the boolean is true, but this is more intuitive for the user
                 case 0:
                     cout << "Returning to main menu.\n";
                     Sleep(1200);
-                    return;
+                    return true;
                 default:
                     cout << "Invalid selection.\n"; // fallback, but should not reach here
                     Sleep(1200);
-                    return;
+                    return false;
             }
             break;
         default:
             cout << "Invalid selection.\n"; // fallback, but should not reach here
             Sleep(1200);
-            return;
+            return false;
     }
 
     cout << "---------------------------------" << endl;
     cout << "Enter the customer's money: ";
     cin >> userMoney;
 
-    if(handleInputError()) return; // handle invalid inputs
+    if(handleInputError()) return false; // handle invalid inputs
 
     // check if the user has sufficient money
-    if(userMoney < (totalAmount) + ((totalAmount) * 0.12)){
+    if(userMoney < (itemTotal) + ((itemTotal) * 0.12)){
         int confirmation;
         cout << "Insufficient money. Try again? (1/0): ";
         cin >> confirmation;
 
-        if(handleInputError()) return; // handle invalid inputs
+        if(handleInputError()) return false; // handle invalid inputs
 
         switch(confirmation){
             case 1:
-                processTransaction(productNames, productQuantities, productPrices, username);
-                break;
+                return processTransaction(username);
             case 0:
                 // clear the cart after cancelling the transaction
-                productNames.clear();
-                productQuantities.clear();
-                productPrices.clear();
+                cart.clear();
 
                 cout << "Transaction cancelled.\n";
                 Sleep(1200);
-                return;
+                return true;
             default:
                 cout << "Invalid selection.\n"; // fallback, but should not reach here
                 Sleep(1200);
-                return;
+                return true;
         }
     } else {
         // power outtage might happen here after the user had paid, so we need to have a backup that will log the transaction even if the program crashes
@@ -232,20 +287,20 @@ void POSCashier::processTransaction(vector<string>& productNames, vector<int>& p
         ofstream backupFile("database/transactions/backup.csv", ios::app); // open in append mode
         if (!backupFile) {
             cerr << "Error opening backup file for writing." << endl;
-            return;
+            return false;
         }
 
         // convert productNames vector to a semicolon-separated string
         stringstream productNamesToString;
-        for(int i = 0; i < productNames.size(); i++){
-            productNamesToString << productNames[i]; // append the product name to the variable productNamesToString
-            if(i < productNames.size() - 1){ // only add semicolon if it's not the last item
+        for(int i = 0; i < cart.size(); i++){
+            productNamesToString << cart[i][0]; // append the product name to the variable productNamesToString
+            if(i < cart.size() - 1){ // only add semicolon if it's not the last item
                 productNamesToString << ";"; // append semicolon everywhere except the last item || append a semicolon to the next item
             }
         }
 
         backupFile << productNamesToString.str() << ","
-                    << totalAmount + (totalAmount * 0.12) << ","
+                    << itemTotal + (itemTotal * 0.12) << ","
                     << userMoney << ","
                     << date << ","
                     << time << ","
@@ -265,12 +320,13 @@ void POSCashier::processTransaction(vector<string>& productNames, vector<int>& p
             getline(ss, token, ',');
             getline(ss, productName, ','); // get the product name
             getline(ss, token, ','); // skip the sub-category
+            getline(ss, token, ','); // skip the category
             getline(ss, productQuantity, ','); // get the quantity
 
             // since there are multiple products, we need to loop through the vector of product names
-            for(int i = 0; i < productNames.size(); i++){ // iterate through the cart
-                if(productName == productNames[i]){
-                    int updatedQuantity = stoi(productQuantity) - productQuantities[i]; // subtract the quantity purchased | stoi means string to integer
+            for(int i = 0; i < cart.size(); i++){ // iterate through the cart
+                if(productName == cart[i][0]){
+                    int updatedQuantity = stoi(productQuantity) - stoi(cart[i][2]); // subtract the quantity purchased | stoi means string to integer
                     // update the quantity in the database
                     admin.updateInformation(productsDatabase, productName, "productQuantity", to_string(updatedQuantity), username); // use the previous function to update the quantity | we used to_string since we are not only using the function for products
                 }
@@ -279,29 +335,27 @@ void POSCashier::processTransaction(vector<string>& productNames, vector<int>& p
         
         // pass the vector of product names and quantities to a single string, separated by semicolons
         stringstream namesStream, quantitiesStream;
-        for(int i = 0; i < productNames.size(); i++){ // iterate through the cart
-            namesStream << productNames[i]; // append the product name to the stream
-            quantitiesStream << productQuantities[i]; // append the product quantity to the stream
-            if(i < productNames.size() - 1){ // append semicolon everywhere except the last item
+        for(int i = 0; i < cart.size(); i++){ // iterate through the cart
+            namesStream << cart[i][0]; // append the product name to the stream
+            quantitiesStream << cart[i][2]; // append the product quantity to the stream
+            if(i < cart.size() - 1){ // append semicolon everywhere except the last item
                 namesStream << ";";
                 quantitiesStream << ";";
             }
         }
         // save the transaction to the main database
-        saveTransaction(namesStream.str(), quantitiesStream.str(), totalAmount + (totalAmount * 0.12), username);
+        saveTransaction(namesStream.str(), quantitiesStream.str(), itemTotal + (itemTotal * 0.12), username);
 
         // remove the backup file after saving the transaction to the main database
         remove("database/transactions/backup.csv");
 
         // clear the cart after the transaction
-        cartProducts.clear();
-        cartQuantities.clear();
-        cartPrices.clear();
+        cart.clear();
 
-        cout << "Change: " << userMoney - ((totalAmount) + ((totalAmount) * 0.12)) << endl;
+        cout << "Change: " << userMoney - ((itemTotal) + ((itemTotal) * 0.12)) << endl;
     }
     system("pause");
-    return;
+    return true;
 }
 
 bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCategory, string username){
@@ -313,7 +367,7 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
         Sleep(1200);
         return false;
     }
-    cout << "Format: ID, ProductName, SubCategory, Quantity, Price\n" << endl;
+    cout << "Format: ID, ProductName, Category, SubCategory, Quantity, Price\n" << endl;
 
     // Read and filter T-Shirts products
     vector<vector<string>> subCategoryRows;
@@ -327,7 +381,7 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
             // row will look like this: {"ID", "ProductName", "SubCategory", "Quantity", "Price"
         }
         // Only add if ProductSubCategory is the desired sub-category (subCategory)
-        if (row.size() > 2 && row[2] == subCategory) { // if row size is 2 to avoid out of range error since we are trying to get the 3rd index which is subcategory
+        if (row.size() > 3 && row[3] == subCategory) { // if row size is 2 to avoid out of range error since we are trying to get the 3rd index which is subcategory
             subCategoryRows.push_back(row); // add the row to the subCategoryRows
             // subCategoryRows will look like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "T-Shirts", "10", "100"}, ...
             // the contents of the variable row will only be added if the sub-category matches
@@ -371,7 +425,7 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
         cout << '\n';
     }
 
-    string productName;
+    string productName, productCategory;
     int productQuantity, productPrice;
 
     // Get user input for product ID
@@ -388,8 +442,9 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
     for (auto row : subCategoryRows) {
         if (stoi(row[0]) == selectedId) {
             productName = row[1];
-            productQuantity = stoi(row[3]);
-            productPrice = stoi(row[4]);
+            productCategory = row[2];
+            productQuantity = stoi(row[4]);
+            productPrice = stoi(row[5]);
 
             if (productQuantity == 0){
                 cout << "Product is out of stock!\n";
@@ -399,6 +454,8 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
                 found = true;
                 cout << "\nSelected Product:\n";
                 cout << "Product Name: " << productName << "\n";
+                cout << "Product category: " << productCategory << "\n";
+                cout << "Available Quantity: " << productQuantity << "\n";
                 cout << "Price: P" << productPrice << "\n";
                 break;
             }   
@@ -435,9 +492,7 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
     if(handleInputError()) return false; // handle invalid inputs
 
     // save or append the previous product
-    cartProducts.push_back(productName);
-    cartQuantities.push_back(quantityToPurchase);
-    cartPrices.push_back(productPrice);
+    cart.push_back({productName, productCategory, to_string(quantityToPurchase), to_string(productPrice)});
 
     switch(addMore){
         case 1:
@@ -451,6 +506,5 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
             return false;
     }
 
-    processTransaction(cartProducts, cartQuantities, cartPrices, username);
-    return true;
+    return processTransaction(username);
 };
