@@ -419,12 +419,16 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
     // if the quantity is greater than the available quantity, show an error message
     if (quantityToPurchase > productQuantity) {
         cout << "Insufficient stock available!\n";
-        system("pause");
+        Sleep(1200);
+        return false;
+    } else if(quantityToPurchase < 0){
+        cout << "Quantity cannot be negative. Please enter a valid integer." << endl;
+        Sleep(1200);
         return false;
     }
 
     // ask if the user wants to add more products to the cart
-    cout << "Product added succcessfully. Do you want to add more? (1/0): ";
+    cout << "Product added successfully. Do you want to add more? (1/0): ";
     int addMore;
     cin >> addMore;
 
