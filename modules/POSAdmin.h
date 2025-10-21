@@ -22,6 +22,7 @@ public:
     // UPDATE
     int updateInformation(string filename, string query, string type, string newValue, string username);
     void updateProductFields(string type, string database, string field, string username);
+    void updateDiscounts(string username);
 
     // DELETE
     void deleteInformation(string type, string filename, string username);

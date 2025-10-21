@@ -119,7 +119,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     double itemTotal = 0.0;
     double discountAmount = 0.0;
     int userMoney;
-
+    
     // Step 1: Pre-load all available discounts into a map for quick access.
     map<string, double> categoryDiscounts;
     ifstream discountFile("database/discounts.csv");
@@ -174,6 +174,8 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
             discountAmount += subtotalForDiscount * categoryDiscounts[category];
         }
     }
+
+    // --- END OF DISCOUNT LOGIC ---
 
     for(const auto& item : cart){
         cout << "\nProduct name: " << item[0] << "\n";

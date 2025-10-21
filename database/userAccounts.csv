@@ -1,10 +1,4 @@
 UserID,Username,Password,Role
 1,admin,admin,Admin
-3,cashier,cashier,Cashier
-4,manager,manager,Manager
-5,rian,rain,Admin
-6,cashier_one,cashier1,Cashier
-7,00test,testing,Admin
-8,adminthree,admin3,Admin
-9,newcashier,newpass456,Cashier
-10,newcashier,password123,Cashier
+2,cashier,cashier,Cashier
+3,manager,manager,Manager

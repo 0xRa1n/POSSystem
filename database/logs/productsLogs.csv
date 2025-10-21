@@ -177,3 +177,9 @@ ADD,Classic_Polo,10_20_25,09:29:45_PM,admin
 UPDATE,Graphic_Tee_Quantity_to_7,10_20_25,09:32:20_PM,newcashier
 ADD,Test,10_20_25,09:47:33_PM,admin
 DELETE,Test,10_20_25,09:47:38_PM,admin
+DELETE,Classic_Polo,10_21_25,09:16:28_AM,admin
+DELETE,demoProduct,10_21_25,09:16:35_AM,admin
+UPDATE,Tops_Discount_to_11,10_21_25,09:58:32_AM,admin
+UPDATE,Tops_Discount_to_12,10_21_25,10:00:04_AM,admin
+UPDATE,Tops_Discount_to_12,10_21_25,10:00:16_AM,admin
+UPDATE,Tops_Discount_to_10,10_21_25,10:00:55_AM,admin

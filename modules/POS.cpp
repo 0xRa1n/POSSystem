@@ -70,8 +70,7 @@ void PointOfSale::adminMenu(string username) {
                         "Add an account",
                         "View all products",
                         "View all accounts",
-                        "View all logs",
-                        "Update account or product",
+                        "Update account, product, or discounts",
                         "Delete a product",
                         "Delete an account",
                         "Go back"
@@ -138,7 +137,7 @@ void PointOfSale::adminMenu(string username) {
                             // initialize a loop where it contains the menu Product, Account, and Go back
                             while(true){
                                 system("cls");
-                                string updateMenu[] = {"Product", "Account", "Go back"};
+                                string updateMenu[] = {"Product", "Account", "Discounts", "Go back"};
                                 int updateInput = showMenu("Update", updateMenu);
                                 system("cls");
 
@@ -199,7 +198,11 @@ void PointOfSale::adminMenu(string username) {
                                                 break;
                                         }
                                     }
-                                } else if(updateInput == 3){ // go back
+                                } else if(updateInput == 3){ // discounts
+                                    // initialize a loop to update the discounts
+                                    showHeader("Update discounts");
+                                    admin.updateDiscounts(username);
+                                } else if(updateInput == 4){ // go back
                                     // this will go back to the admin menu
                                     break;
                                 } else {
@@ -550,4 +553,3 @@ void PointOfSale::cashierMenu(string username) {
         }
     }
 }
-// ...existing code...
