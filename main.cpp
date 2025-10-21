@@ -6,7 +6,7 @@ using namespace std;
 int main(){
     // initialize variables
     PointOfSale POS;
-    int retries = 0;
+    int retry = 0;
     string usernameInput, passwordInput, role;
 
     while(true){
@@ -32,13 +32,13 @@ int main(){
                 break;
             }
         } else {
-            if (retries == 2){
+            if (retry == 2){
                 cout << "Maximum attempt reached.";
                 break;
             }
             cout << "Invalid credentials" << endl;
             Sleep(1200);
-            retries++;
+            retry++;
         }
     }
 }

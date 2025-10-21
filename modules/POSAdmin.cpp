@@ -12,7 +12,7 @@ using namespace std;
 // offstream == writing to the file
 #include "POSAdmin.h"
 
-inline static const regex disallowed{R"([^A-Za-z0-9_@#&])"}; // any character that is not A-Z, a-z, 0-9, _ @ # &
+const regex disallowed{R"([^A-Za-z0-9_@#&])"}; // any character that is not A-Z, a-z, 0-9, _ @ # &
 
 void POSAdmin::saveLogs(string type, string operation, string affectedEntry, string adminName) {
     // use different log files for different types
@@ -108,7 +108,6 @@ void POSAdmin::addProduct(string database, string username) {
             Sleep(1200);
             return;
         }
-
         // ask the user for the product's quantity and price
         cout << "Enter the quantity (0 to go back): "; // and quantity SHOULD not be zero
         cin >> quantity;
@@ -412,6 +411,72 @@ void POSAdmin::getTodaysSales(string database){
     }
     file.close();
     cout << "Today's Sales: P" << todaysSales << endl;
+}
+
+void POSAdmin::getAllLogs(string type){
+    string database;
+    if(type == "accounts"){
+        database = "database/logs/adminUserLogs.csv";
+    } else if(type == "products"){
+        database = "database/logs/productsLogs.csv";
+    } else if(type == "cashier"){
+        database = "database/transactions/cashierTransactions.csv";
+    } else {
+        cout << "Invalid log type specified." << endl;
+        Sleep(1200);
+        return;
+    }
+
+    // Open the file
+    ifstream file(database);
+
+    // check if file exists
+    if (!file.is_open()) {
+        cout << "Failed to open file\n";
+        return;
+    }
+
+    // Read all rows first
+    vector<vector<string>> rows; // 2D vector to hold rows and columns
+    string line;
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string cell;
+        vector<string> row; // this will hold a single row, example output of this is {"ADD", "Product1", "12_31_23", "10:00:00_AM", "AdminUser"} 
+        while (getline(ss, cell, ',')) { // split by comma
+            row.push_back(cell); // add each cell to the row
+        }
+        rows.push_back(row); // add the row to the list of rows
+    }
+    file.close(); // close the file
+
+    // stop if the rows are empty
+    if (rows.empty()){
+        cout << "No logs found in the database.\n";
+        return;
+    }
+
+    // Find max width of each column
+    size_t cols = 0;
+    for (auto &r : rows) cols = max(cols, r.size()); 
+    vector<size_t> widths(cols, 0); 
+
+    for (auto &r : rows) { 
+        for (size_t c = 0; c < r.size(); ++c) 
+            widths[c] = max(widths[c], r[c].size()); 
+    }
+
+    // Add a little padding for readability
+    for (auto &w : widths) w += 2;
+
+    // Print
+    for (auto &r : rows) {
+        for (size_t c = 0; c < r.size(); ++c) { 
+            cout << left << setw(static_cast<int>(widths[c])) << r[c]; 
+        }
+        cout << '\n';
+    }
+    system("pause");
 }
 
 void POSAdmin::deleteInformation(string type, string filename, string username){

@@ -70,6 +70,7 @@ void PointOfSale::adminMenu(string username) {
                         "Add an account",
                         "View all products",
                         "View all accounts",
+                        "View all logs",
                         "Update account or product",
                         "Delete a product",
                         "Delete an account",
@@ -101,7 +102,39 @@ void PointOfSale::adminMenu(string username) {
 
                             system("pause");
                             break;
-                        case 5: { // update
+                        case 5: // view all logs
+                            while(true){
+                                system("cls"); // initial clear
+                                string logsMenu[] = {"Account logs", "Product logs", "Cashier logs", "Go back"};
+                                int logsInput = showMenu("View all logs", logsMenu);
+                                system("cls"); // clear again after getting input
+
+                                switch(logsInput){
+                                    case 1: // account logs
+                                        showHeader("Account logs");
+                                        admin.getAllLogs("accounts");
+                                        break;
+                                    case 2: // product logs
+                                        showHeader("Product logs");
+                                        admin.getAllLogs("products");
+                                        break;
+                                    case 3: // cashier logs
+                                        showHeader("Cashier logs");
+                                        admin.getAllLogs("cashier");
+                                        break;
+                                    case 4: // go back
+                                        break;
+                                    default:
+                                        cout << "Invalid selection";
+                                        Sleep(1200);
+                                        break;
+                                }
+
+                                if(logsInput == 3) break; // exit the logs menu
+                            }
+                            
+                            break;
+                        case 6: { // update
                             // initialize a loop where it contains the menu Product, Account, and Go back
                             while(true){
                                 system("cls");
@@ -176,15 +209,15 @@ void PointOfSale::adminMenu(string username) {
                             }
                             break;
                         }
-                        case 6: // delete product
+                        case 7: // delete product
                             showHeader("Delete product");
                             admin.deleteInformation("products", productsDatabase, username);
                             break;
-                        case 7: // delete account
+                        case 8: // delete account
                             showHeader("Delete account");
                             admin.deleteInformation("accounts", usersDatabase, username);
                             break;
-                        case 8:
+                        case 9:
                             // Go back to admin main menu
                             goto endInventoryLoop;
                         default:

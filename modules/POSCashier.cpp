@@ -120,55 +120,58 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     double discountAmount = 0.0;
     int userMoney;
 
-    for (const auto& item : cart) {
-        itemTotal += stoi(item[3]) * stoi(item[2]); // price * quantity
-    }
-    // we opted for the for loop instead of calculating the total inside the for loop because we need to get the total of each item first before applying discounts
-    // this way, we can get the discount if the user bought 3 different items from the same category
-    // or if the user bought the same item multiple times, it will still count as 1 towards the 3 different items requirement
-
-    map<string, int> categoryCounts; // store in a map the total quantity per category 
-    // the expected output of this is: {"Tops": 3, "Bottoms": 2, ...}
-    for (const auto& item : cart) { // loop through each item in the cart and the quantity
-        string category = item[1]; // Category is at index 1
-        int quantity = stoi(item[2]); // Quantity is at index 2
-        categoryCounts[category] += quantity; // append the quantity to the category in the map
-        // if the category does not exist yet, it will create it with 0 as default, then add the quantity
-        // it will look like this after adding: {"Tops": 3, "Bottoms": 2, ...}
-    }
-
-    for(auto const& [category, count] : categoryCounts){ // the const here means that we are not modifying the values in the map
-        // it gets the category name and count from the map categoryCounts
-        if(count == 3){ // check if the user bought exactly 3 items from the same category
-            double categorySubtotal = 0.0;
-
-            for (const auto& item : cart){
-                if (item[1] == category) { // if the item's category matches the current category, calculate the subtotal for that category (even if the user bought distinct items, it will still count towards the subtotal for the discount)
-                    // or if the user bought the same item multiple times, it will still count towards the subtotal for the discount
-                    categorySubtotal += stoi(item[3]) * stoi(item[2]); // price * quantity
-                }
+    // Step 1: Pre-load all available discounts into a map for quick access.
+    map<string, double> categoryDiscounts;
+    ifstream discountFile("database/discounts.csv");
+    if (discountFile.is_open()) {
+        string line;
+        getline(discountFile, line); // Skip header
+        while (getline(discountFile, line)) {
+            stringstream ss(line);
+            string category, percentageStr;
+            getline(ss, category, ',');
+            getline(ss, percentageStr, ',');
+            if (!percentageStr.empty()) {
+                categoryDiscounts[category] = stod(percentageStr) / 100.0;
             }
+        }
+        discountFile.close();
+    }
 
-            // Now, find the discount percentage for this category and apply it.
-            ifstream discountFile("database/discounts.csv");
-            if (discountFile.is_open()) {
-                string line;
-                getline(discountFile, line); // Skip header
+    // Step 2: Get total quantity for each category and the cart's total value.
+    map<string, int> categoryCounts;
+    for (const auto& item : cart) {
+        categoryCounts[item[1]] += stoi(item[2]);
+        itemTotal += stoi(item[3]) * stoi(item[2]);
+    }
 
-                while (getline(discountFile, line)) {
-                    stringstream ss(line);
-                    string disc_category, discountPercentageStr;
-                    getline(ss, disc_category, ','); // category
-                    getline(ss, discountPercentageStr, ','); // discount percentage
+    // Step 3: For each category that qualifies, calculate the discount on its FIRST 3 items.
+    for (auto const& [category, count] : categoryCounts) {
+        // Check if the category has 3 or more items AND has a discount defined.
+        if (count >= 3 && categoryDiscounts.count(category) > 0) {
+            
+            double subtotalForDiscount = 0.0;
+            int itemsCounted = 0;
 
-                    if (disc_category == category) { // check if the discount category matches the current category
-                        double discountPercentage = stod(discountPercentageStr) / 100.0; // get the decimal of the percentage
-                        discountAmount += categorySubtotal * discountPercentage; // calculate the discount amount for this category and add it to the total discount amount
-                        break; // Found the discount, move to the next category.
+            // Find the first 3 items belonging to this category in the cart.
+            for (const auto& item : cart) {
+                if (item[1] == category) { // If the item is in the right category
+                    int price = stoi(item[3]);
+                    int quantity = stoi(item[2]);
+
+                    // Process each unit of this item (e.g., if quantity is 2, loop twice)
+                    for (int i = 0; i < quantity; ++i) {
+                        if (itemsCounted < 3) {
+                            subtotalForDiscount += price;
+                            itemsCounted++;
+                        } else {
+                            break; // Stop counting for this item if we already have 3
+                        }
                     }
                 }
-                discountFile.close();
             }
+            // Add the calculated discount for this category to the total discount amount.
+            discountAmount += subtotalForDiscount * categoryDiscounts[category];
         }
     }
 
@@ -185,6 +188,11 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
 
     cout << "\nProceed to purchase? (1/0): ";
     cin >> confirmation;
+    
+    // Correct VAT Calculation
+    double discountedTotal = itemTotal - discountAmount;
+    double vatAmount = discountedTotal * 0.12;
+    double finalAmountDue = discountedTotal + vatAmount;
 
     if(handleInputError()) return false; // handle invalid inputs
 
@@ -206,8 +214,9 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
 
             cout << "Total Amount: P" << itemTotal << endl;
             cout << "Discounts Applied: P" << discountAmount << endl;
-            cout << "VAT (12%): P" << (itemTotal) * 0.12 << endl;
-            cout << "Amount Due: P" << (itemTotal) - discountAmount + ((itemTotal) * 0.12) << endl;
+
+            cout << "VAT (12%): P" << vatAmount << endl;
+            cout << "Amount Due: P" << finalAmountDue << endl;
             break;
         case 0:
             int choice;
@@ -501,6 +510,7 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
             // do nothing just proceed to the next step
             break;
         default:
+            system("cls");
             cout << "Invalid selection.\n"; // fallback, but cin.fail() should catch this
             Sleep(1200);
             return false;
