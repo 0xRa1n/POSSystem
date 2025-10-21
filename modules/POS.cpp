@@ -70,6 +70,7 @@ void PointOfSale::adminMenu(string username) {
                         "Add an account",
                         "View all products",
                         "View all accounts",
+                        "View all logs",
                         "Update account, product, or discounts",
                         "Delete a product",
                         "Delete an account",
@@ -108,6 +109,8 @@ void PointOfSale::adminMenu(string username) {
                                 int logsInput = showMenu("View all logs", logsMenu);
                                 system("cls"); // clear again after getting input
 
+                                if (logsInput == 4) break; // exit logs menu
+
                                 switch(logsInput){
                                     case 1: // account logs
                                         showHeader("Account logs");
@@ -120,8 +123,6 @@ void PointOfSale::adminMenu(string username) {
                                     case 3: // cashier logs
                                         showHeader("Cashier logs");
                                         admin.getAllLogs("cashier");
-                                        break;
-                                    case 4: // go back
                                         break;
                                     default:
                                         cout << "Invalid selection";
