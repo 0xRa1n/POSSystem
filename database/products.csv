@@ -1,6 +1,6 @@
 ProductNumber,ProductName,ProductCategory,ProductSubCategory,Quantity,Price
 1,Graphic_Tee,Tops,T_Shirts,7,75
-2,Plain_Oversized_Tee,Tops,T_Shirts,2,60
+2,Plain_Oversized_Tee,Tops,T_Shirts,10,60
 3,Vintage_Print_Tee,Tops,T_Shirts,6,85
 4,Striped_Polo,Tops,Polo_Shirts,6,65
 5,Checkered_Polo,Tops,Polo_Shirts,2,75
@@ -26,5 +26,3 @@ ProductNumber,ProductName,ProductCategory,ProductSubCategory,Quantity,Price
 25,Leather_Wallet,Accessories,Wallets,6,35
 26,Fabric_Wallet,Accessories,Wallets,10,25
 27,Coin_Purse,Accessories,Wallets,8,20
-28,demoProduct,test,100,1,
-29,Classic_Polo,Tops,T_Shirts,25,950

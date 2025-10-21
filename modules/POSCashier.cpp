@@ -126,7 +126,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     // we opted for the for loop instead of calculating the total inside the for loop because we need to get the total of each item first before applying discounts
     // this way, we can get the discount if the user bought 3 different items from the same category
     // or if the user bought the same item multiple times, it will still count as 1 towards the 3 different items requirement
-
+    
     map<string, int> categoryCounts; // store in a map the total quantity per category 
     // the expected output of this is: {"Tops": 3, "Bottoms": 2, ...}
     for (const auto& item : cart) { // loop through each item in the cart and the quantity

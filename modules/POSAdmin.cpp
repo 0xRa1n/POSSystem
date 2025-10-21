@@ -472,7 +472,7 @@ void POSAdmin::deleteInformation(string type, string filename, string username){
 
 int POSAdmin::updateInformation(string filename, string query, string type, string newValue, string username) {
     ifstream fileIn(filename); // open an input file stream, since we are reading the file first, then, writing it back
-    if (!fileIn) {
+    if (!fileIn.is_open()) {
         return 0;
     }
 
@@ -562,6 +562,78 @@ int POSAdmin::updateInformation(string filename, string query, string type, stri
         }
         return 1;
     }
+}
+
+void POSAdmin::updateDiscounts(string username) {
+    string category;
+    ifstream discountFile("database/discounts.csv");
+    if(!discountFile.is_open()){
+        cout << "Failed to open discounts database.\n";
+        return;
+    }
+    cout << "Enter the category (Tops/Bottoms/Accessories) to update discount (0 to go back): ";
+    cin >> category;
+    vector<string> categories = {"Tops", "Bottoms", "Accessories"};
+
+    if(category == "0") return;
+    if(regex_search(category, disallowed)){
+        cout << "Category cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+        Sleep(1200);
+        return;
+    }
+    
+    category[0] = toupper(category[0]); // capitalize the first letter, if not already
+    auto lookFor = find(categories.begin(), categories.end(), category); // search for the category
+    if(lookFor == categories.end()){
+        cout << "Invalid category. Please enter Tops, Bottoms, or Accessories only.\n";
+        Sleep(1200);
+        return;
+    }
+
+    cout << "Enter the new discount percentage (0-100, 0 to go back): ";
+    int discountPercentage;
+    cin >> discountPercentage;
+
+    if(handleInputError()) return; // handle invalid inputs
+    if(discountPercentage == 0) return;
+
+    if(discountPercentage < 0 || discountPercentage > 100){
+        cout << "Discount percentage must be between 0 and 100.\n";
+        Sleep(1200);
+        return;
+    }
+
+    // read the file and update the discount
+    string line;
+    string fileContent;
+    while(getline(discountFile, line)){
+        stringstream ss(line);
+        string token;
+        string fileCategory, fileDiscountPercentage;
+        getline(ss, fileCategory, ','); // read category
+        getline(ss, fileDiscountPercentage, ','); // read discount percentage
+
+        if(fileCategory == category){
+            // update the discount percentage
+            fileContent += category + "," + to_string(discountPercentage) + "\n";
+        } else {
+            fileContent += fileCategory + "," + fileDiscountPercentage + "\n"; // keep the line as is
+        }
+    }
+    discountFile.close();
+
+    // write back to the file
+    ofstream discountFileOut("database/discounts.csv");
+    if(!discountFileOut.is_open()){
+        cout << "Failed to open discounts database for writing.\n";
+        return;
+    }
+    discountFileOut << fileContent;
+    discountFileOut.close();
+
+    cout << "Successfully updated discount for " << category << " to " << discountPercentage << "%.\n";
+    saveLogs("products", "UPDATE", category + "_Discount_to_" + to_string(discountPercentage), username);
+    Sleep(1200);
 }
 
 void POSAdmin::updateProductFields(string type, string database, string field, string username){
