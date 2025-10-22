@@ -6,7 +6,7 @@
 class POSAdmin {
 public:
     // --- DECLARATIONS ONLY ---
-    void saveLogs(string type, string operation, string affectedEntry, string adminName);
+    void saveLogs(string type, string operation, string affectedEntry, string adminName, string message);
 
     // CREATE
     void addProduct(string database, string username);
@@ -20,7 +20,7 @@ public:
     void getAllLogs(string type);
 
     // UPDATE
-    int updateInformation(string filename, string query, string type, string newValue, string username);
+    int updateInformation(string filename, string query, string type, string newValue, string username, string reason);
     void updateProductFields(string type, string database, string field, string username);
     void updateDiscounts(string username);
 

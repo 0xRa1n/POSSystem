@@ -3,7 +3,7 @@
 #include <sstream> // for stringstream
 #include <cstdlib> // for exit()
 #include <windows.h> // for Sleep() and system("cls")
-#include <bits/stdc++.h> // this includes all standard libraries
+#include <bits/stdc++.h> // for this file, here are the functions used along with this package: fstream, vector, string, ctime (time.h), sstream, regex, iomanip (setw and left), limits, stdexcept (invalid_argument and out_of_range)
 #include <algorithm> // used for find
 #include <regex> // for regex
 using namespace std;
@@ -12,9 +12,11 @@ using namespace std;
 // offstream == writing to the file
 #include "POSAdmin.h"
 
-const regex disallowed{R"([^A-Za-z0-9_@#&])"}; // any character that is not A-Z, a-z, 0-9, _ @ # &
+const regex disallowed{R"([^A-Za-z0-9_@#&])"}; // any character that is not A-Z, a-z, 0-9, or one of _ @ # &
+// the brackets tells us that its a character set, and the ^ means NOT
+// and only A-Z, a-z, 0-9, _ @ # & are allowed
 
-void POSAdmin::saveLogs(string type, string operation, string affectedEntry, string adminName) {
+void POSAdmin::saveLogs(string type, string operation, string affectedEntry, string adminName, string message) {
     // use different log files for different types
     string database;
     if(type == "accounts"){
@@ -37,19 +39,19 @@ void POSAdmin::saveLogs(string type, string operation, string affectedEntry, str
     strftime(time, 50, "%I:%M:%S_%p", &datetime);
 
     // open the transactions.csv file in append mode
-    ofstream fout(database, ios::app);
+    ofstream fout(database, ios::app); // fout is an instance of ofstream, used to write to files
     if (!fout) {
         cerr << "Error opening database for writing." << endl;
         return;
     }
 
     // write the transaction details to the file
-    // to do: make sure that the product name modified should be the same as cashierTransactions if possible
     fout << operation << ","
         << affectedEntry << ","
         << date << ","
         << time << ","
-        << adminName << endl;
+        << adminName << ","
+        << message << endl;
 
     fout.close();
 }
@@ -147,7 +149,7 @@ void POSAdmin::addProduct(string database, string username) {
                 << price << "\n";
 
             fout.close();                    
-            saveLogs("products", "ADD", productName, username);
+            saveLogs("products", "ADD", productName, username, "New_Product_Added");
             cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
             Sleep(1200);
         }  
@@ -217,7 +219,7 @@ void POSAdmin::addUser(string database, string accessingUsername){
 
         fout.close();
         cout << "Successfully added user " << username << endl;
-        saveLogs("accounts", "ADD", username, accessingUsername);
+        saveLogs("accounts", "ADD", username, accessingUsername, "New_User_Added");
     }
     // wait for 1.2 seconds before going back to the menu
     Sleep(1200);
@@ -525,9 +527,9 @@ void POSAdmin::deleteInformation(string type, string filename, string username){
         output_file.close();
 
         if(type == "accounts"){ // save to the account logs
-            saveLogs("accounts", "DELETE", deleteProductInput, username);
+            saveLogs("accounts", "DELETE", deleteProductInput, username, "Account_Deleted");
         } else if(type == "products"){ // save to the product logs
-            saveLogs("products", "DELETE", deleteProductInput, username);
+            saveLogs("products", "DELETE", deleteProductInput, username, "Product_Deleted");
         }
 
         cout << "Successfully deleted " << deleteProductInput << endl;
@@ -535,7 +537,7 @@ void POSAdmin::deleteInformation(string type, string filename, string username){
     Sleep(1200);
 }
 
-int POSAdmin::updateInformation(string filename, string query, string type, string newValue, string username) {
+int POSAdmin::updateInformation(string filename, string query, string type, string newValue, string username, string reason) {
     ifstream fileIn(filename); // open an input file stream, since we are reading the file first, then, writing it back
     if (!fileIn.is_open()) {
         return 0;
@@ -606,22 +608,22 @@ int POSAdmin::updateInformation(string filename, string query, string type, stri
         // we will log EVERY action made by the admin
         if(type.find("account") != string::npos){ // check if the type contains the word "account"
             if(type == "accountPassword"){
-                saveLogs("accounts", "UPDATE", query + "_PW_to_" + newValue, username);
+                saveLogs("accounts", "UPDATE", query + "_PW_to_" + newValue, username, reason);
             } else {
-                saveLogs("accounts", "UPDATE", query + "_to_" + newValue, username);
+                saveLogs("accounts", "UPDATE", query + "_to_" + newValue, username, reason);
             }
         } else if(type.find("product") != string::npos){
             if(type == "productName"){
-                saveLogs("products", "UPDATE", query + "_to_" + newValue, username);
+                saveLogs("products", "UPDATE", query + "_to_" + newValue, username, reason);
             } else {
                 if(type == "productPrice"){
-                    saveLogs("products", "UPDATE", query + "_Price_to_" + newValue, username);
+                    saveLogs("products", "UPDATE", query + "_Price_to_" + newValue, username, reason);
                 } else if(type == "productQuantity"){
-                    saveLogs("products", "UPDATE", query + "_Quantity_to_" + newValue, username);
+                    saveLogs("products", "UPDATE", query + "_Quantity_to_" + newValue, username, reason);
                 } else if(type == "productSubCategory"){
-                    saveLogs("products", "UPDATE", query + "_SubCategory_to_" + newValue, username);
+                    saveLogs("products", "UPDATE", query + "_SubCategory_to_" + newValue, username, reason);
                 } else {
-                    saveLogs("products", "UPDATE", query + "_to_" + newValue, username);
+                    saveLogs("products", "UPDATE", query + "_to_" + newValue, username, reason);
                 }
             }
         }
@@ -697,7 +699,7 @@ void POSAdmin::updateDiscounts(string username) {
     discountFileOut.close();
 
     cout << "Successfully updated discount for " << category << " to " << discountPercentage << "%.\n";
-    saveLogs("products", "UPDATE", category + "_Discount_to_" + to_string(discountPercentage), username);
+    saveLogs("products", "UPDATE", category + "_Discount_to_" + to_string(discountPercentage), username, "Discount_Updated");
     Sleep(1200);
 }
 
@@ -785,9 +787,36 @@ void POSAdmin::updateProductFields(string type, string database, string field, s
                 return;
             }
         } 
-        field[0] = toupper(field[0]); // capitalize the first letter of the field
+        field[0] = toupper(field[0]); // capitalize the first letter of the field, if it wasn't capitalized
 
-        if(updateInformation(database, originalInputName, type + field, newInputField, username) == 1){ // since I am only using this function one time inside this function
+        // ask the user for the reason for updating the entry
+        cout << "Please provide a reason for updating the " + type + " " + field
+                << " (e.g., 'Correcting_Price', 'Updating_Quantity', etc. And make sure to use underscores instead of spaces): ";
+        string reason;
+
+        // Clear the input buffer to remove any leftover newline characters from previous 'cin' operations.
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+        // cin.ignore already ignores the previous inputs
+        // but, we are also telling it to remove to delete a large number of characters until it finds a newline character
+        // \n is the delimiter, it means that it will end if it finds the end of the line
+        // it considers the key enter as \n
+
+        // Read the entire line, including spaces.
+        getline(cin, reason);
+
+        // getline can be used for reading any input stream, including standard input (cin) and file streams (ifstream, ofstream).
+
+        if(reason.empty()){
+            cout << "Reason cannot be empty.\n";
+            Sleep(1200);
+            return;
+        } else if(regex_search(reason, disallowed)){
+            cout << "Invalid reason, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+            Sleep(1200);
+            return;
+        }
+
+        if(updateInformation(database, originalInputName, type + field, newInputField, username, reason) == 1){ // since I am only using this function one time inside this function
             cout << "Updated successfully.\n";
         } else {
             cout << "The product " + type + " was not found.\n";

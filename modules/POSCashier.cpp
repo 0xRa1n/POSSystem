@@ -339,7 +339,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                 if(productName == cart[i][0]){
                     int updatedQuantity = stoi(productQuantity) - stoi(cart[i][2]); // subtract the quantity purchased | stoi means string to integer
                     // update the quantity in the database
-                    admin.updateInformation(productsDatabase, productName, "productQuantity", to_string(updatedQuantity), username); // use the previous function to update the quantity | we used to_string since we are not only using the function for products
+                    admin.updateInformation(productsDatabase, productName, "productQuantity", to_string(updatedQuantity), username, "Purchased_Quantity_Deducted"); // use the previous function to update the quantity | we used to_string since we are not only using the function for products
                 }
             }
         }

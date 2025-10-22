@@ -2,3 +2,4 @@ UserID,Username,Password,Role
 1,admin,admin,Admin
 2,cashier,cashier,Cashier
 3,manager,manager,Manager
+4,Demo,NewPassword,Cashier
