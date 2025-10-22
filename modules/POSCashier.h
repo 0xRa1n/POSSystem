@@ -9,6 +9,7 @@ class POSAdmin;
 
 class POSCashier {
 public:
+    // we declare all member functions of POSCashier here
     bool viewCart(string username);
     void saveTransaction(string productNames, string productQuantities, int totalAmount, string cashierName);
     bool processTransaction(string username);

@@ -5,12 +5,13 @@
 
 class POSAdmin {
 public:
-    // --- DECLARATIONS ONLY ---
-    void saveLogs(string type, string operation, string affectedEntry, string adminName, string message);
+    // we declare all member functions of POSAdmin here
 
     // CREATE
     void addProduct(string database, string username);
     void addUser(string database, string accessingUsername);
+    void saveLogs(string type, string operation, string affectedEntry, string adminName, string message);
+
 
     // READ
     void readProducts(string database);

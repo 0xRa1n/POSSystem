@@ -12,9 +12,11 @@ using namespace std;
 // offstream == writing to the file
 #include "POSAdmin.h"
 
-const regex disallowed{R"([^A-Za-z0-9_@#&])"}; // any character that is not A-Z, a-z, 0-9, or one of _ @ # &
+const regex disallowed{R"([^A-Za-z0-9_@#&])"};
 // the brackets tells us that its a character set, and the ^ means NOT
 // and only A-Z, a-z, 0-9, _ @ # & are allowed
+
+// we define all member functions of POSAdmin here
 
 void POSAdmin::saveLogs(string type, string operation, string affectedEntry, string adminName, string message) {
     // use different log files for different types

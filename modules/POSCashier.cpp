@@ -12,6 +12,8 @@ using namespace std;
 // the cart
 vector<vector<string>> cart; // 2D vector to hold cart items: { {productName, productCategory, quantity, price}, ... }
 
+// we define all member functions of POSCashier here
+
 class POSAdmin admin;
 
 bool POSCashier::viewCart(string username){ // view cart is also bool since if the user proceeds to checkout, we need to know in the main menu to not break the loop

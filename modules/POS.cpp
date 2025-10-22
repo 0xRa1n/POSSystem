@@ -86,52 +86,6 @@ void PointOfSale::adminMenu(string username) {
                             showHeader("Add an account");
                             admin.addUser(usersDatabase, username);
                             break;
-                        // case 3: // view products
-                        //     showHeader("View all products");
-                        //     // since the terminal would not clear if it expects an input to the user
-                        //     // and we aim to let the inventory stay for a little while until the user wants to go back
-                        //     admin.readProducts(productsDatabase);
-
-                        //     system("pause");
-                        //     break;
-                        // case 4: // view all accounts
-                        //     showHeader("View all accounts");
-                        //     admin.getAllAccounts(usersDatabase);
-
-                        //     system("pause");
-                        //     break;
-                        // case 5: // view all logs
-                            // while(true){
-                            //     system("cls"); // initial clear
-                            //     string logsMenu[] = {"Account logs", "Product logs", "Cashier logs", "Go back"};
-                            //     int logsInput = showMenu("View all logs", logsMenu);
-                            //     system("cls"); // clear again after getting input
-
-                            //     if (logsInput == 4) break; // exit logs menu
-
-                            //     switch(logsInput){
-                            //         case 1: // account logs
-                            //             showHeader("Account logs");
-                            //             admin.getAllLogs("accounts");
-                            //             break;
-                            //         case 2: // product logs
-                            //             showHeader("Product logs");
-                            //             admin.getAllLogs("products");
-                            //             break;
-                            //         case 3: // cashier logs
-                            //             showHeader("Cashier logs");
-                            //             admin.getAllLogs("cashier");
-                            //             break;
-                            //         default:
-                            //             cout << "Invalid selection";
-                            //             Sleep(1200);
-                            //             break;
-                            //     }
-
-                            //     if(logsInput == 3) break; // exit the logs menu
-                        //     }
-                            
-                        //     break;
                         case 3: {
                             while(true){
                                 system("cls");
@@ -286,8 +240,8 @@ void PointOfSale::adminMenu(string username) {
                     }
                 }
                 // this serves as an exit point for the second while loop
-                endInventoryLoop: ;
-                break;
+                endInventoryLoop: ; // since this is empty
+                break; // it will just break, returning to the main menu
             }
             case 2: {
                 while(true){
