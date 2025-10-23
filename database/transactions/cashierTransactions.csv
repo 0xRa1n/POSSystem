@@ -1,3 +1,9 @@
 TransNum,ProdNames,ProdQtys,Amt,Tax,TotalAmt,Change,Date,Time,CashierName
 1,Graphic_Tee,1,66,7.92,75,0,10_23_25,06:44:58_PM,cashier
 2,Graphic_Tee,1,66.96,8.04,75.00,0.00,10_23_25,06:46:41_PM,cashier
+3,Graphic_Tee,1,66.96,8.04,75.00,25.00,10_23_25,07:28:22_PM,cashier
+4,Graphic_Tee,1,66.96,8.04,75.00,25.00,10_23_25,07:46:21_PM,cashier
+5,Graphic_Tee,1,66.96,8.04,75.00,25.00,10_23_25,08:01:45_PM,cashier
+6,Graphic_Tee,1,66.96,8.04,75.00,25.00,10_23_25,08:02:41_PM,cashier
+7,Plain_Oversized_Tee,1,53.57,6.43,60.00,40.00,10_23_25,08:04:36_PM,cashier
+8,Plain_Oversized_Tee,1,53.57,6.43,60.00,40.00,10_23_25,08:05:41_PM,cashier
