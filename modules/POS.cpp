@@ -314,12 +314,12 @@ void PointOfSale::managerMenu(string username) {
                     system("cls"); // initial clearing for this loop
                     string inventoryMenu[] = {
                         "Add products",
-                        "View all products",
+                        "View products, accounts, logs, or backup transaction data",
                         "Update product",
                         "Delete a product",
                         "Go back"
                     };
-                    int inventoryInput = showMenu("Admin utilities", inventoryMenu);
+                    int inventoryInput = showMenu("Manager utilities", inventoryMenu);
                     system("cls"); // if an error arise, it will reach this part to clear the screen again
 
                     switch (inventoryInput) {
@@ -327,14 +327,68 @@ void PointOfSale::managerMenu(string username) {
                             showHeader("Add a product");
                             admin.addProduct(productsDatabase, username);
                             break;
-                        case 2: // view products
-                            showHeader("View all products");
-                            // since the terminal would not clear if it expects an input to the user
-                            // and we aim to let the inventory stay for a little while until the user wants to go back
-                            admin.readProducts(productsDatabase);
+                        case 2: {
+                            while(true){
+                                system("cls");
+                                string viewMenu[] = {"View all products", "View all accounts", "View all logs", "Backup transaction data", "Go back"};
+                                int viewInput = showMenu("View", viewMenu);
+                                system("cls");
 
-                            system("pause");
+                                if(viewInput == 5) break; // exit view menu
+
+                                switch(viewInput){
+                                    case 1:
+                                        showHeader("View all products");
+                                        admin.readProducts(productsDatabase);
+                                        system("pause"); // pause to let the user read the products
+                                        break;
+                                    case 2:
+                                        showHeader("View all accounts");
+                                        admin.getAllAccounts(usersDatabase);
+                                        system("pause"); // pause to let the user read the accounts
+                                        break;
+                                    case 3:
+                                        while(true){
+                                            system("cls"); // initial clear
+                                            string logsMenu[] = {"Account logs", "Product logs", "Cashier logs", "Go back"};
+                                            int logsInput = showMenu("View all logs", logsMenu);
+                                            system("cls"); // clear again after getting input
+
+                                            if (logsInput == 4) break; // exit logs menu
+
+                                            switch(logsInput){
+                                                case 1: // account logs
+                                                    showHeader("Account logs");
+                                                    admin.getAllLogs("accounts");
+                                                    break;
+                                                case 2: // product logs
+                                                    showHeader("Product logs");
+                                                    admin.getAllLogs("products");
+                                                    break;
+                                                case 3: // cashier logs
+                                                    showHeader("Cashier logs");
+                                                    admin.getAllLogs("cashier");
+                                                    break;
+                                                default:
+                                                    cout << "Invalid selection";
+                                                    Sleep(1200);
+                                                    break;
+                                            }
+                                        }
+                                        break;
+                                    case 4:
+                                        showHeader("Backup transaction data");
+                                        admin.readBackupTransactions("database/transactions/backup.csv");
+                                        system("pause"); // pause to let the user read the backup transactions
+                                        break;
+                                    default:
+                                        cout << "Invalid selection";
+                                        Sleep(1200);
+                                        break;
+                                }
+                            }
                             break;
+                        }
                         case 3: { // update
                             // initialize a loop to update the information of a product                          
                             while(true){

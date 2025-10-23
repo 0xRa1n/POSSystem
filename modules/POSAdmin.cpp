@@ -20,70 +20,7 @@ const regex disallowed{R"([^A-Za-z0-9_@#&])"};
 // and only A-Z, a-z, 0-9, _ @ # & are allowed
 // the R"()" syntax is used to define raw string literals, which allows us to include special characters without needing to escape them
 
-void POSAdmin::saveLogs(string type, string operation, string affectedEntry, string adminName, string message) {
-    // use different log files for different types
-    string database;
-    if(type == "accounts"){
-        database = "database/logs/adminUserLogs.csv";
-    } else if(type == "products"){
-        database = "database/logs/productsLogs.csv";
-    } else {
-        cout << "Invalid log type specified." << endl;
-        Sleep(1200);
-        return;
-    }
-
-    // get the current date and time
-    time_t timestamp = time(nullptr); // we do not need to assign a timestamp, we need the current time only, so nullptr is used
-
-    struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *
-
-    // dereference means that we get the value that the pointer is pointing to, because if it wasn't, it will return the address only (e.g. 0x123ff456)
-
-    // we used ampersand in the timestamp to get the address pointer of the timestamp variable, otherwise, it will return an error since it expects a pointer, not an integer
-
-    char date[50];
-    char time[50];
-
-    // char are used because ctime functions expect char arrays (and is coded in C to accept character arrays)
-
-    strftime(date, 50, "%m_%d_%y", &datetime);
-    strftime(time, 50, "%I:%M:%S_%p", &datetime);
-
-    // strftime = format date and time as string
-
-    // 50 means the maximum size of the char array
-    // %m == month
-    // %d == day
-    // %y == year (last two digits)
-
-    // %I == hour (12-hour clock)
-    // %M == minute
-    // %S == second
-    // %p == AM or PM
-
-    // &datetime == pointer to struct tm
-
-    // open the transactions.csv file in append mode
-    ofstream fout(database, ios::app); // fout is an instance of ofstream, used to write to files
-    if (!fout) {
-        cerr << "Error opening database for writing." << endl;
-        return;
-    }
-
-    // write the transaction details to the file
-    fout << operation << ","
-        << affectedEntry << ","
-        << date << ","
-        << time << ","
-        << adminName << ","
-        << message << endl;
-
-    fout.close(); // close the file
-    // if not closed, it may lead to data loss or corruption if the program ends unexpectedly
-}
-
-// CRUD-Related Functions
+// CREATE
 void POSAdmin::addProduct(string database, string username) {
     string productName, productSubCategory;
     int quantity, price;
@@ -253,6 +190,70 @@ void POSAdmin::addUser(string database, string accessingUsername){
     Sleep(1200);
 }
 
+void POSAdmin::saveLogs(string type, string operation, string affectedEntry, string adminName, string message) {
+    // use different log files for different types
+    string database;
+    if(type == "accounts"){
+        database = "database/logs/adminUserLogs.csv";
+    } else if(type == "products"){
+        database = "database/logs/productsLogs.csv";
+    } else {
+        cout << "Invalid log type specified." << endl;
+        Sleep(1200);
+        return;
+    }
+
+    // get the current date and time
+    time_t timestamp = time(nullptr); // we do not need to assign a timestamp, we need the current time only, so nullptr is used
+
+    struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *
+
+    // dereference means that we get the value that the pointer is pointing to, because if it wasn't, it will return the address only (e.g. 0x123ff456)
+
+    // we used ampersand in the timestamp to get the address pointer of the timestamp variable, otherwise, it will return an error since it expects a pointer, not an integer
+
+    char date[50];
+    char time[50];
+
+    // char are used because ctime functions expect char arrays (and is coded in C to accept character arrays)
+
+    strftime(date, 50, "%m_%d_%y", &datetime);
+    strftime(time, 50, "%I:%M:%S_%p", &datetime);
+
+    // strftime = format date and time as string
+
+    // 50 means the maximum size of the char array
+    // %m == month
+    // %d == day
+    // %y == year (last two digits)
+
+    // %I == hour (12-hour clock)
+    // %M == minute
+    // %S == second
+    // %p == AM or PM
+
+    // &datetime == pointer to struct tm
+
+    // open the transactions.csv file in append mode
+    ofstream fout(database, ios::app); // fout is an instance of ofstream, used to write to files
+    if (!fout) {
+        cerr << "Error opening database for writing." << endl;
+        return;
+    }
+
+    // write the transaction details to the file
+    fout << operation << ","
+        << affectedEntry << ","
+        << date << ","
+        << time << ","
+        << adminName << ","
+        << message << endl;
+
+    fout.close(); // close the file
+    // if not closed, it may lead to data loss or corruption if the program ends unexpectedly
+}
+
+// READ
 void POSAdmin::readProducts(string database) {
     // Open the file
     ifstream file(database);
@@ -303,6 +304,64 @@ void POSAdmin::readProducts(string database) {
     // Add a little padding for readability
     for (auto &w : widths) w += 2;
 
+    // Print
+    for (auto &r : rows) {
+        for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
+            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
+            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
+        }
+        cout << '\n';
+    }
+}
+
+void POSAdmin::readBackupTransactions(string database){
+    // Open the file
+    ifstream file(database);
+
+    // check if file exists
+    if (!file.is_open()) {
+        cout << "File could not be opened.\n";
+        return;
+    }
+
+    // Read all rows first
+    vector<vector<string>> rows; // 2D vector to hold rows and columns || the output should looks like this: {{"ID", "Username", "Password", "Role"}, {"1", "User1", "Pass1", "Admin"}, ...}
+    string line;
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string cell;
+        vector<string> row; 
+        while (getline(ss, cell, ',')) { // split by comma
+            row.push_back(cell); // add each cell to the row || row will look like this: {"ID", "Username", "Password", "Role"}
+        }
+        rows.push_back(row); // add the row to the list of rows || rows will look like this: {{"ID", "Username", "Password", "Role"}, {"1", "User1", "Pass1", "Admin"}, ...
+    }
+    file.close(); // close the file
+
+    // stop if the rows are empty
+    if (rows.empty()){
+        cout << "No backup transactions found in the database.\n";
+        return;
+    }
+
+    // Find max width of each column
+    size_t cols = 0;
+    for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
+    // no brackets since its a single controlled statement
+    vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
+    // initially: widths is {0, 0, 0, 0} for 4 columns
+
+    // after we get the maximum number, we will update the widths vector
+    // this will make sure that each value will not overlap with each other
+
+    for (auto &r : rows) { 
+        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
+            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
+            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
+            // there is no curly braces here because it is a single controlled statement
+    }
+    // Add a little padding for readability
+    for (auto &w : widths) w += 2;
     // Print
     for (auto &r : rows) {
         for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
@@ -509,120 +568,7 @@ void POSAdmin::getAllLogs(string type){
     system("pause");
 }
 
-void POSAdmin::readBackupTransactions(string database){
-    // Open the file
-    ifstream file(database);
-
-    // check if file exists
-    if (!file.is_open()) {
-        cout << "File could not be opened.\n";
-        return;
-    }
-
-    // Read all rows first
-    vector<vector<string>> rows; // 2D vector to hold rows and columns || the output should looks like this: {{"ID", "Username", "Password", "Role"}, {"1", "User1", "Pass1", "Admin"}, ...}
-    string line;
-    while (getline(file, line)) {
-        stringstream ss(line);
-        string cell;
-        vector<string> row; 
-        while (getline(ss, cell, ',')) { // split by comma
-            row.push_back(cell); // add each cell to the row || row will look like this: {"ID", "Username", "Password", "Role"}
-        }
-        rows.push_back(row); // add the row to the list of rows || rows will look like this: {{"ID", "Username", "Password", "Role"}, {"1", "User1", "Pass1", "Admin"}, ...
-    }
-    file.close(); // close the file
-
-    // stop if the rows are empty
-    if (rows.empty()){
-        cout << "No backup transactions found in the database.\n";
-        return;
-    }
-
-    // Find max width of each column
-    size_t cols = 0;
-    for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
-    // no brackets since its a single controlled statement
-    vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
-    // initially: widths is {0, 0, 0, 0} for 4 columns
-
-    // after we get the maximum number, we will update the widths vector
-    // this will make sure that each value will not overlap with each other
-
-    for (auto &r : rows) { 
-        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
-            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
-            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
-            // there is no curly braces here because it is a single controlled statement
-    }
-    // Add a little padding for readability
-    for (auto &w : widths) w += 2;
-    // Print
-    for (auto &r : rows) {
-        for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
-            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
-            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
-        }
-        cout << '\n';
-    }
-}
-
-void POSAdmin::deleteInformation(string type, string filename, string username){
-    string deleteProductInput;
-
-    cout << "Enter the entry name you want to delete (type 0 to go back): ";
-    cin >> deleteProductInput;
-
-    if(regex_search(deleteProductInput, disallowed)){
-        cout << "Entry name cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
-        Sleep(1200);
-        return;
-    }
-
-    if (deleteProductInput == "0") return;
-
-    ifstream input_file(filename);
-    vector<string> rows;
-    string line;
-    bool found = false;
-
-    // Read each line and filter out the one with the username
-    while (getline(input_file, line)) {
-        stringstream ss(line);
-        string token;
-        getline(ss, token, ',');     // read id (not used)
-        getline(ss, token, ',');     // read the second entry
-        if(token != deleteProductInput){
-            rows.push_back(line); // keep the line if it doesn't match
-        } else {
-            found = true;
-        }
-        // at this point, the vector rows now holds the value except the line that matches the query
-    }
-    input_file.close();
-
-    if (!found) {
-        cout << "Query not found";
-    } else {
-        // Write back filtered rows
-        ofstream output_file(filename, ios::trunc); // open in truncate mode
-        // it avoids the line that has the query, and it rewrites the csv without it
-        for (const auto& row : rows) { // write each remaining row
-            output_file << row << "\n"; // now, write the contents of the variable rows back to the file
-        } 
-        output_file.close();
-
-        if(type == "accounts"){ // save to the account logs
-            saveLogs("accounts", "DELETE", deleteProductInput, username, "Account_Deleted");
-        } else if(type == "products"){ // save to the product logs
-            saveLogs("products", "DELETE", deleteProductInput, username, "Product_Deleted");
-        }
-
-        cout << "Successfully deleted " << deleteProductInput << endl;
-    }
-    Sleep(1200);
-}
-
+// UPDATE
 int POSAdmin::updateInformation(string filename, string query, string type, string newValue, string username, string reason) {
     ifstream fileIn(filename); // open an input file stream, since we are reading the file first, then, writing it back
     if (!fileIn.is_open()) {
@@ -916,4 +862,61 @@ void POSAdmin::updateProductFields(string type, string database, string field, s
         Sleep(1200);
         return;
     }
+}
+
+// DELETE
+void POSAdmin::deleteInformation(string type, string filename, string username){
+    string deleteProductInput;
+
+    cout << "Enter the entry name you want to delete (type 0 to go back): ";
+    cin >> deleteProductInput;
+
+    if(regex_search(deleteProductInput, disallowed)){
+        cout << "Entry name cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+        Sleep(1200);
+        return;
+    }
+
+    if (deleteProductInput == "0") return;
+
+    ifstream input_file(filename);
+    vector<string> rows;
+    string line;
+    bool found = false;
+
+    // Read each line and filter out the one with the username
+    while (getline(input_file, line)) {
+        stringstream ss(line);
+        string token;
+        getline(ss, token, ',');     // read id (not used)
+        getline(ss, token, ',');     // read the second entry
+        if(token != deleteProductInput){
+            rows.push_back(line); // keep the line if it doesn't match
+        } else {
+            found = true;
+        }
+        // at this point, the vector rows now holds the value except the line that matches the query
+    }
+    input_file.close();
+
+    if (!found) {
+        cout << "Query not found";
+    } else {
+        // Write back filtered rows
+        ofstream output_file(filename, ios::trunc); // open in truncate mode
+        // it avoids the line that has the query, and it rewrites the csv without it
+        for (const auto& row : rows) { // write each remaining row
+            output_file << row << "\n"; // now, write the contents of the variable rows back to the file
+        } 
+        output_file.close();
+
+        if(type == "accounts"){ // save to the account logs
+            saveLogs("accounts", "DELETE", deleteProductInput, username, "Account_Deleted");
+        } else if(type == "products"){ // save to the product logs
+            saveLogs("products", "DELETE", deleteProductInput, username, "Product_Deleted");
+        }
+
+        cout << "Successfully deleted " << deleteProductInput << endl;
+    }
+    Sleep(1200);
 }
