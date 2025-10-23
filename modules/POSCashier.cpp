@@ -139,6 +139,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
 
     cout << "Order Summary" << endl;
     double itemTotal = 0.0;
+    int quantity = 0;
     double discountAmount = 0.0;
     int userMoney;
     
@@ -312,6 +313,18 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                 return true;
         }
     } else {
+        // we need these for two purposes: backup and main transaction logging
+        // pass the vector of product names and quantities to a single string, separated by semicolons
+        stringstream namesStream, quantitiesStream;
+        for(int i = 0; i < cart.size(); i++){ // iterate through the cart
+            namesStream << cart[i][0]; // append the product name to the stream
+            quantitiesStream << cart[i][2]; // append the product quantity to the stream
+            if(i < cart.size() - 1){ // append semicolon everywhere except the last item
+                namesStream << ";";
+                quantitiesStream << ";";
+            }
+        }
+
         // power outtage might happen here after the user had paid, so we need to have a backup that will log the transaction even if the program crashes
         // in this manner, if the power outtage happens right after the user had paid, we can still recover the transaction from the backup file
 
@@ -330,18 +343,10 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
             cerr << "Error opening backup file for writing." << endl;
             return false;
         }
-
-        // convert productNames vector to a semicolon-separated string
-        stringstream productNamesToString;
-        for(int i = 0; i < cart.size(); i++){
-            productNamesToString << cart[i][0]; // append the product name to the variable productNamesToString
-            if(i < cart.size() - 1){ // only add semicolon if it's not the last item
-                productNamesToString << ";"; // append semicolon everywhere except the last item || append a semicolon to the next item
-            }
-        }
         
         // to do: add quantity
-        backupFile << productNamesToString.str() << ","
+        backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,Date,Time,Cashier\n" << namesStream.str() << ","
+                    << quantitiesStream.str() << ","
                     << itemTotal << ","
                     << discountAmount << ","
                     << vatAmount << ","
@@ -379,21 +384,11 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
             }
         }
         
-        // pass the vector of product names and quantities to a single string, separated by semicolons
-        stringstream namesStream, quantitiesStream;
-        for(int i = 0; i < cart.size(); i++){ // iterate through the cart
-            namesStream << cart[i][0]; // append the product name to the stream
-            quantitiesStream << cart[i][2]; // append the product quantity to the stream
-            if(i < cart.size() - 1){ // append semicolon everywhere except the last item
-                namesStream << ";";
-                quantitiesStream << ";";
-            }
-        }
         // save the transaction to the main database
         saveTransaction(namesStream.str(), quantitiesStream.str(), itemTotal, finalAmountDue, change, username);
 
         // remove the backup file after saving the transaction to the main database
-        remove("database/transactions/backup.csv");
+        // remove("database/transactions/backup.csv");
 
         // clear the cart after the transaction
         cart.clear();

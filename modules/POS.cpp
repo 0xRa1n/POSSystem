@@ -136,8 +136,9 @@ void PointOfSale::adminMenu(string username) {
                                         }
                                         break;
                                     case 4:
-                                        cout << "Backing up transaction data...\n";
-                                        Sleep(1200);
+                                        showHeader("Backup transaction data");
+                                        admin.readBackupTransactions("database/transactions/backup.csv");
+                                        system("pause"); // pause to let the user read the backup transactions
                                         break;
                                     default:
                                         cout << "Invalid selection";

@@ -12,13 +12,13 @@ public:
     void addUser(string database, string accessingUsername);
     void saveLogs(string type, string operation, string affectedEntry, string adminName, string message);
 
-
     // READ
     void readProducts(string database);
     void getTotalSales(string database);
     void getTodaysSales(string database);
     void getAllAccounts(string database);
     void getAllLogs(string type);
+    void readBackupTransactions(string database);
 
     // UPDATE
     int updateInformation(string filename, string query, string type, string newValue, string username, string reason);
