@@ -43,9 +43,9 @@ bool POSCashier::viewCart(string username){ // view cart is also bool since if t
             totalAmount += stoi(item[3]) * stoi(item[2]);
         }
 
-        cout << "\nTotal Amount: P" << totalAmount << endl;
-        // cout << "VAT (12%): P" << (totalAmount) * 0.12 << endl;
-        // cout << "Amount Due: P" << (totalAmount) + ((totalAmount) * 0.12) << endl;
+        cout << "\nTotal Amount: P" << totalAmount - (totalAmount * 0.12) << endl;
+        cout << "VAT (12%): P" << (totalAmount) * 0.12 << endl;
+        cout << "Amount Due: P" << (totalAmount) + ((totalAmount) * 0.12) << endl;
 
         cout << "\nDo you want to proceed to checkout? (1/0): ";
         int confirmation;
@@ -69,7 +69,7 @@ bool POSCashier::viewCart(string username){ // view cart is also bool since if t
     return false; // just to satisfy the compiler, this line will never be reached
 }
 
-void POSCashier::saveTransaction(string productNames, string productQuantities, int initialAmount, int totalAmount, int change, string cashierName){
+void POSCashier::saveTransaction(string productNames, string productQuantities, double initialAmount, double totalAmount, double change, string cashierName){
     string database = "database/transactions/cashierTransactions.csv";
     // get the current date and time
     time_t timestamp = time(NULL);
@@ -109,10 +109,10 @@ void POSCashier::saveTransaction(string productNames, string productQuantities, 
     fout << newId << ","
             << productNames << ","
             << productQuantities << ","
-            << initialAmount << ","
-            << initialAmount * 0.12 << ","
-            << totalAmount << ","
-            << change << ","
+            << setprecision(2) << fixed << initialAmount << ","
+            << setprecision(2) << fixed << initialAmount * 0.12 << ","
+            << setprecision(2) << fixed << totalAmount << ","
+            << setprecision(2) << fixed << change << ","
             << date << ","
             << time << ","
             << cashierName << endl;
@@ -204,7 +204,11 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
         }
     }
 
-    // --- END OF DISCOUNT LOGIC ---
+    double rawPrice = itemTotal / 1.12; // total before VAT
+
+    double discountedTotal = rawPrice - discountAmount;
+    double vatAmount = discountedTotal * 0.12;
+    double finalAmountDue = discountedTotal + vatAmount;
 
     for(const auto& item : cart){
         cout << "\nProduct name: " << item[0] << "\n";
@@ -213,17 +217,17 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
         cout << "Price: P" << stoi(item[3]) * stoi(item[2]) << "\n";
     }
 
-    cout << "\nTotal Amount: P" << itemTotal << endl;
-    cout << "Discounts Applied: P" << discountAmount << endl;
-    cout << "Amount Due: P" << itemTotal - discountAmount << endl;
+    cout << "\nTotal Amount: P" << setprecision(2) << fixed << rawPrice << endl;
+    cout << "Discounts Applied: P" << setprecision(2) << fixed << discountAmount << endl;
+    cout << "VAT (12%): P" << setprecision(2) << fixed << vatAmount << endl;
+    cout << "Amount Due: P" << setprecision(2) << fixed << finalAmountDue << endl;
+
+    // setprecision gets the first two decimal places
+    // fixed makes sure that the decimal places are always shown, even if they are zeros
+    // because if we don't use fixed, it will show as, for example, 123.5 instead of 123.50
 
     cout << "\nProceed to purchase? (1/0): ";
     cin >> confirmation;
-    
-    // Correct VAT Calculation
-    double discountedTotal = itemTotal - discountAmount;
-    double vatAmount = discountedTotal * 0.12;
-    double finalAmountDue = discountedTotal + vatAmount;
 
     if(handleInputError()) return false; // handle invalid inputs
 
@@ -243,11 +247,11 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                 cout << "Price: P" << item[3] << "\n\n";
             }
 
-            cout << "Total Amount: P" << itemTotal << endl;
-            cout << "Discounts Applied: P" << discountAmount << endl;
+            cout << "Total Amount: P" << setprecision(2) << fixed << rawPrice << endl;
+            cout << "Discounts Applied: P" << setprecision(2) << fixed << discountAmount << endl;
 
-            cout << "VAT (12%): P" << vatAmount << endl;
-            cout << "Amount Due: P" << finalAmountDue << endl;
+            cout << "VAT (12%): P" << setprecision(2) << fixed << vatAmount << endl;
+            cout << "Amount Due: P" << setprecision(2) << fixed << finalAmountDue << endl;
             break;
         case 0:
             int choice;
@@ -287,10 +291,10 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
 
     if(handleInputError()) return false; // handle invalid inputs
 
-    int change = userMoney - ((itemTotal) + ((itemTotal) * 0.12));
+    int change = userMoney - finalAmountDue;
 
     // check if the user has sufficient money
-    if(userMoney < (itemTotal) + ((itemTotal) * 0.12)){
+    if(userMoney < finalAmountDue){
         int confirmation;
         cout << "Insufficient money. Try again? (1/0): ";
         cin >> confirmation;
@@ -345,14 +349,15 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
         }
         
         // to do: add quantity
-        backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,Date,Time,Cashier\n" << namesStream.str() << ","
+        backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,Date,Time,Cashier\n" 
+                    << namesStream.str() << ","
                     << quantitiesStream.str() << ","
-                    << itemTotal << ","
-                    << discountAmount << ","
-                    << vatAmount << ","
-                    << finalAmountDue << ","
-                    << userMoney << ","
-                    << change << ","
+                    << setprecision(2) << fixed << rawPrice << ","
+                    << setprecision(2) << fixed << discountAmount << ","
+                    << setprecision(2) << fixed << vatAmount << ","
+                    << setprecision(2) << fixed << finalAmountDue << ","
+                    << setprecision(2) << fixed << userMoney << ","
+                    << setprecision(2) << fixed << change << ","
                     << date << ","
                     << time << ","
                     << username << "\n";
@@ -385,10 +390,10 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
         }
         
         // save the transaction to the main database
-        saveTransaction(namesStream.str(), quantitiesStream.str(), itemTotal, finalAmountDue, change, username);
+        saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, change, username);
 
         // remove the backup file after saving the transaction to the main database
-        // remove("database/transactions/backup.csv");
+        remove("database/transactions/backup.csv");
 
         // clear the cart after the transaction
         cart.clear();
@@ -497,7 +502,7 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
                 cout << "Product Name: " << productName << "\n";
                 cout << "Product category: " << productCategory << "\n";
                 cout << "Available Quantity: " << productQuantity << "\n";
-                cout << "Price: P" << productPrice << "\n";
+                cout << "Price: P" << setprecision(2) << fixed << productPrice << "\n";
                 break;
             }   
         }
