@@ -1,3 +1,4 @@
-TransactionNumber,ProductNames,ProductQuantities,TotalAmount,Date,Time,CashierName
-1,Graphic_Tee,1,84,10_12_25,03:42:54_PM,Cashier
-2,Plain_Oversized_Tee;Baseball_Cap,2;1,179,10_12_25,03:43:28_PM,Cashier
+TransNum,ProdNames,ProdQtys,Amt,Tax,TotalAmt,Change,Date,Time,CashierName
+1,Graphic_Tee,1,75,9,84,16,10_23_25,03:36:47_PM,cashier
+2,Graphic_Tee;Striped_Polo;Slim_Fit_Jeans;Mini_Skirt,1;1;1;1,300,36,336,164,10_23_25,03:37:43_PM,cashier
+3,Graphic_Tee,1,75,9,84,16,10_23_25,03:47:07_PM,cashier

@@ -5,3 +5,14 @@ UPDATE,DemoProduct_SubCategory_to_Demo,10_22_25,09:30:08_PM,admin,Incorrect_Subc
 UPDATE,DemoProduct_Quantity_to_10,10_22_25,09:30:25_PM,admin,Incorrect_Quantity
 UPDATE,DemoProduct_Price_to_100,10_22_25,09:30:34_PM,admin,Incorrect_Price
 UPDATE,DemoProduct_Price_to_100,10_22_25,09:51:18_PM,admin,Test hello
+UPDATE,Tops_Discount_to_11,10_23_25,11:22:14_AM,admin,Discount_Updated
+UPDATE,Graphic_Tee_Quantity_to_6,10_23_25,03:13:27_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_5,10_23_25,03:20:28_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_4,10_23_25,03:25:53_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_3,10_23_25,03:31:53_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_2,10_23_25,03:36:47_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_1,10_23_25,03:37:43_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Striped_Polo_Quantity_to_5,10_23_25,03:37:43_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Slim_Fit_Jeans_Quantity_to_2,10_23_25,03:37:43_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Mini_Skirt_Quantity_to_14,10_23_25,03:37:43_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_0,10_23_25,03:47:07_PM,cashier,Purchased_Quantity_Deducted

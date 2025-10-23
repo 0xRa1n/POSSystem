@@ -2,15 +2,17 @@
 #include "POSAdmin.h"   // Include the header for the class we need to use
 #include "utilities.h"  // Include for utility functions
 
-#include <cctype>
-#include <sstream>
-#include <windows.h>
-#include <bits/stdc++.h>
+#include <cctype> // for toupper()
+#include <sstream> // for stringstream
+#include <windows.h> // for Sleep() and system("cls")
+#include <bits/stdc++.h> // for this file, here are the functions used along with this package: fstream, vector, string, ctime (time.h), sstream, regex, iomanip (setw and left), limits, stdexcept (invalid_argument and out_of_range)
 
 using namespace std;
 
 // the cart
 vector<vector<string>> cart; // 2D vector to hold cart items: { {productName, productCategory, quantity, price}, ... }
+// vector of vector is used to hold multiple items, each item is a vector of strings
+// so it will be easy to access each item and its details (by just looping over the cart vector, and using the index to access each item's details)
 
 // we define all member functions of POSCashier here
 
@@ -27,12 +29,12 @@ bool POSCashier::viewCart(string username){ // view cart is also bool since if t
     double totalAmount = 0.0;
 
     // check if the cart is empty
-    if(cart.empty()){
+    if(cart.empty()){ // if the vector is empty
         cout << "\nYour cart is empty.\n";
         Sleep(1200);
         return false;
     } else {
-        for(const auto& item : cart){
+        for(const auto& item : cart){ // Iterate over each item (which is a vector<string>) in the cart.
             cout << "\nProduct name: " << item[0] << "\n";
             cout << "Category: " << item[1] << "\n";
             cout << "Quantity: " << item[2] << "\n";
@@ -67,7 +69,7 @@ bool POSCashier::viewCart(string username){ // view cart is also bool since if t
     return false; // just to satisfy the compiler, this line will never be reached
 }
 
-void POSCashier::saveTransaction(string productNames, string productQuantities, int totalAmount, string cashierName){
+void POSCashier::saveTransaction(string productNames, string productQuantities, int initialAmount, int totalAmount, int change, string cashierName){
     string database = "database/transactions/cashierTransactions.csv";
     // get the current date and time
     time_t timestamp = time(NULL);
@@ -78,6 +80,20 @@ void POSCashier::saveTransaction(string productNames, string productQuantities, 
 
     strftime(date, 50, "%m_%d_%y", &datetime);
     strftime(time, 50, "%I:%M:%S_%p", &datetime);
+
+        // strftime = format date and time as string
+
+    // 50 means the maximum size of the char array
+    // %m == month
+    // %d == day
+    // %y == year (last two digits)
+
+    // %I == hour (12-hour clock)
+    // %M == minute
+    // %S == second
+    // %p == AM or PM
+
+    // &datetime == pointer to struct tm
 
     // generate an id based on the previous id 
     int newId = getLastId(database) + 1;
@@ -93,12 +109,16 @@ void POSCashier::saveTransaction(string productNames, string productQuantities, 
     fout << newId << ","
             << productNames << ","
             << productQuantities << ","
+            << initialAmount << ","
+            << initialAmount * 0.12 << ","
             << totalAmount << ","
+            << change << ","
             << date << ","
             << time << ","
             << cashierName << endl;
 
-    fout.close();
+    fout.close(); // close the file
+    // if not closed, it may lead to data loss or corruption if the program ends unexpectedly
 }
 
 // CRUD-Related Functions
@@ -122,35 +142,41 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     double discountAmount = 0.0;
     int userMoney;
     
-    // Step 1: Pre-load all available discounts into a map for quick access.
-    map<string, double> categoryDiscounts;
-    ifstream discountFile("database/discounts.csv");
-    if (discountFile.is_open()) {
-        string line;
-        getline(discountFile, line); // Skip header
-        while (getline(discountFile, line)) {
-            stringstream ss(line);
-            string category, percentageStr;
-            getline(ss, category, ',');
-            getline(ss, percentageStr, ',');
-            if (!percentageStr.empty()) {
-                categoryDiscounts[category] = stod(percentageStr) / 100.0;
-            }
-        }
-        discountFile.close();
+    // map is similar to vector and array, but it uses key-value pairs (just like JSON)
+    map<string, double> categoryDiscounts; // expected output: { "Tops": 0.10, "Bottoms": 0.15, ... }
+    ifstream discountFile("database/discounts.csv"); // open the discounts file
+    if (!discountFile.is_open()) { 
+        cerr << "Error opening discounts file." << endl;
+        Sleep(1200);
+        return false;
     }
 
-    // Step 2: Get total quantity for each category and the cart's total value.
+    string line;
+    getline(discountFile, line); // Skip header
+    while (getline(discountFile, line)) {
+        stringstream ss(line); // create a stringstream object to parse the line
+        string category, percentageStr;
+
+        getline(ss, category, ',');
+        getline(ss, percentageStr, ',');
+        if (!percentageStr.empty()) { // if it's not empty
+            categoryDiscounts[category] = stod(percentageStr) / 100.0; // convert percentage to decimal, and store it in the map
+        }
+    }
+    discountFile.close(); // close the file
+
     map<string, int> categoryCounts;
     for (const auto& item : cart) {
-        categoryCounts[item[1]] += stoi(item[2]);
-        itemTotal += stoi(item[3]) * stoi(item[2]);
+        categoryCounts[item[1]] += stoi(item[2]); // count the quantity of each category in the cart
+        itemTotal += stoi(item[3]) * stoi(item[2]); // calculate the total amount before discount
     }
 
     // Step 3: For each category that qualifies, calculate the discount on its FIRST 3 items.
     for (auto const& [category, count] : categoryCounts) {
         // Check if the category has 3 or more items AND has a discount defined.
         if (count >= 3 && categoryDiscounts.count(category) > 0) {
+            // if this was >= instead of ==, it will only count exactly 3 times, ignoring the discount if there are more than 3 items
+            // below will calculate the subtotal for the first 3 items in this category
             
             double subtotalForDiscount = 0.0;
             int itemsCounted = 0;
@@ -163,7 +189,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
 
                     // Process each unit of this item (e.g., if quantity is 2, loop twice)
                     for (int i = 0; i < quantity; ++i) {
-                        if (itemsCounted < 3) {
+                        if (itemsCounted < 3) { // Only count up to 3 items, otherwise, stop counting
                             subtotalForDiscount += price;
                             itemsCounted++;
                         } else {
@@ -173,7 +199,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                 }
             }
             // Add the calculated discount for this category to the total discount amount.
-            discountAmount += subtotalForDiscount * categoryDiscounts[category];
+            discountAmount += subtotalForDiscount * categoryDiscounts[category]; // apply the discount rate
         }
     }
 
@@ -260,6 +286,8 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
 
     if(handleInputError()) return false; // handle invalid inputs
 
+    int change = userMoney - ((itemTotal) + ((itemTotal) * 0.12));
+
     // check if the user has sufficient money
     if(userMoney < (itemTotal) + ((itemTotal) * 0.12)){
         int confirmation;
@@ -311,14 +339,19 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                 productNamesToString << ";"; // append semicolon everywhere except the last item || append a semicolon to the next item
             }
         }
-
+        
+        // to do: add quantity
         backupFile << productNamesToString.str() << ","
-                    << itemTotal + (itemTotal * 0.12) << ","
+                    << itemTotal << ","
+                    << discountAmount << ","
+                    << vatAmount << ","
+                    << finalAmountDue << ","
                     << userMoney << ","
+                    << change << ","
                     << date << ","
                     << time << ","
                     << username << "\n";
-
+                    
         backupFile.close();
 
         // first, find the product in the database, then, update the quantity using the function updateInformation
@@ -357,7 +390,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
             }
         }
         // save the transaction to the main database
-        saveTransaction(namesStream.str(), quantitiesStream.str(), itemTotal + (itemTotal * 0.12), username);
+        saveTransaction(namesStream.str(), quantitiesStream.str(), itemTotal, finalAmountDue, change, username);
 
         // remove the backup file after saving the transaction to the main database
         remove("database/transactions/backup.csv");
@@ -365,7 +398,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
         // clear the cart after the transaction
         cart.clear();
 
-        cout << "Change: " << userMoney - ((itemTotal) + ((itemTotal) * 0.12)) << endl;
+        cout << "Change: " << change << endl;
     }
     system("pause");
     return true;

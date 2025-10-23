@@ -68,7 +68,7 @@ void PointOfSale::adminMenu(string username) {
                     string inventoryMenu[] = {
                         "Add products",
                         "Add an account",
-                        "View products, accounts, or logs",
+                        "View products, accounts, logs, or backup transaction data",
                         "Update account, product, or discounts",
                         "Delete a product",
                         "Delete an account",
@@ -89,11 +89,11 @@ void PointOfSale::adminMenu(string username) {
                         case 3: {
                             while(true){
                                 system("cls");
-                                string viewMenu[] = {"View all products", "View all accounts", "View all logs", "Go back"};
+                                string viewMenu[] = {"View all products", "View all accounts", "View all logs", "Backup transaction data", "Go back"};
                                 int viewInput = showMenu("View", viewMenu);
                                 system("cls");
 
-                                if(viewInput == 4) break; // exit view menu
+                                if(viewInput == 5) break; // exit view menu
 
                                 switch(viewInput){
                                     case 1:
@@ -134,6 +134,10 @@ void PointOfSale::adminMenu(string username) {
                                                     break;
                                             }
                                         }
+                                        break;
+                                    case 4:
+                                        cout << "Backing up transaction data...\n";
+                                        Sleep(1200);
                                         break;
                                     default:
                                         cout << "Invalid selection";

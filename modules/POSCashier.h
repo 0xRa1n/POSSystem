@@ -11,7 +11,7 @@ class POSCashier {
 public:
     // we declare all member functions of POSCashier here
     bool viewCart(string username);
-    void saveTransaction(string productNames, string productQuantities, int totalAmount, string cashierName);
+    void saveTransaction(string productNames, string productQuantities, int initialAmount, int totalAmount, int change, string cashierName);
     bool processTransaction(string username);
     bool readProductsBySubcategory(string productsDatabase, string subCategory, string username);
 };
