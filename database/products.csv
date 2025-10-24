@@ -1,8 +1,8 @@
 ProductNumber,ProductName,ProductCategory,ProductSubCategory,Quantity,Price
 1,Graphic_Tee,Tops,T_Shirts,0,75
-2,Plain_Oversized_Tee,Tops,T_Shirts,7,60
-3,Vintage_Print_Tee,Tops,T_Shirts,5,85
-4,Striped_Polo,Tops,Polo_Shirts,5,65
+2,Plain_Oversized_Tee,Tops,T_Shirts,6,60
+3,Vintage_Print_Tee,Tops,T_Shirts,2,85
+4,Striped_Polo,Tops,Polo_Shirts,4,65
 5,Checkered_Polo,Tops,Polo_Shirts,2,75
 6,Plain_White_Polo,Tops,Polo_Shirts,11,60
 7,Windbreaker,Tops,Jackets,3,110

@@ -1,6 +1,6 @@
-#include "POSCashier.h" // Include the header for this class
-#include "POSAdmin.h"   // Include the header for the class we need to use
-#include "utilities.h"  // Include for utility functions
+#include "./include/POSCashier.h" // Include the header for this class
+#include "./include/POSAdmin.h"   // Include the header for the class we need to use
+#include "./include/utilities.h"  // Include for utility functions
 
 #include <cctype> // for toupper()
 #include <sstream> // for stringstream
@@ -16,7 +16,10 @@ vector<vector<string>> cart; // 2D vector to hold cart items: { {productName, pr
 
 // we define all member functions of POSCashier here
 
-class POSAdmin admin;
+class POSAdmin admin; // because we will use this to deduct the quantity of the products after a successful transaction
+
+// here are all member functions of POSCashier class
+// the double colon (::) is the scope resolution operator, which tells us that the function belongs to the class POSCashier
 
 bool POSCashier::viewCart(string username){ // view cart is also bool since if the user proceeds to checkout, we need to know in the main menu to not break the loop
     // and if the user cancels the transaction and he went with the view cart, it will just return to the main menu

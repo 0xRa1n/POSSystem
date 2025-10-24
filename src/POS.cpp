@@ -1,10 +1,13 @@
-#include "POS.h"
-#include "utilities.h" // For showHeader, etc.
+#include "./include/POS.h"
+#include "./include/utilities.h" // For showHeader, etc.
 #include <fstream>
 #include <sstream>
 #include <iostream>
 
 using namespace std;
+
+// here are all member functions of PointOfSale class
+// the double colon (::) is the scope resolution operator, which tells us that the function belongs to the class PointOfSale
 
 bool PointOfSale::login(string username, string password, string& outRole) {
     const string userAccounts = "database/userAccounts.csv";

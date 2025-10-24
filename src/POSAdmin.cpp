@@ -3,7 +3,7 @@
 #include <sstream> // for stringstream
 #include <cstdlib> // for exit()
 #include <windows.h> // for Sleep() and system("cls")
-#include <bits/stdc++.h> // for this file, here are the functions used along with this package: fstream, vector, string, ctime (time.h), sstream, regex, iomanip (setw and left), limits, stdexcept (invalid_argument and out_of_range)
+#include <bits/stdc++.h> // for this file, here are the functions used along with this package: fstream, vectors, ctime (time.h), sstream, regex, iomanip (setw and left), limits, stdexcept (invalid_argument and out_of_range)
 #include <algorithm> // used for find
 #include <regex> // for regex
 using namespace std;
@@ -11,7 +11,7 @@ using namespace std;
 // ifstream == reading the file
 // offstream == writing to the file
 
-#include "POSAdmin.h"
+#include "./include/POSAdmin.h"
 // include the declaration of POSAdmin class
 // and in here we will define all the member functions of POSAdmin
 
@@ -19,6 +19,10 @@ const regex disallowed{R"([^A-Za-z0-9_@#&])"};
 // the brackets tells us that its a character set, and the ^ means NOT
 // and only A-Z, a-z, 0-9, _ @ # & are allowed
 // the R"()" syntax is used to define raw string literals, which allows us to include special characters without needing to escape them
+
+
+// here are all member functions of POSAdmin class
+// the double colon (::) is the scope resolution operator, which tells us that the function belongs to the class POSAdmin
 
 // CREATE
 void POSAdmin::addProduct(string database, string username) {

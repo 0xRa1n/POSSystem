@@ -5,7 +5,7 @@
 #include <bits/stdc++.h> // this includes all standard libraries
 using namespace std;
 
-#include "utilities.h"
+#include "./include/utilities.h"
 
 void showHeader(string headerTitle){
     system("cls");

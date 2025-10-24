@@ -32,3 +32,8 @@ UPDATE,Graphic_Tee_Quantity_to_1,10_23_25,08:01:45_PM,cashier,Purchased_Quantity
 UPDATE,Graphic_Tee_Quantity_to_0,10_23_25,08:02:41_PM,cashier,Purchased_Quantity_Deducted
 UPDATE,Plain_Oversized_Tee_Quantity_to_8,10_23_25,08:04:36_PM,cashier,Purchased_Quantity_Deducted
 UPDATE,Plain_Oversized_Tee_Quantity_to_7,10_23_25,08:05:41_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Plain_Oversized_Tee_Quantity_to_6,10_24_25,10:32:47_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Vintage_Print_Tee_Quantity_to_2,10_24_25,10:37:21_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Striped_Polo_Quantity_to_4,10_24_25,10:37:21_AM,cashier,Purchased_Quantity_Deducted
+ADD,test,10_24_25,07:28:48_PM,admin,New_Product_Added
+DELETE,test,10_24_25,07:28:59_PM,admin,Product_Deleted

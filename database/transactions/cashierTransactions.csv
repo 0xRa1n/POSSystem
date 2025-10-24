@@ -7,3 +7,5 @@ TransNum,ProdNames,ProdQtys,Amt,Tax,TotalAmt,Change,Date,Time,CashierName
 6,Graphic_Tee,1,66.96,8.04,75.00,25.00,10_23_25,08:02:41_PM,cashier
 7,Plain_Oversized_Tee,1,53.57,6.43,60.00,40.00,10_23_25,08:04:36_PM,cashier
 8,Plain_Oversized_Tee,1,53.57,6.43,60.00,40.00,10_23_25,08:05:41_PM,cashier
+9,Plain_Oversized_Tee,1,53.57,6.43,60.00,40.00,10_24_25,10:32:47_AM,cashier
+10,Vintage_Print_Tee;Striped_Polo,3;1,285.71,34.29,291.44,8.00,10_24_25,10:37:21_AM,cashier

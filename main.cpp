@@ -1,13 +1,13 @@
 #include <iostream>
-#include "modules/POS.h"
-#include "modules/utilities.h"
+#include "./include/POS.h"
+#include "./include/utilities.h"
 using namespace std;
 
 int main(){
     // initialize variables
-    PointOfSale POS;
+    PointOfSale POS; // since we need to seperate the functions for each role, we need to create a class named PointOfSale that will handle the login and menu navigation
     int retry = 0;
-    string usernameInput, passwordInput, role;
+    string usernameInput, passwordInput, role; // the role will be used to determine which menu to show || it will be empty, but, after passing it throught the login function, it will contain the role of the user
 
     while(true){
         system("cls");
@@ -32,7 +32,7 @@ int main(){
                 break;
             }
         } else {
-            if (retry == 2){
+            if (retry == 2){ // maximum of 3 attempts
                 cout << "Maximum attempt reached.";
                 break;
             }
