@@ -15,11 +15,63 @@ vector<vector<string>> cart; // 2D vector to hold cart items: { {productName, pr
 // so it will be easy to access each item and its details (by just looping over the cart vector, and using the index to access each item's details)
 
 // we define all member functions of POSCashier here
-
-class POSAdmin admin; // because we will use this to deduct the quantity of the products after a successful transaction
+POSAdmin admin; // we need to use the function saveLogs 
 
 // here are all member functions of POSCashier class
 // the double colon (::) is the scope resolution operator, which tells us that the function belongs to the class POSCashier
+
+void POSCashier::deductPurchasedQuantities(string productsDatabase, string query, string username, string quantities){
+    string line, fileContent;
+    bool isFound;
+
+    ifstream readFile(productsDatabase);
+    if(!readFile.is_open()){
+        cout << "Failed to open file\n";
+        Sleep(1200);
+        return;
+    }
+
+    while(getline(readFile, line)){
+        stringstream ss(line); // create a string stream from the line
+        string indexOne, indexTwo, indexThree, indexFour, indexFive, indexSix;
+        // get a copy of each entries
+        getline(ss, indexOne, ','); // read the id (not used) and save to variable indexOne
+        getline(ss, indexTwo, ','); // read the second entry (username or product name) and save to variable indexTwo
+        getline(ss, indexThree, ','); // read the product category or password and save to variable indexThree
+        getline(ss, indexFour, ','); // read the product subcategory or role and save to variable indexFour
+        getline(ss, indexFive, ','); // get the product quantity and save to variable indexFive
+        getline(ss, indexSix, ','); // get the product price and save to variable indexSix
+
+        // since we only need to change the quantity 
+        if(indexTwo == query){
+            int currentQuantity = stoi(indexFive);
+            int purchasedQuantity = stoi(quantities);
+            int updatedQuantity = currentQuantity - purchasedQuantity;
+            indexFive = to_string(updatedQuantity);
+        }
+
+        fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "," + indexFive + "," + indexSix + "\n";
+        isFound = true;
+    }
+
+    if(!isFound){
+        cout << "Product not found in database.\n";
+        Sleep(1200);
+        return;
+    } else {
+        ofstream fileOut(productsDatabase);
+        if(!fileOut){
+            cout << "Cannot write to file " << productsDatabase << endl;
+            Sleep(1200);
+            return;
+        }
+
+        fileOut << fileContent;
+        fileOut.close();
+
+        admin.saveLogs("products", "UPDATE", query + "_Quantity_to_" + quantities, username, "Purchased_Quantity_Deducted");
+    }
+}
 
 bool POSCashier::viewCart(string username){ // view cart is also bool since if the user proceeds to checkout, we need to know in the main menu to not break the loop
     // and if the user cancels the transaction and he went with the view cart, it will just return to the main menu
@@ -339,7 +391,9 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                         if(productName == cart[i][0]){
                             int updatedQuantity = stoi(productQuantity) - stoi(cart[i][2]); // subtract the quantity purchased | stoi means string to integer
                             // update the quantity in the database
-                            admin.updateInformation(productsDatabase, productName, "productQuantity", to_string(updatedQuantity), username, "Purchased_Quantity_Deducted"); // use the previous function to update the quantity | we used to_string since we are not only using the function for products
+                            // admin.updateInformation(productsDatabase, productName, "productQuantity", to_string(updatedQuantity), username, "Purchased_Quantity_Deducted"); // use the previous function to update the quantity | we used to_string since we are not only using the function for products
+                            // admin.updateProduct(productsDatabase, "quantity", username); // log the update to productsLogs.csv
+                            deductPurchasedQuantities(productsDatabase, productName, username, cart[i][2]);
                         }
                     }
                 }

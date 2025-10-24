@@ -162,26 +162,33 @@ void PointOfSale::adminMenu(string username) {
                                 if(updateInput == 1){                  
                                     // initialize a loop to update the information of a product                          
                                     while(true){
-                                        string updateProductMenu[] = {"Product name", "Product Sub-Category", "Product quantity", "Product price", "Go back"};
+                                        system("cls");
+                                        string updateProductMenu[] = {"Product name", "Product Sub-Category", "Product Category", "Product quantity", "Product price", "Go back"};
                                         int updateProductInput = showMenu("Update product", updateProductMenu);
+                                        system("cls");
 
-                                        if(updateProductInput == 5){
-                                            // this will end the loop, and will return to the previous loop
-                                            break;
-                                        }
+                                        if(updateProductInput == 6) break; // this will end the loop, and will return to the previous loop
 
                                         switch(updateProductInput){
                                             case 1:  // update product name
-                                                admin.updateProductFields("product", productsDatabase, "name", username);
+                                                showHeader("Update product name");
+                                                admin.updateProduct(productsDatabase, "productName", username);
                                                 break;
                                             case 2:  // update product sub-category
-                                                admin.updateProductFields("product", productsDatabase, "subCategory", username);
+                                                showHeader("Update product sub-category");
+                                                admin.updateProduct(productsDatabase, "productSubCategory", username);
                                                 break;
-                                            case 3:  // update product quantity
-                                                admin.updateProductFields("product", productsDatabase, "quantity", username);
+                                            case 3:  // update product category
+                                                showHeader("Update product category");
+                                                admin.updateProduct(productsDatabase, "productCategory", username);
                                                 break;
-                                            case 4:  // update product price
-                                                admin.updateProductFields("product", productsDatabase, "price", username);
+                                            case 4:  // update product quantity
+                                                showHeader("Update product quantity");
+                                                admin.updateProduct(productsDatabase, "productQuantity", username);
+                                                break;
+                                            case 5:  // update product price
+                                                showHeader("Update product price");
+                                                admin.updateProduct(productsDatabase, "productPrice", username);
                                                 break;
                                             default: // fallback
                                                 cout << "Invalid selection";
@@ -192,8 +199,10 @@ void PointOfSale::adminMenu(string username) {
                                 } else if (updateInput == 2){                                        
                                     // initialize a loop to update the information of a product                          
                                     while(true){
+                                        system("cls");
                                         string updateAccountMenu[] = {"Username", "Password", "Role", "Go back"};
                                         int updateAccountInput = showMenu("Update account", updateAccountMenu);
+                                        system("cls");
 
                                         if(updateAccountInput == 4){
                                             // this will end the loop, and will return to the previous loop
@@ -202,13 +211,16 @@ void PointOfSale::adminMenu(string username) {
 
                                         switch(updateAccountInput){
                                             case 1:  // update username
-                                                admin.updateProductFields("account", usersDatabase, "username", username);
+                                                showHeader("Update account username");
+                                                admin.updateAccount(usersDatabase, "accountUsername", username);
                                                 break;
                                             case 2:  // update password
-                                                admin.updateProductFields("account", usersDatabase, "password", username);
+                                                showHeader("Update account password");
+                                                admin.updateAccount(usersDatabase, "accountPassword", username);
                                                 break;
                                             case 3:  // update role
-                                                admin.updateProductFields("account", usersDatabase, "role", username);
+                                                showHeader("Update account role");
+                                                admin.updateAccount(usersDatabase, "accountRole", username);
                                                 break;
                                             default:
                                                 cout << "Invalid selection";
@@ -438,16 +450,16 @@ void PointOfSale::managerMenu(string username) {
 
                                 switch(updateProductInput){
                                     case 1:  // update product name
-                                        admin.updateProductFields("product", productsDatabase, "name", username);
+                                        // admin.updateProductFields("product", productsDatabase, "name", username);
                                         break;
                                     case 2:  // update product sub-category
-                                        admin.updateProductFields("product", productsDatabase, "subCategory", username);
+                                        // admin.updateProductFields("product", productsDatabase, "subCategory", username);
                                         break;
                                     case 3:  // update product quantity
-                                        admin.updateProductFields("product", productsDatabase, "quantity", username);
+                                        // admin.updateProductFields("product", productsDatabase, "quantity", username);
                                         break;
                                     case 4:  // update product price
-                                        admin.updateProductFields("product", productsDatabase, "price", username);
+                                        // admin.updateProductFields("product", productsDatabase, "price", username);
                                         break;
                                     default: // fallback
                                         cout << "Invalid selection";

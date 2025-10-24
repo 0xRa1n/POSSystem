@@ -686,16 +686,84 @@ void POSAdmin::getAllLogs(string type){
 }
 
 // UPDATE
-int POSAdmin::updateInformation(string filename, string query, string type, string newValue, string username, string reason) {
-    ifstream fileIn(filename); // open an input file stream, since we are reading the file first, then, writing it back
-    if (!fileIn.is_open()) {
-        return 0;
+void POSAdmin::updateProduct(string database, string type, string username){
+    string query, newValue, reason;
+
+    ifstream readFile(database);
+    if(!readFile.is_open()){
+        cout << "Failed to open file\n";
+        return;
+    }
+
+    cout << "What is the product name you want to update? (0 to go back): ";
+    cin >> query;
+
+    // check if product name exists in the csv
+    if(!isAlreadyInCsv(database, query)){
+        cout << "Product name '" << query << "' does not exist in the CSV.\n";
+        Sleep(1200);
+        return;
+    }
+
+    if (query == "0") return;
+    if(regex_search(query, disallowed)){
+        cout << "Product name cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+        Sleep(1200);
+        return;
+    }
+
+    cout << "Enter the new value (0 to go back): ";
+    cin >> newValue;
+
+    if(newValue == "0") return; // input from cin is always string
+
+    // error handling for different fields
+    if(query == "productName" || query == "productSubCategory"){
+        if(regex_search(newValue, disallowed)){
+            cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+            Sleep(1200);
+            return;
+        } else if(query == "name" && isAlreadyInCsv(database, newValue)){
+            cout << "Product name '" << newValue << "' is already in the CSV.\n"; // since duplicate product names are not allowed
+            Sleep(1200);
+            return;
+        }
+    } else if(query == "price" || query == "quantity"){
+        // make sure that the new input is a valid integer
+        // note that the function handleInputError() will only work for INTEGERS entered via cin
+        // and this function not only takes integers
+        try {
+            int value = stoi(newValue);
+            if(value < 0){
+                cout << "The " + query + " cannot be negative.\n";
+                Sleep(1200);
+                return;
+            }
+        } catch (invalid_argument&) {
+            cout << "Invalid input, please enter a valid integer for " + query + ".\n";
+            Sleep(1200);
+            return;
+        } catch (out_of_range&) {
+            cout << "The number entered is out of range for " + query + ".\n";
+            Sleep(1200);
+            return;
+        }
+    } 
+
+    cout << "What is the reason for the update? (0 to go back): ";
+    cin.ignore(); // ignore any inputs from the last cin (input)
+    getline(cin, reason); // get the whole line including the spaces, because if we use cin, it will end at the space (which we don't want)
+    if(reason == "0") return;
+    if(regex_search(reason, disallowed)){
+        cout << "Reason cannot contain commas or any other special character besides: _ @ # &\n";
+        Sleep(1200);
+        return;
     }
 
     string fileContent, line;
     bool found = false;
 
-    while (getline(fileIn, line)) {
+    while (getline(readFile, line)) {
         stringstream ss(line); // create a string stream from the line
         string indexOne, indexTwo, indexThree, indexFour, indexFive, indexSix;
         // get a copy of each entries
@@ -704,9 +772,7 @@ int POSAdmin::updateInformation(string filename, string query, string type, stri
         getline(ss, indexThree, ','); // read the product category or password and save to variable indexThree
         getline(ss, indexFour, ','); // read the product subcategory or role and save to variable indexFour
         getline(ss, indexFive, ','); // get the product quantity and save to variable indexFive
-        if(type.find("product") != string::npos){ // if the type contains the word "product"
-            getline(ss, indexSix, ','); // get the product price and save to variable indexSix
-        }
+        getline(ss, indexSix, ','); // get the product price and save to variable indexSix
 
         // if-elseif has been used since switch case does not support strings in C++
         // modify the entry if it matches the query
@@ -724,8 +790,100 @@ int POSAdmin::updateInformation(string filename, string query, string type, stri
             } else if(type == "productCategory"){
                 indexThree = newValue; // update product category
             }
-            // account
-            else if(type == "accountUsername"){
+            found = true;
+        }
+        // write back to the file content
+        // create a copy of each line, then, modify the index that the user wants to change
+        fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "," + indexFive + "," + indexSix + "\n";
+        // we cannot use the variable line here since it still holds the old value, and this function's purpose is to update the value
+    }
+    readFile.close(); // close the file
+
+    if (!found) { // just a safety precaution, the above isAlreadyInCsv() should have caught this already
+        return; // query not found, will exit the function
+    } else {
+        ofstream fileOut(database);
+        if (!fileOut) {
+            cout << "Cannot write to file." << endl;
+            Sleep(1200);
+            return;
+        }
+
+        fileOut << fileContent;
+        fileOut.close();
+
+        // we will log EVERY action made by the manager or admin
+        if(type == "productName"){
+            saveLogs("products", "UPDATE", query + "_to_" + newValue, username, reason);
+        } else {
+            if(type == "productPrice"){
+                saveLogs("products", "UPDATE", query + "_Price_to_" + newValue, username, reason);
+            } else if(type == "productQuantity"){
+                saveLogs("products", "UPDATE", query + "_Quantity_to_" + newValue, username, reason);
+            } else if(type == "productSubCategory"){
+                saveLogs("products", "UPDATE", query + "_SubCategory_to_" + newValue, username, reason);
+            } else {
+                saveLogs("products", "UPDATE", query + "_to_" + newValue, username, reason);
+            }
+        }
+        cout << "Successfully updated product " << query << " with " << newValue << " as a new " << type << endl;
+    }
+    Sleep(1200);
+    return;
+}
+
+void POSAdmin::updateAccount(string database, string type, string username){
+    string query, newValue, reason;
+    ifstream readFile(database);
+    if(!readFile.is_open()){
+        cout << "Failed to open file\n";
+        Sleep(1200);
+        return;
+    }
+
+    cout << "What is the account username you want to update? (0 to go back): ";
+    cin >> query;
+    if(!isAlreadyInCsv(database, query)){
+        cout << "Account username '" << query << "' does not exist in the CSV.\n";
+        Sleep(1200);
+        return;
+    }
+
+    cout << "What is the new value you want to set? ";
+    cin >> newValue;
+    
+    if(regex_search(newValue, disallowed)){
+        cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+        Sleep(1200);
+        return;
+    }
+
+    cout << "What is the reason for the update? ";
+    cin.ignore(); // ignore previous user inputs
+    getline(cin, reason); // get the whole line including spaces 
+    if(regex_search(reason, disallowed)){
+        cout << "Reason cannot contain commas or any other special character besides: _ @ # &\n";
+        Sleep(1200);
+        return;
+    }
+
+    string fileContent, line;
+    bool found = false;
+
+    while (getline(readFile, line)) {
+        stringstream ss(line); // create a string stream from the line
+        string indexOne, indexTwo, indexThree, indexFour, indexFive, indexSix;
+        // get a copy of each entries
+        getline(ss, indexOne, ','); // read the id (not used) and save to variable indexOne
+        getline(ss, indexTwo, ','); // read the account username and save to variable indexTwo
+        getline(ss, indexThree, ','); // read the account password and save to variable indexThree
+        getline(ss, indexFour, ','); // read the account role and save to variable indexFour
+
+        // if-elseif has been used since switch case does not support strings in C++
+        // modify the entry if it matches the query
+        if (indexTwo == query) {
+            // update the corresponding field
+            if(type == "accountUsername"){
                 indexTwo = newValue; // update account username 
             } else if(type == "accountPassword"){
                 indexThree = newValue; // update account password
@@ -736,52 +894,34 @@ int POSAdmin::updateInformation(string filename, string query, string type, stri
         }
         // write back to the file content
         // create a copy of each line, then, modify the index that the user wants to change
-        if(type.find("product") != string::npos){
-            fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "," + indexFive + "," + indexSix + "\n";
-        } else { // account
-            fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "\n";
-        }
+        fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "\n";
         // we cannot use the variable line here since it still holds the old value, and this function's purpose is to update the value
     }
-    fileIn.close(); // close the file
+    readFile.close(); // close the file
 
     if (!found) {
-        return 0; // query not found, will exit the function
+        return; // query not found, will exit the function
     } else {
-        ofstream fileOut(filename);
+        ofstream fileOut(database);
         if (!fileOut) {
-            cout << "Cannot write to file " << filename << endl;
+            cout << "Cannot write to file " << database << endl;
+            Sleep(1200);
+            return;
         }
 
         fileOut << fileContent;
         fileOut.close();
 
         // we will log EVERY action made by the manager or admin
-        if(type.find("account") != string::npos){ // check if the type contains the word "account"
-            // string::npos is a very large number representing "not found"
-            // If the substring is not found, it returns the special value string::npos
-            if(type == "accountPassword"){
-                saveLogs("accounts", "UPDATE", query + "_PW_to_" + newValue, username, reason);
-            } else {
-                saveLogs("accounts", "UPDATE", query + "_to_" + newValue, username, reason);
-            }
-        } else if(type.find("product") != string::npos){ // check if the type contains the word "product"
-            if(type == "productName"){
-                saveLogs("products", "UPDATE", query + "_to_" + newValue, username, reason);
-            } else {
-                if(type == "productPrice"){
-                    saveLogs("products", "UPDATE", query + "_Price_to_" + newValue, username, reason);
-                } else if(type == "productQuantity"){
-                    saveLogs("products", "UPDATE", query + "_Quantity_to_" + newValue, username, reason);
-                } else if(type == "productSubCategory"){
-                    saveLogs("products", "UPDATE", query + "_SubCategory_to_" + newValue, username, reason);
-                } else {
-                    saveLogs("products", "UPDATE", query + "_to_" + newValue, username, reason);
-                }
-            }
+        if(type == "accountPassword"){
+            saveLogs("accounts", "UPDATE", query + "_PW_to_" + newValue, username, reason);
+        } else {
+            saveLogs("accounts", "UPDATE", query + "_to_" + newValue, username, reason);
         }
-        return 1;
+        cout << "Successfully updated account " << query << " with " << newValue << " as a new " << type << endl;
     }
+    Sleep(1200);
+    return;
 }
 
 void POSAdmin::updateDiscounts(string username) {
@@ -856,129 +996,6 @@ void POSAdmin::updateDiscounts(string username) {
     cout << "Successfully updated discount for " << category << " to " << discountPercentage << "%.\n";
     saveLogs("products", "UPDATE", category + "_Discount_to_" + to_string(discountPercentage), username, "Discount_Updated");
     Sleep(1200);
-}
-
-void POSAdmin::updateProductFields(string type, string database, string field, string username){
-    system("cls"); // clear the console
-
-    cout << "---------------------------------" << endl;
-    cout << "Update " + type + " " + field << endl;
-    cout << "---------------------------------" << endl;
-    string originalInputName;
-
-    cout << "Enter the " + type + " name (type 0 to go back): ";
-    cin >> originalInputName;
-
-    // just somehow if the user decides to change his mind
-    if(originalInputName == "0") return;
-
-    if(regex_search(originalInputName, disallowed)){
-        cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
-        Sleep(1200);
-        return;
-    }
-    string newInputField;
-
-    // validate first if the query exists in the database
-    ifstream file(database);
-    string line;
-    bool found = false;
-    while (getline(file, line)) { // reads the file and saves the output in the variable "line"
-        stringstream ss(line); // create a string stream from the line
-        // stringstream helps us read a string as if it were a stream (like cin)
-        // stream are the foundation of i/o operations in C++
-        string token;
-        getline(ss, token, ',');     // first read the id (not used) | the third parameter is the delimiter
-        getline(ss, token, ',');     // second read the username or product name | the value of the second getline is saved in the variable "token"
-        if(token == originalInputName){
-            found = true;
-            break;
-        }
-    }
-    file.close();
-
-    if (!found) {
-        cout << "The product " + type + " was not found.\n";
-        Sleep(1200);
-        return;
-    } else {
-        cout << "Enter the new " + type + " " + field + " (0 to go back): ";
-        cin >> newInputField;
-
-        if (newInputField == "0") return;
-
-        // error handling for different fields
-        if(field == "name" || field == "subCategory" || field == "username" || field == "password" || field == "role"){
-            if(regex_search(newInputField, disallowed)){
-                cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
-                Sleep(1200);
-                return;
-            } else if(field == "name" && isAlreadyInCsv(database, newInputField)){
-                cout << "Product name '" << newInputField << "' is already in the CSV.\n";
-                Sleep(1200);
-                return;
-            } else if(field == "username" && isAlreadyInCsv(database, newInputField)){
-                cout << "Username '" << newInputField << "' is already in the database!\n";
-                Sleep(1200);
-                return;
-            }
-        } else if(field == "price" || field == "quantity"){
-            // make sure that the new input is a valid integer
-            // note that the function handleInputError() will only work for INTEGERS entered via cin
-            try {
-                int value = stoi(newInputField);
-                if(value < 0){
-                    cout << "The " + field + " cannot be negative.\n";
-                    Sleep(1200);
-                    return;
-                }
-            } catch (invalid_argument&) {
-                cout << "Invalid input, please enter a valid integer for " + field + ".\n";
-                Sleep(1200);
-                return;
-            } catch (out_of_range&) {
-                cout << "The number entered is out of range for " + field + ".\n";
-                Sleep(1200);
-                return;
-            }
-        } 
-        field[0] = toupper(field[0]); // capitalize the first letter of the field, if it wasn't capitalized
-
-        // ask the user for the reason for updating the entry
-        cout << "Please provide a reason for updating the " + type + " " + field
-                << " (e.g., 'Correcting_Price', 'Updating_Quantity', etc. And make sure to use underscores instead of spaces): ";
-        string reason;
-
-        // Clear the input buffer to remove any leftover newline characters from previous 'cin' operations.
-        cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
-        // cin.ignore already ignores the previous inputs
-        // but, we are also telling it to remove to delete a large number of characters until it finds a newline character
-        // \n is the delimiter, it means that it will end if it finds the end of the line
-        // it considers the key enter as \n
-
-        // Read the entire line, including spaces.
-        getline(cin, reason);
-
-        // getline can be used for reading any input stream, including standard input (cin) and file streams (ifstream, ofstream).
-
-        if(reason.empty()){
-            cout << "Reason cannot be empty.\n";
-            Sleep(1200);
-            return;
-        } else if(regex_search(reason, disallowed)){
-            cout << "Invalid reason, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
-            Sleep(1200);
-            return;
-        }
-
-        if(updateInformation(database, originalInputName, type + field, newInputField, username, reason) == 1){ // since I am only using this function one time inside this function
-            cout << "Updated successfully.\n";
-        } else {
-            cout << "The product " + type + " was not found.\n";
-        }
-        Sleep(1200);
-        return;
-    }
 }
 
 // DELETE

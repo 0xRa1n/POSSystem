@@ -24,6 +24,8 @@ public:
 
     // UPDATE
     int updateInformation(string filename, string query, string type, string newValue, string username, string reason);
+    void updateProduct(string filename, string type, string username);
+    void updateAccount(string filename, string type, string username);
     void updateProductFields(string type, string database, string field, string username);
     void updateDiscounts(string username);
 
