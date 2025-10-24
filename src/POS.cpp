@@ -248,13 +248,13 @@ void PointOfSale::adminMenu(string username) {
                     }
                 }
                 // this serves as an exit point for the second while loop
-                endInventoryLoop: ; // since this is empty
-                break; // it will just break, returning to the main menu
+                endInventoryLoop: ; // it will execute this, but will do nothing
+                break; // afterwards, it will break the first while loop's switch case
             }
             case 2: {
                 while(true){
                     system("cls");
-                    string monitoringMenu[] = {"View all products", "View today's sales", "View total sales", "Go back"};
+                    string monitoringMenu[] = {"View all products", "View sales", "Go back"};
                     int monitoringSelection = showMenu("Monitoring", monitoringMenu);
                     system("cls");
 
@@ -266,27 +266,60 @@ void PointOfSale::adminMenu(string username) {
                             system("pause");
                             break;
                         case 2:
-                            showHeader("View today's sales");
-                            admin.getTodaysSales("database/transactions/cashierTransactions.csv");
+                            while(true){
+                                system("cls");
+                                string salesMenu[] = {"View daily sales", "View monthly sales", "View yearly sales", "View total sales", "Go back"};
+                                int salesSelection = showMenu("View Sales", salesMenu);
+                                system("cls");
 
-                            system("pause");
+                                if(salesSelection == 5) break; // go back to monitoring menu
+
+                                switch(salesSelection){
+                                    case 1:
+                                        showHeader("View daily sales");
+                                        admin.getDailySales("database/transactions/cashierTransactions.csv");
+                                        cout << "\n";
+
+                                        system("pause");
+                                        break;
+                                    case 2:
+                                        showHeader("View monthly sales");
+                                        admin.getMonthlySales("database/transactions/cashierTransactions.csv");
+                                        cout << "\n";
+
+                                        system("pause");
+                                        break;
+                                    case 3:
+                                        showHeader("View yearly sales");
+                                        admin.getYearlySales("database/transactions/cashierTransactions.csv");
+                                        cout << "\n";
+
+                                        system("pause");
+                                        break;
+                                    case 4:
+                                        showHeader("View total sales");
+                                        admin.getTotalSales("database/transactions/cashierTransactions.csv");
+                                        cout << "\n";
+
+                                        system("pause");
+                                        break;
+                                    default:
+                                        cout << "Invalid option\n";
+                                        Sleep(1200);
+                                        break;
+                                }
+                            }
                             break;
                         case 3:
-                            showHeader("View total sales");
-                            admin.getTotalSales("database/transactions/cashierTransactions.csv");
-
-                            system("pause");
-                            break;
-                        case 4:
                             // go back to the previous menu
-                            goto endMonitoringLoop; // it will break the current loop and go to the endMonitoringLoop label, because it is empty, it will just resort to the loop above it
+                            goto endMonitoringLoop; 
                         default:
                             cout << "Invalid option\n";
                             Sleep(1200);
                             break;
                     }
                 }
-                endMonitoringLoop: ;
+                endMonitoringLoop: ; // this is a label, it is still executed but nothing happens, after that, it will execute the break keyword
                 break;
             }
             case 3:
@@ -444,7 +477,7 @@ void PointOfSale::managerMenu(string username) {
             case 2: {
                 while(true){
                     system("cls");
-                    string monitoringMenu[] = {"View all products", "View today's sales", "View total sales", "Go back"};
+                    string monitoringMenu[] = {"View all products", "View today's sales","Go back"};
                     int monitoringSelection = showMenu("Monitoring", monitoringMenu);
                     system("cls");
 
@@ -456,20 +489,53 @@ void PointOfSale::managerMenu(string username) {
                             system("pause");
                             break;
                         case 2:
-                            showHeader("View today's sales");
-                            admin.getTodaysSales("database/transactions/cashierTransactions.csv");
+                            while(true){
+                                system("cls");
+                                string salesMenu[] = {"View daily sales", "View monthly sales", "View yearly sales", "View total sales", "Go back"};
+                                int salesSelection = showMenu("View Sales", salesMenu);
+                                system("cls");
 
-                            system("pause");
+                                if(salesSelection == 5) break; // go back to monitoring menu
+
+                                switch(salesSelection){
+                                    case 1:
+                                        showHeader("View daily sales");
+                                        admin.getDailySales("database/transactions/cashierTransactions.csv");
+                                        cout << "\n";
+
+                                        system("pause");
+                                        break;
+                                    case 2:
+                                        showHeader("View monthly sales");
+                                        admin.getMonthlySales("database/transactions/cashierTransactions.csv");
+                                        cout << "\n";
+
+                                        system("pause");
+                                        break;
+                                    case 3:
+                                        showHeader("View yearly sales");
+                                        admin.getYearlySales("database/transactions/cashierTransactions.csv");
+                                        cout << "\n";
+
+                                        system("pause");
+                                        break;
+                                    case 4:
+                                        showHeader("View total sales");
+                                        admin.getTotalSales("database/transactions/cashierTransactions.csv");
+                                        cout << "\n";
+
+                                        system("pause");
+                                        break;
+                                    default:
+                                        cout << "Invalid option\n";
+                                        Sleep(1200);
+                                        break;
+                                }
+                            }
                             break;
                         case 3:
-                            showHeader("View total sales");
-                            admin.getTotalSales("database/transactions/cashierTransactions.csv");
-
-                            system("pause");
-                            break;
-                        case 4:
                             // go back to the previous menu
-                            goto endMonitoringLoop; // it will break the current loop and go to the endMonitoringLoop label, because it is empty, it will just resort to the loop above it
+                            goto endMonitoringLoop; 
                         default:
                             cout << "Invalid option\n";
                             Sleep(1200);

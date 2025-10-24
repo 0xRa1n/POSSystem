@@ -14,8 +14,10 @@ public:
 
     // READ
     void readProducts(string database);
+    void getDailySales(string database);
     void getTotalSales(string database);
-    void getTodaysSales(string database);
+    void getMonthlySales(string database);
+    void getYearlySales(string database);
     void getAllAccounts(string database);
     void getAllLogs(string type);
     void readBackupTransactions(string database);

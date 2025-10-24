@@ -434,36 +434,7 @@ void POSAdmin::getAllAccounts(string database) {
     }
 }
 
-void POSAdmin::getTotalSales(string database){
-    string line;
-    int totalSales = 0;
-    // open the file
-    ifstream file(database);
-
-    // check if file exists
-    if(!file.is_open()){
-        cout << "Failed to open file\n";
-        return;
-    }
-
-    // loop through each line and get the amount
-    getline(file, line); // skip the header of the csv
-    while(getline(file, line)){
-        stringstream ss(line); // create a string stream, making us read the line as if it were a stream
-        string token;
-        // skip the first three tokens
-        getline(ss, token, ','); // skip id
-        getline(ss, token, ','); // skip product names
-        getline(ss, token, ','); // skip product quantities
-        getline(ss, token, ','); // get the amount
-        totalSales += stoi(token); // convert to integer and add to total sales
-    }
-    file.close();
-
-    cout << "Total Sales: P" << totalSales << endl;
-}
-
-void POSAdmin::getTodaysSales(string database){
+void POSAdmin::getDailySales(string database){
     // we should first read the csv, then get the current date and the date from the csv. Then, starting there, get the amount
     string line;
     int todaysSales = 0;
@@ -472,11 +443,14 @@ void POSAdmin::getTodaysSales(string database){
     ifstream file(database);
 
     // get the current date
-    time_t timestamp = time(NULL);
-    struct tm datetime = *localtime(&timestamp);
+    time_t timestamp = time(NULL); // set the time as null so that it will return the current timestamp
+    struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *, and we used ampersand inside the argument to get the address pointer of the timestamp variable, as it is expecting an address
     char date[50]; // since it points to a char array
-    strftime(date, 50, "%m_%d_%y", &datetime);
-    string currentDate(date);
+    strftime(date, 50, "%m_%d_%y", &datetime); // format the date as mm_dd_yy
+    string currentDate(date); // we need to convert it from char array to string for easier comparison later
+    // if you would notice, in the POSCashier, we used the same format for the date when saving transactions
+    // we do not have to do this conversion in POSCashier.cpp because we are not comparing dates there
+    // because, when we compare, we check for the address of the char array, which is not correct, so we convert it to string here
     
     // check if file exists
     if(!file.is_open()){
@@ -504,6 +478,145 @@ void POSAdmin::getTodaysSales(string database){
     }
     file.close();
     cout << "Today's Sales: P" << todaysSales << endl;
+}
+
+void POSAdmin::getMonthlySales(string database){
+    // we should first read the csv, then get the current date and the date from the csv. Then, starting there, get the amount
+    string line;
+    int monthlySales = 0;
+
+    // open the file
+    ifstream file(database);
+
+    // get the current date
+    time_t timestamp = time(NULL); // set the time as null so that it will return the current timestamp
+    struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *, and we used ampersand inside the argument to get the address pointer of the timestamp variable, as it is expecting an address
+    char monthChar[10], yearChar[10]; // since it points to a char array
+    strftime(monthChar, 10, "%m", &datetime); // format the date as mm
+    strftime(yearChar, 10, "%y", &datetime); // format the date as yy
+    string currentMonth(monthChar); // we need to convert it from char array to string for easier comparison later
+    string currentYear(yearChar); // we need to convert it from char array to string for easier comparison later
+
+    // if you would notice, in the POSCashier, we used the same format for the date when saving transactions
+    // we do not have to do this conversion in POSCashier.cpp because we are not comparing dates there
+    // because, when we compare, we check for the address of the char array, which is not correct, so we convert it to string here
+    
+    // check if file exists
+    if(!file.is_open()){
+        cout << "Failed to open file\n";
+        return;
+    }
+
+    // loop through each line and get the amount
+    getline(file, line); // skip the header of the csv
+    while(getline(file, line)){
+        stringstream ss(line); // create a string stream, making us read the line as if it were a stream
+        string token;
+        // skip the first four tokens
+        getline(ss, token, ','); // skip id
+        getline(ss, token, ','); // skip product names
+        getline(ss, token, ','); // skip product quantities
+        getline(ss, token, ','); // skip product amt (not including tax)
+        getline(ss, token, ','); // skip the tax amount
+        getline(ss, token, ','); // get the amount (including tax)
+        string amount = token;
+        getline(ss, token, ','); // skip the change
+        getline(ss, token, ','); // get the date
+        string transactionDate = token;
+
+        string transactionMonth = transactionDate.substr(0,2); // get the first two characters of the transaction date (which is the month)
+        string transactionYear = transactionDate.substr(6,2); // get the last two characters of the transaction date (which is the year)
+
+        // if(transactionDate.substr(0,2) == currentDate){ // get the first two characters of the transaction date (which is the month)
+        //     monthlySales += stoi(amount); // convert to integer and add to monthly sales
+        // }
+        if(transactionMonth == currentMonth && transactionYear == currentYear){
+            monthlySales += stoi(amount); // convert to integer and add to monthly sales
+        }
+    }
+    file.close();
+    cout << "Monthly Sales: P" << setprecision(2) << fixed << monthlySales << endl;
+}
+
+void POSAdmin::getYearlySales(string database){
+    // we should first read the csv, then get the current date and the date from the csv. Then, starting there, get the amount
+    string line;
+    int yearlySales = 0;
+
+    // open the file
+    ifstream file(database);
+
+    // get the current date
+    time_t timestamp = time(NULL); // set the time as null so that it will return the current timestamp
+    struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *, and we used ampersand inside the argument to get the address pointer of the timestamp variable, as it is expecting an address
+    char date[10]; // since it points to a char array
+    strftime(date, 10, "%y", &datetime); // format the date as mm
+    string currentDate(date); // we need to convert it from char array to string for easier comparison later
+    // if you would notice, in the POSCashier, we used the same format for the date when saving transactions
+    // we do not have to do this conversion in POSCashier.cpp because we are not comparing dates there
+    // because, when we compare, we check for the address of the char array, which is not correct, so we convert it to string here
+    
+    // check if file exists
+    if(!file.is_open()){
+        cout << "Failed to open file\n";
+        return;
+    }
+
+    // loop through each line and get the amount
+    getline(file, line); // skip the header of the csv
+    while(getline(file, line)){
+        stringstream ss(line); // create a string stream, making us read the line as if it were a stream
+        string token;
+        getline(ss, token, ','); // skip id
+        getline(ss, token, ','); // skip product names
+        getline(ss, token, ','); // skip product quantities
+        getline(ss, token, ','); // skip product amt (not including tax)
+        getline(ss, token, ','); // skip the tax amount
+        getline(ss, token, ','); // get the amount (including tax)
+        string amount = token;
+        getline(ss, token, ','); // skip the change
+        getline(ss, token, ','); // get the date
+        string transactionDate = token;
+
+        // the year starts at the 6th index and has a length of 2 (e.g. 25 for 2025)
+        // so, we have to pass 6 as the starting index and 2 as the length
+        if(transactionDate.substr(6,2) == currentDate){ // only get the year (e.g. 25 for 2025)
+            yearlySales += stoi(amount); // convert to integer and add to yearly sales
+        }
+    }
+    file.close();
+    cout << "Yearly Sales: P" << setprecision(2) << fixed << yearlySales << endl;
+}
+
+void POSAdmin::getTotalSales(string database){
+    string line;
+    int totalSales = 0;
+    // open the file
+    ifstream file(database);
+
+    // check if file exists
+    if(!file.is_open()){
+        cout << "Failed to open file\n";
+        return;
+    }
+
+    // loop through each line and get the amount
+    getline(file, line); // skip the header of the csv
+    while(getline(file, line)){
+        stringstream ss(line); // create a string stream, making us read the line as if it were a stream
+        string token;
+        // skip the first three tokens
+        getline(ss, token, ','); // skip id
+        getline(ss, token, ','); // skip product names
+        getline(ss, token, ','); // skip product quantities
+        getline(ss, token, ','); // skip product amt (not including tax)
+        getline(ss, token, ','); // skip the tax amount
+        getline(ss, token, ','); // get the amount (including tax)
+        totalSales += stoi(token); // convert to integer and add to total sales
+    }
+    file.close();
+
+    cout << "Total Sales: P" << setprecision(2) << fixed << totalSales<< endl;
 }
 
 void POSAdmin::getAllLogs(string type){
