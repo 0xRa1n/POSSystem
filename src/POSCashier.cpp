@@ -126,8 +126,13 @@ bool POSCashier::viewCart(string username){ // view cart is also bool since if t
     return false; // just to satisfy the compiler, this line will never be reached
 }
 
-void POSCashier::saveTransaction(string productNames, string productQuantities, double initialAmount, double totalAmount, double change, string cashierName){
-    string database = "database/transactions/cashierTransactions.csv";
+void POSCashier::saveTransaction(string productNames, string productQuantities, double initialAmount, double totalAmount, double change, string cashierName, string paymentMethod, int referenceID){
+    string database;
+    if(paymentMethod == "GCash"){
+        database = "database/transactions/gcash_cashierTransactions.csv";
+    } else if(paymentMethod == "Cash"){
+        database = "database/transactions/cash_cashierTransactions.csv";
+    }
     // get the current date and time
     time_t timestamp = time(NULL);
     struct tm datetime = *localtime(&timestamp);        
@@ -162,20 +167,40 @@ void POSCashier::saveTransaction(string productNames, string productQuantities, 
         return;
     }
 
+    // now, check if the paymentMethod is Cash or GCash
+    if(paymentMethod == "Cash"){
     // write the transaction details to the file
-    fout << newId << ","
-            << productNames << ","
-            << productQuantities << ","
-            << setprecision(2) << fixed << initialAmount << ","
-            << setprecision(2) << fixed << initialAmount * 0.12 << ","
-            << setprecision(2) << fixed << totalAmount << ","
-            << setprecision(2) << fixed << change << ","
-            << date << ","
-            << time << ","
-            << cashierName << endl;
-
-    fout.close(); // close the file
-    // if not closed, it may lead to data loss or corruption if the program ends unexpectedly
+        fout << newId << ","
+                << productNames << ","
+                << productQuantities << ","
+                << setprecision(2) << fixed << initialAmount << ","
+                << setprecision(2) << fixed << initialAmount * 0.12 << ","
+                << setprecision(2) << fixed << totalAmount << ","
+                << setprecision(2) << fixed << change << ","
+                << date << ","
+                << time << ","
+                << cashierName << endl;
+        fout.close(); // close the file
+        // if not closed, it may lead to data loss or corruption if the program ends unexpectedly
+    } else if(paymentMethod == "GCash"){
+        fout << newId << ","
+                << productNames << ","
+                << productQuantities << ","
+                << setprecision(2) << fixed << initialAmount << ","
+                << setprecision(2) << fixed << initialAmount * 0.12 << ","
+                << setprecision(2) << fixed << totalAmount << ","
+                << setprecision(2) << fixed << change << ","
+                << referenceID << ","
+                << date << ","
+                << time << ","
+                << cashierName << endl;
+        fout.close(); // close the file
+        // if not closed, it may lead to data loss or corruption if the program ends unexpectedly
+    } else {
+        cout << "Invalid payment method." << endl;
+        Sleep(1000);
+        return;
+    }
 }
 
 // CRUD-Related Functions
@@ -186,7 +211,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
         Sleep(1200);
         return false;
     }
-
+ 
     // get the current date and time
     time_t timestamp = time(NULL);
     struct tm datetime = *localtime(&timestamp);        
@@ -303,111 +328,144 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     if(handleInputError()) return false; // handle invalid inputs
 
     int change;
+    string paymentMethod;
     switch(confirmation){
         case 1: {
-            cout << "Enter the customer's money: ";
-            cin >> userMoney;
+            int referenceID;
+            stringstream namesStream, quantitiesStream;
+            for(int i = 0; i < cart.size(); i++){
+                namesStream << cart[i][0]; // append the product name to the stream
+                quantitiesStream << cart[i][2]; // append the product quantity to the stream
+            }
 
-            if(handleInputError()) return false; // handle invalid inputs
+            cout << "Enter the payment method (Cash/GCash): ";
+            cin >> paymentMethod;
 
-            change = userMoney - finalAmountDue;
+            if(paymentMethod != "Cash" && paymentMethod != "GCash"){ // this will check if the inputs are both NOT Cash or GCASH
+                // if we were to use OR (||), it would always be true since the first condition would always be true for one of the options
+                cout << "Invalid payment method. Please enter Cash or GCash only.\n";
+                Sleep(1200);
+                return false;
+            }
 
-            // check if the user has sufficient money
-            if(userMoney < finalAmountDue){
-                int confirmation;
-                cout << "Insufficient money. Try again? (1/0): ";
-                cin >> confirmation;
+            if(paymentMethod == "GCash"){
+                paymentMethod = "GCash";
+
+                cout << "Enter the money received from the customer: ";
+                cin >> userMoney;
+                if(handleInputError()) return false; // handle invalid inputs
+                change = userMoney - finalAmountDue;
+
+                cout << "Enter the reference id: ";
+                cin >> referenceID;
+                if(handleInputError()) return false; // handle invalid inputs
+                
+                saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, change, username, "GCash", referenceID);
+            } else if(paymentMethod == "Cash"){
+                paymentMethod = "Cash";
+
+                cout << "Enter the customer's money: ";
+                cin >> userMoney;
 
                 if(handleInputError()) return false; // handle invalid inputs
 
-                switch(confirmation){
-                    case 1:
-                        return processTransaction(username);
-                    case 0:
-                        // clear the cart after cancelling the transaction
-                        cart.clear();
+                change = userMoney - finalAmountDue;
 
-                        cout << "Transaction cancelled.\n";
-                        Sleep(1200);
-                        return true;
-                    default:
-                        cout << "Invalid selection.\n"; // fallback, but should not reach here
-                        Sleep(1200);
-                        return true;
-                }
-            } else {
-                // we need these for two purposes: backup and main transaction logging
-                // pass the vector of product names and quantities to a single string, separated by semicolons
-                stringstream namesStream, quantitiesStream;
-                for(int i = 0; i < cart.size(); i++){ // iterate through the cart
-                    namesStream << cart[i][0]; // append the product name to the stream
-                    quantitiesStream << cart[i][2]; // append the product quantity to the stream
-                    if(i < cart.size() - 1){ // append semicolon everywhere except the last item
-                        namesStream << ";";
-                        quantitiesStream << ";";
+                // check if the user has sufficient money
+                if(userMoney < finalAmountDue){
+                    int confirmation;
+                    cout << "Insufficient money. Try again? (1/0): ";
+                    cin >> confirmation;
+
+                    if(handleInputError()) return false; // handle invalid inputs
+
+                    switch(confirmation){
+                        case 1:
+                            return processTransaction(username);
+                        case 0:
+                            // clear the cart after cancelling the transaction
+                            cart.clear();
+
+                            cout << "Transaction cancelled.\n";
+                            Sleep(1200);
+                            return true;
+                        default:
+                            cout << "Invalid selection.\n"; // fallback, but should not reach here
+                            Sleep(1200);
+                            return true;
                     }
-                }
-
-                // power outtage might happen here after the user had paid, so we need to have a backup that will log the transaction even if the program crashes
-                // in this manner, if the power outtage happens right after the user had paid, we can still recover the transaction from the backup file
-
-                ofstream backupFile("database/transactions/backup.csv", ios::app); // open in append mode
-                if (!backupFile) {
-                    cerr << "Error opening backup file for writing." << endl;
-                    return false;
-                }
-                
-                // to do: add quantity
-                backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,Date,Time,Cashier\n" 
-                            << namesStream.str() << ","
-                            << quantitiesStream.str() << ","
-                            << setprecision(2) << fixed << rawPrice << ","
-                            << setprecision(2) << fixed << discountAmount << ","
-                            << setprecision(2) << fixed << vatAmount << ","
-                            << setprecision(2) << fixed << finalAmountDue << ","
-                            << setprecision(2) << fixed << userMoney << ","
-                            << setprecision(2) << fixed << change << ","
-                            << date << ","
-                            << time << ","
-                            << username << "\n";
-                            
-                backupFile.close();
-
-                // first, find the product in the database, then, update the quantity using the function updateInformation
-                const string productsDatabase = "database/products.csv";
-                // get the value of the quantity from the database, then, subtract it with the quantity purchased
-                ifstream fileIn(productsDatabase);
-                
-                string fileContent, line;
-                while(getline(fileIn, line)){
-                    stringstream ss(line);
-                    string productName, productQuantity, token;
-                    getline(ss, token, ',');
-                    getline(ss, productName, ','); // get the product name
-                    getline(ss, token, ','); // skip the sub-category
-                    getline(ss, token, ','); // skip the category
-                    getline(ss, productQuantity, ','); // get the quantity
-
-                    // since there are multiple products, we need to loop through the vector of product names
+                } else {
+                    // we need these for two purposes: backup and main transaction logging
+                    // pass the vector of product names and quantities to a single string, separated by semicolons
                     for(int i = 0; i < cart.size(); i++){ // iterate through the cart
-                        if(productName == cart[i][0]){
-                            int updatedQuantity = stoi(productQuantity) - stoi(cart[i][2]); // subtract the quantity purchased | stoi means string to integer
-                            // update the quantity in the database
-                            // admin.updateInformation(productsDatabase, productName, "productQuantity", to_string(updatedQuantity), username, "Purchased_Quantity_Deducted"); // use the previous function to update the quantity | we used to_string since we are not only using the function for products
-                            // admin.updateProduct(productsDatabase, "quantity", username); // log the update to productsLogs.csv
-                            deductPurchasedQuantities(productsDatabase, productName, username, cart[i][2]);
+                        if(i < cart.size() - 1){ // append semicolon everywhere except the last item
+                            namesStream << ";";
+                            quantitiesStream << ";";
                         }
                     }
+
+                    // power outtage might happen here after the user had paid, so we need to have a backup that will log the transaction even if the program crashes
+                    // in this manner, if the power outtage happens right after the user had paid, we can still recover the transaction from the backup file
+
+                    ofstream backupFile("database/transactions/backup.csv", ios::app); // open in append mode
+                    if (!backupFile) {
+                        cerr << "Error opening backup file for writing." << endl;
+                        return false;
+                    }
+                    
+                    // to do: add quantity
+                    backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,PaymentMethod,Date,Time,Cashier\n" 
+                                << namesStream.str() << ","
+                                << quantitiesStream.str() << ","
+                                << setprecision(2) << fixed << rawPrice << ","
+                                << setprecision(2) << fixed << discountAmount << ","
+                                << setprecision(2) << fixed << vatAmount << ","
+                                << setprecision(2) << fixed << finalAmountDue << ","
+                                << setprecision(2) << fixed << userMoney << ","
+                                << setprecision(2) << fixed << change << ","
+                                << "Cash" << ","
+                                << date << ","
+                                << time << ","
+                                << username << "\n";
+                                
+                    backupFile.close();
+
+                    // first, find the product in the database, then, update the quantity using the function updateInformation
+                    const string productsDatabase = "database/products.csv";
+                    // get the value of the quantity from the database, then, subtract it with the quantity purchased
+                    ifstream fileIn(productsDatabase);
+                    
+                    string fileContent, line;
+                    while(getline(fileIn, line)){
+                        stringstream ss(line);
+                        string productName, productQuantity, token;
+                        getline(ss, token, ',');
+                        getline(ss, productName, ','); // get the product name
+                        getline(ss, token, ','); // skip the sub-category
+                        getline(ss, token, ','); // skip the category
+                        getline(ss, productQuantity, ','); // get the quantity
+
+                        // since there are multiple products, we need to loop through the vector of product names
+                        for(int i = 0; i < cart.size(); i++){ // iterate through the cart
+                            if(productName == cart[i][0]){
+                                int updatedQuantity = stoi(productQuantity) - stoi(cart[i][2]); // subtract the quantity purchased | stoi means string to integer
+                                // update the quantity in the database
+                                // admin.updateInformation(productsDatabase, productName, "productQuantity", to_string(updatedQuantity), username, "Purchased_Quantity_Deducted"); // use the previous function to update the quantity | we used to_string since we are not only using the function for products
+                                // admin.updateProduct(productsDatabase, "quantity", username); // log the update to productsLogs.csv
+                                deductPurchasedQuantities(productsDatabase, productName, username, cart[i][2]);
+                            }
+                        }
+                    }
+                    
+                    // save the transaction to the main database
+                    saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, change, username, "Cash");
+
+                    // remove the backup file after saving the transaction to the main database
+                    remove("database/transactions/backup.csv");
+
+                    cout << "Change: " << change << endl;
                 }
-                
-                // save the transaction to the main database
-                saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, change, username);
-
-                // remove the backup file after saving the transaction to the main database
-                remove("database/transactions/backup.csv");
-
-                cout << "Change: " << change << endl;
-            }
+            } 
             system("pause");
         }
         break;
@@ -462,11 +520,13 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     }
     cout << "\n\n";
 
-    cout << "Total Amount: P" << setprecision(2) << fixed << rawPrice << endl;
-    cout << "Discounts Applied: P" << setprecision(2) << fixed << discountAmount << endl;
+    cout << "Money tendered: P" << setprecision(2) << fixed << userMoney << endl;
+    cout << "Less: Discounts: P" << setprecision(2) << fixed << discountAmount << endl;
 
+    cout << "Total before VAT: P" << setprecision(2) << fixed << discountedTotal << endl;
     cout << "VAT (12%): P" << setprecision(2) << fixed << vatAmount << endl;
     cout << "Amount Due: P" << setprecision(2) << fixed << finalAmountDue << endl;
+    cout << "Payment Method: " << paymentMethod << endl;
     cout << "Change: P" << setprecision(2) << fixed << change << endl;
 
     cout << "\n";

@@ -50,3 +50,7 @@ UPDATE,Striped_Polo_Quantity_to_1,10_24_25,11:29:06_PM,cashier,Purchased_Quantit
 ADD,TestProducTwelve,10_25_25,10:56:35_AM,admin,New_Product_Added
 DELETE,NewProduct,10_25_25,10:56:44_AM,admin,Product_Deleted
 DELETE,TestProducTwelve,10_25_25,10:56:50_AM,admin,Product_Deleted
+UPDATE,Baggy_Jeans_Quantity_to_3,10_25_25,12:40:00_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Plain_Oversized_Tee_Quantity_to_1,10_25_25,12:42:42_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_1,10_25_25,12:48:34_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Shoulder_Bag_Quantity_to_1,10_25_25,01:10:47_PM,cashier,Purchased_Quantity_Deducted

@@ -5,7 +5,6 @@
 #include <cctype> // for toupper() and tolower()
 #include <sstream> // for stringstream
 #include <cstdlib> // for exit()
-#include <windows.h> // for Sleep() and system("cls")
 #include <algorithm> // used for find
 #include <regex> // for regex
 #include <fstream> // for fstream, ifstream

@@ -8,7 +8,7 @@ public:
     // we declare all member functions of POSCashier here (the ones that will be defined in POSCashier.cpp)
 
     // CREATE
-    void saveTransaction(string productNames, string productQuantities, double initialAmount, double totalAmount, double change, string cashierName);
+    void saveTransaction(string productNames, string productQuantities, double initialAmount, double totalAmount, double change, string cashierName, string paymentMethod, int referenceID = 0);
     bool processTransaction(string username);
 
     // READ

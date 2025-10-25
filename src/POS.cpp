@@ -14,10 +14,8 @@ using namespace std;
 
 bool PointOfSale::login(string username, string password, string& outRole) {
     const string userAccounts = "database/userAccounts.csv";
-    // open the userAccounts database
     ifstream file(userAccounts);
     
-    // check if the file exists
     if (!file.is_open()) {
         cerr << "Could not open file " << userAccounts << endl;
         return false;
@@ -27,16 +25,16 @@ bool PointOfSale::login(string username, string password, string& outRole) {
     getline(file, line); // skip header
 
     while (getline(file, line)) {
-        stringstream readFromLine(line); // create a string stream from the line || readFromLine is a variable
-        string id, username, password, role;
+        stringstream readFromLine(line);
+        string file_id, file_username, file_password, file_role;
 
-        getline(readFromLine, id, ',');       // Reads until ',' and puts "1" into id
-        getline(readFromLine, username, ','); // Reads until ',' and puts "Sam" into username
-        getline(readFromLine, password, ','); // Reads until ',' and puts "password123" into password
-        getline(readFromLine, role);         // Reads the rest and puts "Admin" into role
+        getline(readFromLine, file_id, ',');
+        getline(readFromLine, file_username, ',');
+        getline(readFromLine, file_password, ',');
+        getline(readFromLine, file_role);
 
-        if (username == username && password == password) {
-            outRole = role;
+        if (file_username == username && file_password == password) {
+            outRole = file_role;
             file.close();
             return true;
         }

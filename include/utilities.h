@@ -1,10 +1,6 @@
 #pragma once // Ensure the header is only included once
 
-// #include <iostream>
-// #include <cctype> // for toupper() and tolower()
-// #include <sstream> // for stringstream
 #include <windows.h> // for Sleep() and system("cls")
-// #include <bits/stdc++.h> // this includes all standard libraries
 #include <string>
 #include <iostream>
 #include <limits>
