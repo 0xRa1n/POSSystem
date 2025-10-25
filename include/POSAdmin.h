@@ -7,27 +7,25 @@ public:
     // we declare all member functions of POSAdmin here (the ones that will be defined in POSAdmin.cpp)
 
     // CREATE
-    void addProduct(string database, string username);
-    void addUser(string database, string accessingUsername);
-    void saveLogs(string type, string operation, string affectedEntry, string adminName, string message);
+    void addProduct(string database, string username); // used to add products to the inventory 
+    void addUser(string database, string accessingUsername); // used to add new user accounts
+    void saveLogs(string type, string operation, string affectedEntry, string adminName, string message); // used to save logs for auditing purposes
 
     // READ
-    void readProducts(string database);
-    void getDailySales(string database);
-    void getTotalSales(string database);
-    void getMonthlySales(string database);
-    void getYearlySales(string database);
-    void getAllAccounts(string database);
-    void getAllLogs(string type);
-    void readBackupTransactions(string database);
+    void readProducts(string database); // read and display all products from the inventory
+    void getDailySales(string database); // get the daily sales from the database
+    void getTotalSales(string database); // get the total sales from the database
+    void getMonthlySales(string database); // get the monthly sales from the database
+    void getYearlySales(string database); // get the yearly sales from the database
+    void getAllAccounts(string database); // get all user accounts from the database
+    void getAllLogs(string type); // get all logs of a specific type
+    void readBackupTransactions(string database); // read and display the backup transaction from a power outage or system crash
 
     // UPDATE
-    int updateInformation(string filename, string query, string type, string newValue, string username, string reason);
-    void updateProduct(string filename, string type, string username);
-    void updateAccount(string filename, string type, string username);
-    void updateProductFields(string type, string database, string field, string username);
-    void updateDiscounts(string username);
+    void updateProduct(string filename, string type, string username); // used to update product's name, price, quantity, category, or sub-category
+    void updateAccount(string filename, string type, string username); // used to update user's password, role, or status
+    void updateDiscounts(string username); // used to update discounts on a product category
 
     // DELETE
-    void deleteInformation(string type, string filename, string username);
+    void deleteInformation(string type, string filename, string username); // used to delete products or accounts from the database
 };

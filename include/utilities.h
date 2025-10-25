@@ -6,10 +6,10 @@
 #include <limits>
 using namespace std;
 
-void showHeader(string headerTitle);
-bool handleInputError();
-int getLastId(string filename);
-bool isAlreadyInCsv(string filename, string productNameToCheck);
+void showHeader(string headerTitle); // display a header with the given title
+bool handleInputError(); // handle input errors ONLY for integer inputs
+int getLastId(string filename); // get the last ID from a CSV file
+bool isAlreadyInCsv(string filename, string productNameToCheck); // check if a product name already exists in the CSV file
 
 template<size_t N>
 // the template size_t N is used so that the function will know the size of the array passed to it
@@ -46,4 +46,5 @@ inline int showMenu(string headerTitle, string (&menu)[N]) {  // pass array by r
     } else {
         return input;
     }
+    // if the user inputs a valid integer, it will be returned
 }

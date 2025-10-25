@@ -112,7 +112,7 @@ bool POSCashier::viewCart(string username){ // view cart is also bool since if t
 
         switch(confirmation){
             case 1:
-                return processTransaction(username);
+                return processTransaction(username); // this is the reason why viewCart is bool, so that if the user proceeds to checkout, we can know in the main menu to not break the loop
             case 0:
                 cout << "Returning to main menu.\n";
                 Sleep(1200);

@@ -1,4 +1,5 @@
 #pragma once // Ensure the header is only included once
+// otherwise, it may lead to function redefinition errors
 
 #include "POSAdmin.h" // include the declaration of POSAdmin class, so that it can be used inside PointOfSale
 #include "POSCashier.h" // include the declaration of POSCashier class, so that it can be used inside PointOfSale
