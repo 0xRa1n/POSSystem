@@ -16,11 +16,10 @@
 // include the declaration of POSAdmin class
 // and in here we will define all the member functions of POSAdmin
 
-const regex disallowed{R"([^A-Za-z0-9_@#&])"};
+const regex disallowed{R"([^A-Za-z0-9_@#&])"}; // const so that it cannot be changed
 // the brackets tells us that its a character set, and the ^ means NOT
 // and only A-Z, a-z, 0-9, _ @ # & are allowed
 // the R"()" syntax is used to define raw string literals, which allows us to include special characters without needing to escape them
-
 
 // here are all member functions of POSAdmin class
 // the double colon (::) is the scope resolution operator, which tells us that the function belongs to the class POSAdmin
@@ -44,87 +43,91 @@ void POSAdmin::addProduct(string database, string username) {
         return;
     }
 
-    // use the function to check if the entry is already in the database
+    // use the function isAlreadyInCsv to check if the entry is already in the database (will return true if found)
     if (isAlreadyInCsv(database, productName)) {
         cout << "Product '" << productName << "' is already in the CSV.\n";
         Sleep(1200);
         return;
-    } else {
-        cout << "Enter the product category (Tops/Bottoms/Accessories, 0 to go back): ";
-        string productCategory;
-        cin >> productCategory;
-
-        if (productCategory == "0") return;
-        if(regex_search(productCategory, disallowed)){
-            cout << "Product category cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
-            Sleep(1200);
-            return;
-        }
-        productCategory[0] = toupper(productCategory[0]); // capitalize the first letter, if it wasn't capitalized
-        vector<string> categories = {"Tops", "Bottoms", "Accessories"}; //vector is used because .find() works better with vectors than arrays (arrays work, but, it will be more complicated)
-        auto lookFor = find(categories.begin(), categories.end(), productCategory); // search for the category in the vector categories
-
-        if(lookFor == categories.end()){ // if it reached the end, it means it was not found
-            cout << "Invalid category. Please enter Tops, Bottoms, or Accessories only.\n";
-            Sleep(1200);
-            return;
-        }
-
-        // ask the user if what product sub-category is the product
-        cout << "Enter the product sub-category (0 to go back): ";
-        cin >> productSubCategory;
-
-        if(productSubCategory == "0") return;
-        if(regex_search(productSubCategory, disallowed)){
-            cout << "Product sub-category cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
-            Sleep(1200);
-            return;
-        }
-
-        // ask the user for the product's quantity and price
-        cout << "Enter the quantity (0 to go back): "; // and quantity SHOULD not be zero
-        cin >> quantity;
-
-        if(handleInputError()) return; // handle invalid inputs (if cin fails, it will return true)
-        if (quantity == 0) return;
-
-        if(quantity < 0){ // quantity cannot be negative
-            cout << "Quantity cannot be negative. Please enter a valid integer." << endl;
-            Sleep(1200);
-            return;
-        }
-
-        cout << "Enter the price (0 to go back): "; // price also should NOT be zero
-        cin >> price;
-        
-        if(handleInputError()) return; // handle invalid inputs
-        if (price == 0) return;
-
-        if(price < 0){ // price cannot be negative
-            cout << "Price cannot be negative. Please enter a valid integer." << endl;
-            Sleep(1200);
-            return;
-        } else {
-            // get the last product id from the database
-            int newId = getLastId(database) +  1;
-
-            // open the database file, and add the new product
-            fstream fout;
-            fout.open(database, ios::out | ios::app); // append or output mode
-
-            fout << newId << ","
-                << productName << ","
-                << productCategory << ","
-                << productSubCategory << ","
-                << quantity << ","
-                << price << "\n";
-
-            fout.close();                    
-            saveLogs("products", "ADD", productName, username, "New_Product_Added");
-            cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
-            Sleep(1200);
-        }  
     }
+
+    // ask the user for the product category
+    cout << "Enter the product category (Tops/Bottoms/Accessories, 0 to go back): ";
+    string productCategory;
+    cin >> productCategory;
+
+    if (productCategory == "0") return;
+    if(regex_search(productCategory, disallowed)){
+        cout << "Product category cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+        Sleep(1200);
+        return;
+    }
+
+    // if productCategory input from user is neither tops, bottoms, or accessories
+    if(productCategory != "Tops" && productCategory != "Bottoms" && productCategory != "Accessories"){
+        cout << "Invalid category. Please enter Tops, Bottoms, or Accessories only.\n";
+        Sleep(1200);
+        return;
+    } else if(regex_search(productCategory, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
+        cout << "Product category cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+        Sleep(1200);
+        return;
+    }
+
+    // ask the user if what product sub-category is the product
+    cout << "Enter the product sub-category (0 to go back): "; // no specific sub-categories since they are many
+    cin >> productSubCategory;
+
+    if(productSubCategory == "0") return;
+    if(regex_search(productSubCategory, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
+        cout << "Product sub-category cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+        Sleep(1200);
+        return;
+    }
+
+    // ask the user for the product's quantity and price
+    cout << "Enter the quantity (0 to go back): "; // and quantity SHOULD not be zero
+    cin >> quantity;
+
+    if(handleInputError()) return; // handle invalid inputs (if cin fails, it will return true)
+    if (quantity == 0) return;
+
+    if(quantity < 0){ // quantity cannot be negative
+        cout << "Quantity cannot be negative. Please enter a valid integer." << endl;
+        Sleep(1200);
+        return;
+    }
+
+    cout << "Enter the price (0 to go back): "; // price also should NOT be zero
+    cin >> price;
+    
+    if(handleInputError()) return; // handle invalid inputs
+    if (price == 0) return;
+
+    if(price < 0){ // price cannot be negative
+        cout << "Price cannot be negative. Please enter a valid integer." << endl;
+        Sleep(1200);
+        return;
+    } 
+
+    // get the last product id from the database
+    int newId = getLastId(database) +  1;
+
+    // open the database file, and add the new product
+    fstream fout; // create a file stream object with the variable fout, so that we can write to the file
+    fout.open(database, ios::app); // this tells the program that the cursor should be placed at the end of the file, avoiding overwritting existing data
+
+    fout << newId << ","
+        << productName << ","
+        << productCategory << ","
+        << productSubCategory << ","
+        << quantity << ","
+        << price << "\n";
+
+    fout.close(); // close the file
+
+    saveLogs("products", "ADD", productName, username, "New_Product_Added"); // log the addition of product to productsLogs.csv
+    cout << "Successfully added product '" << productName << "' with price " << price << ".\n";
+    Sleep(1200); // wait for 1.2 seconds before going back to the menu
 }
 
 void POSAdmin::addUser(string database, string accessingUsername){
@@ -137,12 +140,14 @@ void POSAdmin::addUser(string database, string accessingUsername){
     // use the function to check if the entry is already in the database
     if(isAlreadyInCsv(database, username)){
         cout << "User is already in the database!";
+        Sleep(1200);
+        return;
     }
 
     // if the user decides to change his mind
     if (username == "0") return;
 
-    if(regex_search(username, disallowed)){
+    if(regex_search(username, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
         cout << "Username cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
         Sleep(1200);
         return;
@@ -163,34 +168,35 @@ void POSAdmin::addUser(string database, string accessingUsername){
     cout << "What is the role of the user? (Admin/Manager/Cashier, 0 to go back): ";
     cin >> role;
 
-    if (role == "0") return;
+    if (role == "0") return; // if the user changes his mind
 
-    role[0] = toupper(role[0]); // capitalize the first letter, if it wasn't capitalized
-    vector<string> roles = {"Admin", "Manager", "Cashier"};
-    auto lookFor = find(roles.begin(), roles.end(), role); // search for the role in the vector roles
-
-    if(lookFor == roles.end()){
+    if(role != "Admin" && role != "Manager" && role != "Cashier"){
         cout << "Invalid role. Please enter Admin, Manager, or Cashier only.\n";
         Sleep(1200);
         return;
-    } else {
-        // get the last user id from the dtabase
-        int lastUserId = getLastId(database);
-        int newUserId = lastUserId + 1;
-
-        fstream fout; // create a file stream object with the variable fout
-        fout.open(database, ios::out | ios::app); // output or append mode
-
-        // open the database file, and add the new product
-        fout << newUserId << ","
-            << username << ","
-            << password << ","
-            << role << "\n";
-
-        fout.close();
-        cout << "Successfully added user " << username << endl;
-        saveLogs("accounts", "ADD", username, accessingUsername, "New_User_Added");
+    } else if(regex_search(role, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
+        cout << "Role cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+        Sleep(1200);
+        return;
     }
+
+    // get the last user id from the dtabase
+    int lastUserId = getLastId(database);
+    int newUserId = lastUserId + 1;
+
+    fstream fout; // create a file stream object with the variable fout, so that we can write to the file
+    fout.open(database, ios::app); // output or append mode
+
+    // open the database file, and add the new product
+    fout << newUserId << ","
+        << username << ","
+        << password << ","
+        << role << "\n";
+
+    fout.close(); // close the file
+    cout << "Successfully added user " << username << endl;
+    saveLogs("accounts", "ADD", username, accessingUsername, "New_User_Added"); // log the addition of user to adminUserLogs.csv
+
     // wait for 1.2 seconds before going back to the menu
     Sleep(1200);
 }
@@ -242,11 +248,11 @@ void POSAdmin::saveLogs(string type, string operation, string affectedEntry, str
     // open the transactions.csv file in append mode
     ofstream fout(database, ios::app); // fout is an instance of ofstream, used to write to files
     if (!fout) {
-        cerr << "Error opening database for writing." << endl;
+        cout << "Error opening database for writing." << endl;
         return;
     }
 
-    // write the transaction details to the file
+    // write the transaction details to the file (according to the header format in the CSV file)
     fout << operation << ","
         << affectedEntry << ","
         << date << ","
@@ -273,9 +279,9 @@ void POSAdmin::readProducts(string database) {
     vector<vector<string>> rows; // 2D vector to hold rows and columns || the output should looks like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "SubCat1", "10", "100"}, ...}
     string line;
     while (getline(file, line)) {
-        stringstream ss(line);
-        string cell;
-        vector<string> row; 
+        stringstream ss(line); // lets us read each line
+        string cell; // temporary variable to hold each cell value
+        vector<string> row; // temporary vector to hold each row
         while (getline(ss, cell, ',')) { // split by comma
             row.push_back(cell); // add each cell to the row || row will look like this: {"ID", "ProductName", "SubCategory", "Quantity", "Price"}
         }
@@ -293,8 +299,9 @@ void POSAdmin::readProducts(string database) {
     size_t cols = 0;
     for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
     // no brackets since its a single controlled statement
+
     vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
-    // initially: widths is {0, 0, 0, 0, 0} for 5 columns
+    // if there are 6 columns in the csv, then cols = 6 and it will initialize widths to {0, 0, 0, 0, 0, 0}
 
     // after we get the maximum number, we will update the widths vector
     // this will make sure that each value will not overlap with each other
@@ -304,6 +311,8 @@ void POSAdmin::readProducts(string database) {
             widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
             // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
             // there is no curly braces here because it is a single controlled statement
+
+            // it does this for each value in the widths vector
     }
 
     // Add a little padding for readability
@@ -364,7 +373,10 @@ void POSAdmin::readBackupTransactions(string database){
             widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
             // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
             // there is no curly braces here because it is a single controlled statement
+            
+            // it does this for each value in the widths vector
     }
+
     // Add a little padding for readability
     for (auto &w : widths) w += 2;
     // Print
@@ -422,7 +434,10 @@ void POSAdmin::getAllAccounts(string database) {
             widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
             // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
             // there is no curly braces here because it is a single controlled statement
+            
+            // it does this for each value in the widths vector
     }
+
     // Add a little padding for readability
     for (auto &w : widths) w += 2;
     // Print
@@ -440,14 +455,14 @@ void POSAdmin::getDailySales(string database){
     string line;
     int todaysSales = 0;
 
-    // open the file
+    // open the file as an ifstream
     ifstream file(database);
 
     // get the current date
     time_t timestamp = time(NULL); // set the time as null so that it will return the current timestamp
     struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *, and we used ampersand inside the argument to get the address pointer of the timestamp variable, as it is expecting an address
     char date[50]; // since it points to a char array
-    strftime(date, 50, "%m_%d_%y", &datetime); // format the date as mm_dd_yy
+    strftime(date, 50, "%m_%d_%y", &datetime); // format the date as mm_dd_yy. 50 means the maximum length (size) of the char array
     string currentDate(date); // we need to convert it from char array to string for easier comparison later
     // if you would notice, in the POSCashier, we used the same format for the date when saving transactions
     // we do not have to do this conversion in POSCashier.cpp because we are not comparing dates there
@@ -622,6 +637,7 @@ void POSAdmin::getTotalSales(string database){
 
 void POSAdmin::getAllLogs(string type){
     string database;
+    // use different log files for different types
     if(type == "accounts"){
         database = "database/logs/adminUserLogs.csv";
     } else if(type == "products"){
@@ -634,7 +650,7 @@ void POSAdmin::getAllLogs(string type){
         return;
     }
 
-    // Open the file
+    // Open the file as ifstream, so that we can read it
     ifstream file(database);
 
     // check if file exists
@@ -665,12 +681,20 @@ void POSAdmin::getAllLogs(string type){
 
     // Find max width of each column
     size_t cols = 0;
-    for (auto &r : rows) cols = max(cols, r.size()); 
-    vector<size_t> widths(cols, 0); 
+    for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
+    vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
+    // if there are 6 columns in the csv, then cols = 6 and it will initialize widths to {0, 0, 0, 0, 0, 0}
 
-    for (auto &r : rows) { 
-        for (size_t c = 0; c < r.size(); ++c) 
-            widths[c] = max(widths[c], r[c].size()); 
+    // after we get the maximum number, we will update the widths vector
+    // this will make sure that each value will not overlap with each other
+
+    for (auto &r : rows) { // for each row
+        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
+            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
+            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
+            // there is no curly braces here because it is a single controlled statement
+
+            // it does this for each value in the widths vector
     }
 
     // Add a little padding for readability
@@ -678,8 +702,9 @@ void POSAdmin::getAllLogs(string type){
 
     // Print
     for (auto &r : rows) {
-        for (size_t c = 0; c < r.size(); ++c) { 
-            cout << left << setw(static_cast<int>(widths[c])) << r[c]; 
+        for (size_t c = 0; c < r.size(); ++c) {  // for each column in the row
+            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
+            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
         }
         cout << '\n';
     }
@@ -690,7 +715,7 @@ void POSAdmin::getAllLogs(string type){
 void POSAdmin::updateProduct(string database, string type, string username){
     string query, newValue, reason;
 
-    ifstream readFile(database);
+    ifstream readFile(database); // open the file as an ifstream since we are reading from it
     if(!readFile.is_open()){
         cout << "Failed to open file\n";
         return;
@@ -707,7 +732,7 @@ void POSAdmin::updateProduct(string database, string type, string username){
     }
 
     if (query == "0") return;
-    if(regex_search(query, disallowed)){
+    if(regex_search(query, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
         cout << "Product name cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
         Sleep(1200);
         return;
@@ -718,33 +743,33 @@ void POSAdmin::updateProduct(string database, string type, string username){
 
     if(newValue == "0") return; // input from cin is always string
 
-    // error handling for different fields
-    if(query == "productName" || query == "productSubCategory"){
-        if(regex_search(newValue, disallowed)){
+    // error handling for different fields in a product
+    if(query == "productName" || query == "productSubCategory"){ // only these two fields are strings
+        if(regex_search(newValue, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
             cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
             Sleep(1200);
             return;
-        } else if(query == "name" && isAlreadyInCsv(database, newValue)){
+        } else if(query == "name" && isAlreadyInCsv(database, newValue)){ // check if the user wants to update a product name to another product name that already exists
             cout << "Product name '" << newValue << "' is already in the CSV.\n"; // since duplicate product names are not allowed
             Sleep(1200);
             return;
         }
-    } else if(query == "price" || query == "quantity"){
+    } else if(query == "price" || query == "quantity"){ // only these two fields are integers
         // make sure that the new input is a valid integer
         // note that the function handleInputError() will only work for INTEGERS entered via cin
         // and this function not only takes integers
         try {
-            int value = stoi(newValue);
-            if(value < 0){
+            int value = stoi(newValue); // convert string to integer
+            if(value < 0){ // price and quantity cannot be negative
                 cout << "The " + query + " cannot be negative.\n";
                 Sleep(1200);
                 return;
             }
-        } catch (invalid_argument&) {
+        } catch (invalid_argument&) { // if the input cannot be converted to integer (or invalid input)
             cout << "Invalid input, please enter a valid integer for " + query + ".\n";
             Sleep(1200);
             return;
-        } catch (out_of_range&) {
+        } catch (out_of_range&) { // if the input is too large or too small for an integer
             cout << "The number entered is out of range for " + query + ".\n";
             Sleep(1200);
             return;
@@ -762,7 +787,7 @@ void POSAdmin::updateProduct(string database, string type, string username){
     }
 
     string fileContent, line;
-    bool found = false;
+    bool found = false; // to check if the query was found
 
     while (getline(readFile, line)) {
         stringstream ss(line); // create a string stream from the line
@@ -779,7 +804,6 @@ void POSAdmin::updateProduct(string database, string type, string username){
         // modify the entry if it matches the query
         if (indexTwo == query) {
             // update the corresponding field
-            // product
             if(type == "productName"){
                 indexTwo = newValue; // update product name
             } else if(type == "productQuantity"){
@@ -802,41 +826,45 @@ void POSAdmin::updateProduct(string database, string type, string username){
 
     if (!found) { // just a safety precaution, the above isAlreadyInCsv() should have caught this already
         return; // query not found, will exit the function
-    } else {
-        ofstream fileOut(database);
-        if (!fileOut) {
-            cout << "Cannot write to file." << endl;
-            Sleep(1200);
-            return;
-        }
+    } 
 
-        fileOut << fileContent;
-        fileOut.close();
-
-        // we will log EVERY action made by the manager or admin
-        if(type == "productName"){
-            saveLogs("products", "UPDATE", query + "_to_" + newValue, username, reason);
-        } else {
-            if(type == "productPrice"){
-                saveLogs("products", "UPDATE", query + "_Price_to_" + newValue, username, reason);
-            } else if(type == "productQuantity"){
-                saveLogs("products", "UPDATE", query + "_Quantity_to_" + newValue, username, reason);
-            } else if(type == "productSubCategory"){
-                saveLogs("products", "UPDATE", query + "_SubCategory_to_" + newValue, username, reason);
-            } else {
-                saveLogs("products", "UPDATE", query + "_to_" + newValue, username, reason);
-            }
-        }
-        cout << "Successfully updated product " << query << " with " << newValue << " as a new " << type << endl;
+    ofstream fileOut(database); // open the file as an ofstream since we are writing to it
+    if (!fileOut) { // if the file cannot be written
+        cout << "Cannot write to file." << endl;
+        Sleep(1200);
+        return;
     }
+
+    fileOut << fileContent; // write the updated content back to the file
+    fileOut.close();
+
+    // we will log EVERY action made by the manager or admin
+    if(type == "productName"){ // if the user updated a product name
+        saveLogs("products", "UPDATE", query + "_to_" + newValue, username, reason);
+    } else {
+        if(type == "productPrice"){ // if the user updated a product price
+            saveLogs("products", "UPDATE", query + "_Price_to_" + newValue, username, reason);
+        } else if(type == "productQuantity"){ // if the user updated a product quantity
+            saveLogs("products", "UPDATE", query + "_Quantity_to_" + newValue, username, reason);
+        } else if(type == "productSubCategory"){ // if the user updated a product sub-category
+            saveLogs("products", "UPDATE", query + "_SubCategory_to_" + newValue, username, reason);
+        } else if(type == "productCategory"){ // if the user updated a product category
+            saveLogs("products", "UPDATE", query + "_Category_to_" + newValue, username, reason);
+        } else { // for any other type of update
+            saveLogs("products", "UPDATE", query + "_to_" + newValue, username, reason);
+        }
+    }
+    cout << "Successfully updated product " << query << " with " << newValue << " as a new " << type << endl;
+
     Sleep(1200);
     return;
 }
 
 void POSAdmin::updateAccount(string database, string type, string username){
     string query, newValue, reason;
-    ifstream readFile(database);
-    if(!readFile.is_open()){
+    ifstream readFile(database); // open the file as an ifstream since we are reading from it
+
+    if(!readFile.is_open()){ // if file cannot be opened
         cout << "Failed to open file\n";
         Sleep(1200);
         return;
@@ -844,7 +872,7 @@ void POSAdmin::updateAccount(string database, string type, string username){
 
     cout << "What is the account username you want to update? (0 to go back): ";
     cin >> query;
-    if(!isAlreadyInCsv(database, query)){
+    if(!isAlreadyInCsv(database, query)){ // check if account username exists in the csv
         cout << "Account username '" << query << "' does not exist in the CSV.\n";
         Sleep(1200);
         return;
@@ -853,7 +881,7 @@ void POSAdmin::updateAccount(string database, string type, string username){
     cout << "What is the new value you want to set? ";
     cin >> newValue;
     
-    if(regex_search(newValue, disallowed)){
+    if(regex_search(newValue, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
         cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
         Sleep(1200);
         return;
@@ -872,7 +900,7 @@ void POSAdmin::updateAccount(string database, string type, string username){
     bool found = false;
 
     while (getline(readFile, line)) {
-        stringstream ss(line); // create a string stream from the line
+        stringstream ss(line); // use stringstream to read the line
         string indexOne, indexTwo, indexThree, indexFour, indexFive, indexSix;
         // get a copy of each entries
         getline(ss, indexOne, ','); // read the id (not used) and save to variable indexOne
@@ -902,25 +930,25 @@ void POSAdmin::updateAccount(string database, string type, string username){
 
     if (!found) {
         return; // query not found, will exit the function
-    } else {
-        ofstream fileOut(database);
-        if (!fileOut) {
-            cout << "Cannot write to file " << database << endl;
-            Sleep(1200);
-            return;
-        }
-
-        fileOut << fileContent;
-        fileOut.close();
-
-        // we will log EVERY action made by the manager or admin
-        if(type == "accountPassword"){
-            saveLogs("accounts", "UPDATE", query + "_PW_to_" + newValue, username, reason);
-        } else {
-            saveLogs("accounts", "UPDATE", query + "_to_" + newValue, username, reason);
-        }
-        cout << "Successfully updated account " << query << " with " << newValue << " as a new " << type << endl;
     }
+    ofstream fileOut(database);
+    if (!fileOut) {
+        cout << "Cannot write to file " << database << endl;
+        Sleep(1200);
+        return;
+    }
+
+    fileOut << fileContent;
+    fileOut.close();
+
+    // we will log EVERY action made by the admin
+    if(type == "accountPassword"){ // if the user updated a password
+        saveLogs("accounts", "UPDATE", query + "_PW_to_" + newValue, username, reason);
+    } else { // for any other type of update
+        saveLogs("accounts", "UPDATE", query + "_to_" + newValue, username, reason);
+    }
+    cout << "Successfully updated account " << query << " with " << newValue << " as a new " << type << endl;
+    
     Sleep(1200);
     return;
 }
@@ -934,19 +962,18 @@ void POSAdmin::updateDiscounts(string username) {
     }
     cout << "Enter the category (Tops/Bottoms/Accessories) to update discount (0 to go back): ";
     cin >> category;
-    vector<string> categories = {"Tops", "Bottoms", "Accessories"};
 
     if(category == "0") return;
     if(regex_search(category, disallowed)){
         cout << "Category cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
         Sleep(1200);
         return;
-    }
-    
-    category[0] = toupper(category[0]); // capitalize the first letter, if not already
-    auto lookFor = find(categories.begin(), categories.end(), category); // search for the category
-    if(lookFor == categories.end()){
-        cout << "Invalid category. Please enter Tops, Bottoms, or Accessories only.\n";
+    } else if(!isAlreadyInCsv("database/discounts.csv", category)){
+        cout << "Category '" << category << "' does not exist in the discounts database.\n";
+        Sleep(1200);
+        return;
+    } else if(category != "Tops" && category != "Bottoms" && category != "Accessories"){
+        cout << "Invalid category. Please enter Tops, Bottoms, or Accessories.\n";
         Sleep(1200);
         return;
     }
@@ -983,16 +1010,17 @@ void POSAdmin::updateDiscounts(string username) {
             fileContent += line + "\n"; // keep the line as is
         }
     }
-    discountFile.close();
+    discountFile.close(); // close the file
 
     // write back to the file
-    ofstream discountFileOut("database/discounts.csv");
-    if(!discountFileOut.is_open()){
+    ofstream discountFileOut("database/discounts.csv"); // open the file as ofstream since we are writing to it
+    if(!discountFileOut.is_open()){ // if file cannot be opened
         cout << "Failed to open discounts database for writing.\n";
         return;
     }
-    discountFileOut << fileContent;
-    discountFileOut.close();
+
+    discountFileOut << fileContent; // write the updated content back to the file
+    discountFileOut.close(); // close the file
 
     cout << "Successfully updated discount for " << category << " to " << discountPercentage << "%.\n";
     saveLogs("products", "UPDATE", category + "_Discount_to_" + to_string(discountPercentage), username, "Discount_Updated");
@@ -1006,7 +1034,7 @@ void POSAdmin::deleteInformation(string type, string filename, string username){
     cout << "Enter the entry name you want to delete (type 0 to go back): ";
     cin >> deleteProductInput;
 
-    if(regex_search(deleteProductInput, disallowed)){
+    if(regex_search(deleteProductInput, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
         cout << "Entry name cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
         Sleep(1200);
         return;
@@ -1014,7 +1042,13 @@ void POSAdmin::deleteInformation(string type, string filename, string username){
 
     if (deleteProductInput == "0") return;
 
-    ifstream input_file(filename);
+    ifstream input_file(filename); // open the file as an ifstream since we are reading from it
+    if (!input_file.is_open()) {
+        cout << "Failed to open file\n";
+        Sleep(1200);
+        return;
+    }
+
     vector<string> rows;
     string line;
     bool found = false;
@@ -1036,22 +1070,21 @@ void POSAdmin::deleteInformation(string type, string filename, string username){
 
     if (!found) {
         cout << "Query not found";
-    } else {
-        // Write back filtered rows
-        ofstream output_file(filename, ios::trunc); // open in truncate mode
-        // it avoids the line that has the query, and it rewrites the csv without it
-        for (const auto& row : rows) { // write each remaining row
-            output_file << row << "\n"; // now, write the contents of the variable rows back to the file
-        } 
-        output_file.close();
-
-        if(type == "accounts"){ // save to the account logs
-            saveLogs("accounts", "DELETE", deleteProductInput, username, "Account_Deleted");
-        } else if(type == "products"){ // save to the product logs
-            saveLogs("products", "DELETE", deleteProductInput, username, "Product_Deleted");
-        }
-
-        cout << "Successfully deleted " << deleteProductInput << endl;
     }
+    // Write back filtered rows
+    ofstream output_file(filename, ios::trunc); // open in truncate mode
+    // it avoids the line that has the query, and it rewrites the csv without it
+    for (const auto& row : rows) { // write each remaining row
+        output_file << row << "\n"; // now, write the contents of the variable rows back to the file
+    } 
+    output_file.close();
+
+    if(type == "accounts"){ // save to the account logs
+        saveLogs("accounts", "DELETE", deleteProductInput, username, "Account_Deleted");
+    } else if(type == "products"){ // save to the product logs
+        saveLogs("products", "DELETE", deleteProductInput, username, "Product_Deleted");
+    }
+
+    cout << "Successfully deleted " << deleteProductInput << endl;    
     Sleep(1200);
 }

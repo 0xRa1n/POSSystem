@@ -54,3 +54,6 @@ UPDATE,Baggy_Jeans_Quantity_to_3,10_25_25,12:40:00_PM,cashier,Purchased_Quantity
 UPDATE,Plain_Oversized_Tee_Quantity_to_1,10_25_25,12:42:42_PM,cashier,Purchased_Quantity_Deducted
 UPDATE,Graphic_Tee_Quantity_to_1,10_25_25,12:48:34_PM,cashier,Purchased_Quantity_Deducted
 UPDATE,Shoulder_Bag_Quantity_to_1,10_25_25,01:10:47_PM,cashier,Purchased_Quantity_Deducted
+ADD,RERER,10_25_25,04:10:45_PM,admin,New_Product_Added
+ADD,RERERER,10_25_25,04:10:57_PM,admin,New_Product_Added
+ADD,RERERERERER,10_25_25,04:11:08_PM,admin,New_Product_Added
