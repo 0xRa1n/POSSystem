@@ -112,11 +112,11 @@ void PointOfSale::adminMenu(string username) {
                                     case 3:
                                         while(true){ // every menu, it corresponds with a loop. so that if the user decides to go back, we can just end the loop to have him or her go back to the previous menu
                                             system("cls"); // initial clear
-                                            string logsMenu[] = {"Account logs", "Product logs", "Cashier logs", "Go back"};
+                                            string logsMenu[] = {"Account logs", "Product logs", "Cashier transactions (Cash)", "Cashier transactions (GCash)", "Go back"};
                                             int logsInput = showMenu("View all logs", logsMenu);
                                             system("cls"); // clear again after getting input
 
-                                            if (logsInput == 4) break; // exit logs menu
+                                            if (logsInput == 5) break; // exit logs menu
 
                                             switch(logsInput){
                                                 case 1: // account logs
@@ -128,8 +128,12 @@ void PointOfSale::adminMenu(string username) {
                                                     admin.getAllLogs("products");
                                                     break;
                                                 case 3: // cashier logs
-                                                    showHeader("Cashier logs");
-                                                    admin.getAllLogs("cashier");
+                                                    showHeader("Cashier transactions (Cash)");
+                                                    admin.getAllLogs("cashier_cash");
+                                                    break;
+                                                case 4: // cashier logs
+                                                    showHeader("Cashier transactions (GCash)");
+                                                    admin.getAllLogs("cashier_gcash");
                                                     break;
                                                 default:
                                                     cout << "Invalid selection";

@@ -642,8 +642,10 @@ void POSAdmin::getAllLogs(string type){
         database = "database/logs/adminUserLogs.csv";
     } else if(type == "products"){
         database = "database/logs/productsLogs.csv";
-    } else if(type == "cashier"){
-        database = "database/transactions/cashierTransactions.csv";
+    } else if(type == "cashier_cash"){
+        database = "database/transactions/cash_cashierTransactions.csv";
+    } else if(type == "cashier_gcash"){
+        database = "database/transactions/gcash_cashierTransactions.csv";
     } else {
         cout << "Invalid log type specified." << endl;
         Sleep(1200);
