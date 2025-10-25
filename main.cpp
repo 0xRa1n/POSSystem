@@ -4,6 +4,10 @@
 using namespace std;
 
 int main(){
+    // the contents of the include folder are called header files. Header files are used to declare the structure of classes and functions that can be used in multiple source files.
+    // they are all a declaration of functions and classes that are defined in the src folder.
+    // this is done to improve code organization and reusability.
+
     // initialize variables
     PointOfSale POS; // since we need to seperate the functions for each role, we need to create a class named PointOfSale that will handle the login and menu navigation
     int retry = 0;

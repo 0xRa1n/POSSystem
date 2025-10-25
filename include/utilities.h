@@ -1,10 +1,13 @@
 #pragma once // Ensure the header is only included once
 
-#include <iostream>
-#include <cctype> // for toupper() and tolower()
-#include <sstream> // for stringstream
+// #include <iostream>
+// #include <cctype> // for toupper() and tolower()
+// #include <sstream> // for stringstream
 #include <windows.h> // for Sleep() and system("cls")
-#include <bits/stdc++.h> // this includes all standard libraries
+// #include <bits/stdc++.h> // this includes all standard libraries
+#include <string>
+#include <iostream>
+#include <limits>
 using namespace std;
 
 void showHeader(string headerTitle);
@@ -17,6 +20,8 @@ template<size_t N>
 // and where will it end
 // for example: string updateAccountMenu[] = {"Username", "Password", "Role", "Go back"};
 // the size of this array is 4, so N will be 4. and will print 4 options
+
+// inline tells the compiler that it's alright to be used in multiple files without causing redefinition errors
 inline int showMenu(string headerTitle, string (&menu)[N]) {  // pass array by reference to retain size information
     // the (&menu) in the string (&menu)[N] is used to pass the array by reference
     // meaning that the array passed here will not be a copy of the original array, and it will retain the SIZE

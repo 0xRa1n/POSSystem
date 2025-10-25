@@ -1,12 +1,15 @@
 #include "./include/POS.h"
 #include "./include/utilities.h" // For showHeader, etc.
+
+// include all the packages that we only need IN THIS FILE
 #include <fstream>
 #include <sstream>
 #include <iostream>
 
 using namespace std;
 
-// here are all member functions of PointOfSale class
+// here are all member functions of PointOfSale class 
+// member functions refers to functions defined inside a class
 // the double colon (::) is the scope resolution operator, which tells us that the function belongs to the class PointOfSale
 
 bool PointOfSale::login(string username, string password, string& outRole) {
@@ -24,25 +27,16 @@ bool PointOfSale::login(string username, string password, string& outRole) {
     getline(file, line); // skip header
 
     while (getline(file, line)) {
-        // finds the position of each value after the comma
-        int pos1 = line.find(','); // first comma
-        int pos2 = line.find(',', pos1 + 1); // second comma
-        int pos3 = line.find(',', pos2 + 1); // third comma
+        stringstream readFromLine(line); // create a string stream from the line || readFromLine is a variable
+        string id, username, password, role;
 
-        // substrings the previous values, and gets the username, password, and role
-        // 1 is given to remove the comma
-        string csvUsername = line.substr(pos1 + 1, pos2 - pos1 - 1); // username
-        // subtract the position of the second comma to the first comma to get the length of the username
-        string csvPassword = line.substr(pos2 + 1, pos3 - pos2 - 1); // password
-        // subtract the position of the third comma to the second comma to get the length of the role
-        string csvRole = line.substr(pos3 + 1); // role
-        // no length is given since it will get the rest of the string since there are no more commas
+        getline(readFromLine, id, ',');       // Reads until ',' and puts "1" into id
+        getline(readFromLine, username, ','); // Reads until ',' and puts "Sam" into username
+        getline(readFromLine, password, ','); // Reads until ',' and puts "password123" into password
+        getline(readFromLine, role);         // Reads the rest and puts "Admin" into role
 
-        // .find == find the position
-        // .substr == using the position of the .find, remove the commas, and get the value between them
-
-        if (csvUsername == username && csvPassword == password) {
-            outRole = csvRole;
+        if (username == username && password == password) {
+            outRole = role;
             file.close();
             return true;
         }

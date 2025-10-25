@@ -1,11 +1,10 @@
 #pragma once // Ensure the header is only included once
 
-#include <iostream>
 #include "utilities.h"
 
 class POSAdmin {
 public:
-    // we declare all member functions of POSAdmin here
+    // we declare all member functions of POSAdmin here (the ones that will be defined in POSAdmin.cpp)
 
     // CREATE
     void addProduct(string database, string username);

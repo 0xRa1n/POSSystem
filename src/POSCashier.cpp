@@ -2,12 +2,14 @@
 #include "./include/POSAdmin.h"   // Include the header for the class we need to use
 #include "./include/utilities.h"  // Include for utility functions
 
+// include all the packages that we only need IN THIS FILE
+#include <iostream>
 #include <cctype> // for toupper()
 #include <sstream> // for stringstream
-#include <windows.h> // for Sleep() and system("cls")
-#include <bits/stdc++.h> // for this file, here are the functions used along with this package: fstream, vector, string, ctime (time.h), sstream, regex, iomanip (setw and left), limits, stdexcept (invalid_argument and out_of_range)
-
-using namespace std;
+#include <algorithm> // used for find
+#include <regex> // for regex
+#include <fstream> // for fstream, ifstream
+#include <iomanip> // for setw and left
 
 // the cart
 vector<vector<string>> cart; // 2D vector to hold cart items: { {productName, productCategory, quantity, price}, ... }

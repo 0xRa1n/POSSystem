@@ -1,11 +1,12 @@
-#include <iostream>
-#include <cctype> // for toupper() and tolower()
-#include <sstream> // for stringstream
-#include <windows.h> // for Sleep() and system("cls")
-#include <bits/stdc++.h> // this includes all standard libraries
-using namespace std;
 
 #include "./include/utilities.h"
+
+// include all the packages that we only need IN THIS FILE
+#include <iostream>  // For cout, cin, streamsize
+#include <string>    // For the string type
+#include <limits>    // For numeric_limits
+#include <fstream> // for fstream, ifstream
+#include <sstream> // for stringstream
 
 void showHeader(string headerTitle){
     system("cls");

@@ -1,17 +1,19 @@
+#include "./include/POSAdmin.h"
+
+// include all the packages that we only need IN THIS FILE
 #include <iostream>
 #include <cctype> // for toupper() and tolower()
 #include <sstream> // for stringstream
 #include <cstdlib> // for exit()
 #include <windows.h> // for Sleep() and system("cls")
-#include <bits/stdc++.h> // for this file, here are the functions used along with this package: fstream, vectors, ctime (time.h), sstream, regex, iomanip (setw and left), limits, stdexcept (invalid_argument and out_of_range)
 #include <algorithm> // used for find
 #include <regex> // for regex
-using namespace std;
+#include <fstream> // for fstream, ifstream
+#include <iomanip> // for setw and left
 
 // ifstream == reading the file
 // offstream == writing to the file
 
-#include "./include/POSAdmin.h"
 // include the declaration of POSAdmin class
 // and in here we will define all the member functions of POSAdmin
 

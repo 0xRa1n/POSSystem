@@ -46,3 +46,7 @@ UPDATE,NewProduct_Quantity_to_10,10_24_25,10:21:19_PM,admin,Wrong_Quantity
 UPDATE,Striped_Polo_Quantity_to_1,10_24_25,11:07:05_PM,cashier,Purchased_Quantity_Deducted
 UPDATE,Striped_Polo_Quantity_to_3,10_24_25,11:10:52_PM,cashier,Purchased_Quantity_Deducted
 UPDATE,Plain_Oversized_Tee_Quantity_to_1,10_24_25,11:14:53_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Striped_Polo_Quantity_to_1,10_24_25,11:29:06_PM,cashier,Purchased_Quantity_Deducted
+ADD,TestProducTwelve,10_25_25,10:56:35_AM,admin,New_Product_Added
+DELETE,NewProduct,10_25_25,10:56:44_AM,admin,Product_Deleted
+DELETE,TestProducTwelve,10_25_25,10:56:50_AM,admin,Product_Deleted
