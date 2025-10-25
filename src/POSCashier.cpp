@@ -489,7 +489,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                         cerr << "Error opening backup file for writing." << endl;
                         return false;
                     }
-                    backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,PaymentMethod,Date,Time,Cashier\n" 
+                    backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,PmMethod,Date,Time,Cashier\n" 
                                 << namesStream.str() << ","
                                 << quantitiesStream.str() << ","
                                 << setprecision(2) << fixed << rawPrice << ","

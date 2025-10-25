@@ -92,11 +92,11 @@ void PointOfSale::adminMenu(string username) {
                         case 3: {
                             while(true){ // every menu, it corresponds with a loop. so that if the user decides to go back, we can just end the loop to have him or her go back to the previous menu
                                 system("cls"); // initial clearing of the console
-                                string viewMenu[] = {"View all products", "View all accounts", "View all logs", "Backup transaction data", "Go back"}; // automatically sets the options for the user to choose
+                                string viewMenu[] = {"View all products", "View all accounts", "View all logs", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "Go back"}; // automatically sets the options for the user to choose
                                 int viewInput = showMenu("View", viewMenu); // show the menu and get the user's input
                                 system("cls");
 
-                                if(viewInput == 5) break; // exit view menu
+                                if(viewInput == 6) break; // exit view menu
 
                                 switch(viewInput){
                                     case 1:
@@ -143,8 +143,13 @@ void PointOfSale::adminMenu(string username) {
                                         }
                                         break;
                                     case 4: // this function is for those who had a transaction right after a  power outage or system crash. in that way, they can update immediately the database
-                                        showHeader("Backup transaction data");
-                                        admin.readBackupTransactions("database/transactions/backup.csv");
+                                        showHeader("Backup transaction data (Cash)");
+                                        admin.readBackupTransactions("database/transactions/cash_backup.csv");
+                                        system("pause"); // pause to let the user read the backup transactions
+                                        break;
+                                    case 5: // this function is for those who had a transaction right after a  power outage or system crash. in that way, they can update immediately the database
+                                        showHeader("Backup transaction data (GCash)");
+                                        admin.readBackupTransactions("database/transactions/gcash_backup.csv");
                                         system("pause"); // pause to let the user read the backup transactions
                                         break;
                                     default: // if the user entered an invalid input, the showMenu function will return -1. meaning that it was an invalid input.
