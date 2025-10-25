@@ -57,3 +57,7 @@ UPDATE,Shoulder_Bag_Quantity_to_1,10_25_25,01:10:47_PM,cashier,Purchased_Quantit
 ADD,RERER,10_25_25,04:10:45_PM,admin,New_Product_Added
 ADD,RERERER,10_25_25,04:10:57_PM,admin,New_Product_Added
 ADD,RERERERERER,10_25_25,04:11:08_PM,admin,New_Product_Added
+UPDATE,Graphic_Tee_Quantity_to_1,10_25_25,05:40:00_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Striped_Polo_Quantity_to_1,10_25_25,05:40:00_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_1,10_25_25,05:56:24_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Striped_Polo_Quantity_to_1,10_25_25,05:56:24_PM,cashier,Purchased_Quantity_Deducted
