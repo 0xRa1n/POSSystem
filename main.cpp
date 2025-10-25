@@ -26,7 +26,7 @@ int main(){
         if (POS.login(usernameInput, passwordInput, role)) {
             cout << "Login successful! Welcome, " << usernameInput << " (" << role << ").\n";
             Sleep(1200);
-            system("cls");
+            
             // check if the user's account is admin, manager, or cashier
             if(role == "Admin"){
                 POS.adminMenu(usernameInput);

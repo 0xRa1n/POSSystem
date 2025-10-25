@@ -17,8 +17,7 @@ template<size_t N>
 // for example: string updateAccountMenu[] = {"Username", "Password", "Role", "Go back"};
 // the size of this array is 4, so N will be 4. and will print 4 options
 
-// inline tells the compiler that it's alright to be used in multiple files without causing redefinition errors
-inline int showMenu(string headerTitle, string (&menu)[N]) {  // pass array by reference to retain size information
+int showMenu(string headerTitle, string (&menu)[N]) {  // pass array by reference to retain size information
     // the (&menu) in the string (&menu)[N] is used to pass the array by reference
     // meaning that the array passed here will not be a copy of the original array, and it will retain the SIZE
     showHeader(headerTitle);

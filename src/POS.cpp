@@ -293,49 +293,21 @@ void PointOfSale::adminMenu(string username) {
                             system("pause");
                             break;
                         case 2:
-                            while(true){ // loop for the sales menu, if the user decides to go back, it will end this loop
-                                system("cls");
-                                string salesMenu[] = {"View daily sales", "View monthly sales", "View yearly sales", "View total sales", "Go back"};
-                                int salesSelection = showMenu("View Sales", salesMenu);
-                                system("cls");
+                            showHeader("View sales");
+                            cout << "Daily Sales:\n";
+                            admin.getDailySales();
 
-                                if(salesSelection == 5) break; // go back to monitoring menu
+                            cout << "\nMonthly Sales:\n";
+                            admin.getMonthlySales();
 
-                                switch(salesSelection){
-                                    case 1: // view daily sales
-                                        showHeader("View daily sales");
-                                        admin.getDailySales("database/transactions/cashierTransactions.csv");
-                                        cout << "\n";
+                            cout << "\nYearly Sales:\n";
+                            admin.getYearlySales();
 
-                                        system("pause"); // wait for the users input to exit
-                                        break;
-                                    case 2: // view monthly sales
-                                        showHeader("View monthly sales");
-                                        admin.getMonthlySales("database/transactions/cashierTransactions.csv");
-                                        cout << "\n";
+                            cout << "\nOverall Sales:\n";
+                            admin.getTotalSales();
 
-                                        system("pause"); // wait for the users input to exit
-                                        break;
-                                    case 3: // view yearly sales
-                                        showHeader("View yearly sales");
-                                        admin.getYearlySales("database/transactions/cashierTransactions.csv");
-                                        cout << "\n";
-
-                                        system("pause"); // wait for the users input to exit
-                                        break;
-                                    case 4: // view total sales
-                                        showHeader("View total sales");
-                                        admin.getTotalSales("database/transactions/cashierTransactions.csv");
-                                        cout << "\n";
-
-                                        system("pause"); // wait for the users input to exit
-                                        break;
-                                    default:
-                                        cout << "Invalid option\n";
-                                        Sleep(1200);
-                                        break;
-                                }
-                            }
+                            cout << "\n";
+                            system("pause");
                             break;
                         case 3:
                             // go back to the previous menu
@@ -394,7 +366,7 @@ void PointOfSale::managerMenu(string username) {
                         case 2: {
                             while(true){
                                 system("cls");
-                                string viewMenu[] = {"View all products", "View all accounts", "View all logs", "Backup transaction data", "Go back"}; 
+                                string viewMenu[] = {"View all products", "View all accounts", "View all logs", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "Go back"}; // automatically sets the options for the user to choose
                                 int viewInput = showMenu("View", viewMenu); // automatically sets the options for the user to choose, and shows the menu. it also gets the user's input
                                 system("cls");
 
@@ -414,11 +386,11 @@ void PointOfSale::managerMenu(string username) {
                                     case 3: // view logs (account, product, or cashier)
                                         while(true){ // every menu, it corresponds with a loop. so that if the user decides to go back, we can just end the loop to have him or her go back to the previous menu
                                             system("cls"); // initial clear
-                                            string logsMenu[] = {"Account logs", "Product logs", "Cashier logs", "Go back"};
-                                            int logsInput = showMenu("View all logs", logsMenu); // show the menu and get the user's input
+                                            string logsMenu[] = {"Account logs", "Product logs", "Cashier transactions (Cash)", "Cashier transactions (GCash)", "Go back"};
+                                            int logsInput = showMenu("View all logs", logsMenu);
                                             system("cls"); // clear again after getting input
 
-                                            if (logsInput == 4) break; // exit logs menu
+                                            if (logsInput == 5) break; // exit logs menu
 
                                             switch(logsInput){
                                                 case 1: // account logs
@@ -430,10 +402,14 @@ void PointOfSale::managerMenu(string username) {
                                                     admin.getAllLogs("products");
                                                     break;
                                                 case 3: // cashier logs
-                                                    showHeader("Cashier logs");
-                                                    admin.getAllLogs("cashier");
+                                                    showHeader("Cashier transactions (Cash)");
+                                                    admin.getAllLogs("cashier_cash");
                                                     break;
-                                                default: // fallback for invalid input
+                                                case 4: // cashier logs
+                                                    showHeader("Cashier transactions (GCash)");
+                                                    admin.getAllLogs("cashier_gcash");
+                                                    break;
+                                                default:
                                                     cout << "Invalid selection";
                                                     Sleep(1200);
                                                     break;
@@ -441,8 +417,13 @@ void PointOfSale::managerMenu(string username) {
                                         }
                                         break;
                                     case 4: // this function is for those who had a transaction right after a  power outage or system crash. in that way, they can update immediately the database
-                                        showHeader("Backup transaction data");
-                                        admin.readBackupTransactions("database/transactions/backup.csv");
+                                        showHeader("Backup transaction data (Cash)");
+                                        admin.readBackupTransactions("database/transactions/cash_backup.csv");
+                                        system("pause"); // pause to let the user read the backup transactions
+                                        break;
+                                    case 5: // this function is for those who had a transaction right after a  power outage or system crash. in that way, they can update immediately the database
+                                        showHeader("Backup transaction data (GCash)");
+                                        admin.readBackupTransactions("database/transactions/gcash_backup.csv");
                                         system("pause"); // pause to let the user read the backup transactions
                                         break;
                                     default:
@@ -521,50 +502,22 @@ void PointOfSale::managerMenu(string username) {
 
                             system("pause");
                             break;
-                        case 2: // view today's sales
-                            while(true){ // loop for the sales menu, if the user decides to go back, it will end this loop
-                                system("cls");
-                                string salesMenu[] = {"View daily sales", "View monthly sales", "View yearly sales", "View total sales", "Go back"};
-                                int salesSelection = showMenu("View Sales", salesMenu);
-                                system("cls");
+                        case 2: // get daily, monthly, yearly, and total sales
+                            showHeader("View sales");
+                            cout << "Daily Sales:\n";
+                            admin.getDailySales();
 
-                                if(salesSelection == 5) break; // go back to monitoring menu
+                            cout << "\nMonthly Sales:\n";
+                            admin.getMonthlySales();
 
-                                switch(salesSelection){
-                                    case 1: // view daily sales
-                                        showHeader("View daily sales");
-                                        admin.getDailySales("database/transactions/cashierTransactions.csv");
-                                        cout << "\n";
+                            cout << "\nYearly Sales:\n";
+                            admin.getYearlySales();
 
-                                        system("pause"); // wait for the users input to exit
-                                        break;
-                                    case 2: // view monthly sales
-                                        showHeader("View monthly sales");
-                                        admin.getMonthlySales("database/transactions/cashierTransactions.csv");
-                                        cout << "\n";
+                            cout << "\nOverall Sales:\n";
+                            admin.getTotalSales();
 
-                                        system("pause"); // wait for the users input to exit
-                                        break;
-                                    case 3: // view yearly sales
-                                        showHeader("View yearly sales");
-                                        admin.getYearlySales("database/transactions/cashierTransactions.csv");
-                                        cout << "\n";
-
-                                        system("pause"); // wait for the users input to exit
-                                        break;
-                                    case 4: // view total sales
-                                        showHeader("View total sales");
-                                        admin.getTotalSales("database/transactions/cashierTransactions.csv");
-                                        cout << "\n";
-
-                                        system("pause"); // wait for the users input to exit
-                                        break;
-                                    default:
-                                        cout << "Invalid option\n";
-                                        Sleep(1200);
-                                        break;
-                                }
-                            }
+                            cout << "\n";
+                            system("pause");
                             break;
                         case 3:
                             // go back to the previous menu

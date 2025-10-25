@@ -1,4 +1,5 @@
-TransNum,ProdNames,ProdQtys,Amt,Tax,TotalAm,Change,Date,Time,CashierName
-1,Shoulder_Bag,1,40.18,4.82,45.00,5.00,10_25_25,01:10:47_PM,cashier
-2,Graphic_Tee;Striped_Polo,1;1,125.00,15.00,140.00,60.00,10_25_25,05:40:00_PM,cashier
-3,Graphic_Tee,1,66.96,8.04,75.00,5.00,10_25_25,07:15:40_PM,cashier
+TransNum,ProdNames,ProdQtys,Amt,Tax,TotalAmt,Change,Date,Time,CashierName
+1,Shoulder_Bag,1,40.18,4.82,45.00,5.00,10_26_25,01:10:47_PM,cashier
+1,Shoulder_Bag,1,40.18,4.82,45.00,5.00,10_26_25,01:10:47_PM,cashier
+1,Shoulder_Bag,1,40.18,4.82,45.00,5.00,10_26_25,01:10:47_PM,cashier
+1,Shoulder_Bag,1,40.18,4.82,45.00,5.00,10_26_25,01:10:47_PM,cashier

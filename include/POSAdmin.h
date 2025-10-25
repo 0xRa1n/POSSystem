@@ -13,10 +13,10 @@ public:
 
     // READ
     void readProducts(string database); // read and display all products from the inventory
-    void getDailySales(string database); // get the daily sales from the database
-    void getTotalSales(string database); // get the total sales from the database
-    void getMonthlySales(string database); // get the monthly sales from the database
-    void getYearlySales(string database); // get the yearly sales from the database
+    void getDailySales(); // get the daily sales from the database
+    void getTotalSales(); // get the total sales from the database
+    void getMonthlySales(); // get the monthly sales from the database
+    void getYearlySales(); // get the yearly sales from the database
     void getAllAccounts(string database); // get all user accounts from the database
     void getAllLogs(string type); // get all logs of a specific type
     void readBackupTransactions(string database); // read and display the backup transaction from a power outage or system crash

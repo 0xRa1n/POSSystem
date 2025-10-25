@@ -56,13 +56,13 @@ void POSCashier::deductPurchasedQuantities(string productsDatabase, string query
         isFound = true;
     }
 
-    if(!isFound){
+    if(!isFound){ // if the product to deduct quantity from is not found
         cout << "Product not found in database.\n";
         Sleep(1200);
         return;
     } 
-    ofstream fileOut(productsDatabase);
-    if(!fileOut){
+    ofstream fileOut(productsDatabase); // open the file as an ofstream since we are writing to it
+    if(!fileOut){ // if file cannot be opened
         cout << "Cannot write to file " << productsDatabase << endl;
         Sleep(1200);
         return;
@@ -93,17 +93,17 @@ bool POSCashier::viewCart(string username){ // view cart is also bool since if t
     }
 
     for(const auto& item : cart){ // Iterate over each item (which is a vector<string>) in the cart.
-        cout << "\nProduct name: " << item[0] << "\n";
-        cout << "Category: " << item[1] << "\n";
-        cout << "Quantity: " << item[2] << "\n";
-        cout << "Price: P" << item[3] << "\n";
+        cout << "\nProduct name: " << item[0] << "\n"; // item[0] is product name
+        cout << "Category: " << item[1] << "\n"; // item[1] is product category
+        cout << "Quantity: " << item[2] << "\n"; // item[2] is product quantity
+        cout << "Price: P" << item[3] << "\n"; // item[3] is product price
 
         totalAmount += stoi(item[3]) * stoi(item[2]);
     }
 
-    cout << "\nTotal Amount: P" << totalAmount - (totalAmount * 0.12) << endl;
-    cout << "VAT (12%): P" << (totalAmount) * 0.12 << endl;
-    cout << "Amount Due: P" << (totalAmount) + ((totalAmount) * 0.12) << endl;
+    cout << "\nTotal Amount: P" << totalAmount / 1.12 << endl;
+    cout << "VAT (12%): P" << (totalAmount) * 0.12 << endl; // to revise
+    cout << "Amount Due: P" << totalAmount << endl;
 
     cout << "\nDo you want to proceed to checkout? (1 = Yes, 0 = No): ";
     int confirmation;
@@ -306,7 +306,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                     // Process each unit of this item (e.g., if quantity is 2, loop twice)
                     for (int i = 0; i < quantity; ++i) {
                         if (itemsCounted < 3) { // Only count up to 3 items, otherwise, it should not include that item on the discount (as per buy 3 get __ discount)
-                            subtotalForDiscount += price;
+                            subtotalForDiscount += price; // get the price of the item for that specific category
                             itemsCounted++;
                         } else {
                             break; // Stop counting for this item if we already have 3
@@ -361,8 +361,8 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                 namesStream << cart[cart_count][0]; // append the product name to the stream
                 quantitiesStream << cart[cart_count][2]; // append the product quantity to the stream
                 if(cart_count < cart.size() - 1){ // append semicolon everywhere except the last item
-                    namesStream << ";";
-                    quantitiesStream << ";";
+                    namesStream << "|";
+                    quantitiesStream << "|";
                 }
             }
 
@@ -376,13 +376,19 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                 return false;
             }
 
+            // add validator if the payment method is GCash or Cash, not any special characters
+            // if(regex_search(paymentMethod, disallowed)){
+            //     cout << "Payment method cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+            //     Sleep(1200);
+            //     return false;
+            // }
+
             if(paymentMethod == "GCash"){ // process GCash payment
                 paymentMethod = "GCash"; // this will be used for the receipt where it will show the payment method
 
                 cout << "Enter the money received from the customer: ";
                 cin >> userMoney;
                 if(handleInputError()) return false; // handle invalid inputs
-                change = userMoney - finalAmountDue;
 
                 cout << "Enter the reference id: ";
                 cin >> referenceID;
@@ -396,7 +402,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                     cerr << "Error opening backup file for writing." << endl;
                     return false;
                 }
-                backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,PmMethod,RefID,Date,Time,Cashier\n" 
+                backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,PmMethod,RefID,Date,Time,Cashier\n" 
                             << namesStream.str() << ","
                             << quantitiesStream.str() << ","
                             << setprecision(2) << fixed << rawPrice << ","
@@ -404,7 +410,6 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                             << setprecision(2) << fixed << vatAmount << ","
                             << setprecision(2) << fixed << finalAmountDue << ","
                             << setprecision(2) << fixed << userMoney << ","
-                            << setprecision(2) << fixed << change << ","
                             << "GCash" << ","
                             << referenceID << ","
                             << date << ","
@@ -490,6 +495,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                         return false;
                     }
                     backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,PmMethod,Date,Time,Cashier\n" 
+                    
                                 << namesStream.str() << ","
                                 << quantitiesStream.str() << ","
                                 << setprecision(2) << fixed << rawPrice << ","
@@ -598,14 +604,15 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
 
     //setprecision gets the first two decimal places
     //fixed makes sure that the decimal places are always shown, even if they are zeros
-    cout << "Money tendered: P" << setprecision(2) << fixed << userMoney << endl;
-    cout << "Less: Discounts: P" << setprecision(2) << fixed << discountAmount << endl;
+    cout << setprecision(2) << fixed;
+    cout << "Money tendered: P" << userMoney << endl;
+    cout << "Less: Discounts: P" << discountAmount << endl;
 
-    cout << "Total before VAT: P" << setprecision(2) << fixed << discountedTotal << endl;
-    cout << "VAT (12%): P" << setprecision(2) << fixed << vatAmount << endl;
-    cout << "Amount Due: P" << setprecision(2) << fixed << finalAmountDue << endl;
+    cout << "Total before VAT: P" << discountedTotal << endl;
+    cout << "VAT (12%): P" << vatAmount << endl;
+    cout << "Amount Due: P" << finalAmountDue << endl;
     cout << "Payment Method: " << paymentMethod << endl;
-    cout << "Change: P" << setprecision(2) << fixed << change << endl;
+    cout << "Change: P" << change << endl;
 
     cout << "\n";
 
@@ -735,7 +742,8 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
         cout << "Insufficient stock available!\n";
         Sleep(1200);
         return false;
-    } else if(quantityToPurchase < 0){ // if the quantity is negative
+    } 
+    if(quantityToPurchase < 0){ // if the quantity is negative
         cout << "Quantity cannot be negative. Please enter a valid integer." << endl;
         Sleep(1200);
         return false;
