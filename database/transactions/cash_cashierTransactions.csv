@@ -1,2 +1,6 @@
 TransNum,ProdNames,ProdQtys,Amt,Tax,TotalAmt,Change,AmtRefunded,Date,Time,CashierName,Status
 1,Graphic_Tee,1,66.96,8.04,75.00,0.00,0.00,10_27_25,01:07:57_AM,cashier,Completed
+2,Graphic_Tee,1,66.96,8.04,75.00,0.00,0.00,10_27_25,01:28:26_AM,cashier,Completed
+3,Graphic_Tee,1,66.96,8.04,75.00,0.00,0.00,10_27_25,01:29:16_AM,cashier,Completed
+4,Graphic_Tee,1,66.96,8.04,75.00,0.00,0.00,10_27_25,01:31:36_AM,cashier,Completed
+5,Graphic_Tee,1,66.96,8.04,75.00,0.00,0.00,10_27_25,01:34:46_AM,cashier,Completed

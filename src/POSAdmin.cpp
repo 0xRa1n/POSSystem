@@ -26,8 +26,8 @@ const regex disallowed{R"([^A-Za-z0-9_@#&])"}; // const so that it cannot be cha
 
 // CREATE
 void POSAdmin::addProduct(string database, string username) {
-    string productName, productSubCategory;
-    int quantity;
+    string productName, productSubCategory, productCategory;
+    int quantity, userCategoryInput, userSubCategoryInput;
     double price;
 
     // ask the user for the product name (if 0 is entered, it will go back to the menu)
@@ -52,33 +52,47 @@ void POSAdmin::addProduct(string database, string username) {
     }
 
     // ask the user for the product category
-    cout << "Enter the product category (Tops/Bottoms/Accessories, 0 = Cancel): ";
-    string productCategory;
-    cin >> productCategory;
+    cout << "1. Tops\n2. Bottoms\n3. Accessories\n4. Cancel\n";
+    cout << "Enter the product category: ";
+    cin >> userCategoryInput;
 
-    if (productCategory == "0") return;
-    if(regex_search(productCategory, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
-        cout << "Product category cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
-        Sleep(1200);
-        return;
-    }
+    if(handleInputError()) return; // handle invalid inputs
+    if (userCategoryInput == 4) return;
 
     // if productCategory input from user is neither tops, bottoms, or accessories
-    if(productCategory != "Tops" && productCategory != "Bottoms" && productCategory != "Accessories"){
-        cout << "Invalid category. Please enter Tops, Bottoms, or Accessories only.\n";
+    if(userCategoryInput != 1 && userCategoryInput != 2 && userCategoryInput != 3){
+        cout << "Invalid category. Please enter from the list above.\n";
         Sleep(1200);
         return;
     } 
 
-    // ask the user if what product sub-category is the product
-    cout << "Enter the product sub-category (0 = Cancel): "; // no specific sub-categories since they are many
-    cin >> productSubCategory;
+    switch(userCategoryInput){
+        case 1: productCategory = "Tops"; break;
+        case 2: productCategory = "Bottoms"; break;
+        case 3: productCategory = "Accessories"; break;
+        default: break; // this line will never be reached due to the previous validation
+    }
+    cout << "\n"; 
 
-    if(productSubCategory == "0") return;
-    if(regex_search(productSubCategory, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
-        cout << "Product sub-category cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
-        Sleep(1200);
-        return;
+    // ask the user if what product sub-category is the product
+    cout << "1. T-Shirts\n2. Polo Shirts\n3. Jackets\n4. Jeans\n5. Shorts\n6. Skirts\n7. Bags\n8. Headwear\n9. Wallets\n10. Cancel\n";
+    cout << "Enter the product sub-category: "; // no specific sub-categories since they are many
+    cin >> userSubCategoryInput;
+
+    if(handleInputError()) return; // handle invalid inputs
+    if(userSubCategoryInput == 10) return;
+
+    switch(userSubCategoryInput){
+        case 1: productSubCategory = "T_Shirts"; break;
+        case 2: productSubCategory = "Polo_Shirts"; break;
+        case 3: productSubCategory = "Jackets"; break;
+        case 4: productSubCategory = "Jeans"; break;
+        case 5: productSubCategory = "Shorts"; break;
+        case 6: productSubCategory = "Skirts"; break;
+        case 7: productSubCategory = "Bags"; break;
+        case 8: productSubCategory = "Headwear"; break;
+        case 9: productSubCategory = "Wallets"; break;
+        default: break; // invalid input, so just return. additionally, invalid input is already handled above
     }
 
     // ask the user for the product's quantity and price
@@ -127,13 +141,6 @@ void POSAdmin::addProduct(string database, string username) {
     // open the database file, and add the new product
     fstream fout; // create a file stream object with the variable fout, so that we can write to the file
     fout.open(database, ios::app); // this tells the program that the cursor should be placed at the end of the file, avoiding overwritting existing data
-
-    // fout << newId << ","
-    //     << productName << ","
-    //     << productCategory << ","
-    //     << productSubCategory << ","
-    //     << quantity << ","
-    //     << fixed << setprecision(2) << price << "\n";
 
     fout << newId << ","
         << productCategory << ","

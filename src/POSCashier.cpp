@@ -23,7 +23,7 @@ POSAdmin admin; // we need to use the function saveLogs
 
 void POSCashier::deductPurchasedQuantities(string productsDatabase, string query, string username, string quantities){
     string line, fileContent;
-    bool isFound;
+    bool isFound = false;
 
     ifstream readFile(productsDatabase); // open the file as an ifstream since we are reading from it
     if(!readFile.is_open()){ // if file cannot be opened
@@ -35,25 +35,27 @@ void POSCashier::deductPurchasedQuantities(string productsDatabase, string query
     while(getline(readFile, line)){
         stringstream ss(line); // create a string stream from the line
         string indexOne, indexTwo, indexThree, indexFour, indexFive, indexSix;
+
         // get a copy of each entries
-        getline(ss, indexOne, ','); // read the id (not used) and save to variable indexOne
-        getline(ss, indexTwo, ','); // read the second entry (username or product name) and save to variable indexTwo
-        getline(ss, indexThree, ','); // read the product category or password and save to variable indexThree
-        getline(ss, indexFour, ','); // read the product subcategory or role and save to variable indexFour
-        getline(ss, indexFive, ','); // get the product quantity and save to variable indexFive
-        getline(ss, indexSix, ','); // get the product price and save to variable indexSix
+        getline(ss, indexOne, ','); // read the product id
+        getline(ss, indexTwo, ',');  // read the product category
+        getline(ss, indexThree, ','); // read the product subcategory
+        getline(ss, indexFour, ','); // read the product name
+        getline(ss, indexFive, ','); // read the product quantity
+        getline(ss, indexSix, ',');  // read the product price
 
         // since we only need to change the quantity 
-        if(indexTwo == query){
+        if(indexFour == query){
             int currentQuantity = stoi(indexFive); // convert string to int, so that we can do arithmetic operations
             int purchasedQuantity = stoi(quantities); // convert string to int, so that we can do arithmetic operations
             int updatedQuantity = currentQuantity - purchasedQuantity;
             indexFive = to_string(updatedQuantity); // convert back to string and update the quantity
+            isFound = true;
         }
 
         fileContent += indexOne + "," + indexTwo + "," + indexThree + "," + indexFour + "," + indexFive + "," + indexSix + "\n";
-        isFound = true;
     }
+    readFile.close();
 
     if(!isFound){ // if the product to deduct quantity from is not found
         cout << "Product not found in database.\n";
@@ -386,6 +388,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     if(handleInputError()) return false; // handle invalid inputs
 
     double change = 0;
+    int paymentMethodInput;
     string paymentMethod;
     switch(confirmation){
         case 1: { // proceed to payment
@@ -405,167 +408,168 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
             }
             saveAbandonedCarts(namesStream.str(), quantitiesStream.str()); // save the customer purchase logs
 
-            cout << "Enter the payment method (Cash/GCash, 0 = Cancel): ";
-            cin >> paymentMethod;
-            if(paymentMethod == "0") return true; // cancel the transaction and go back to main menu without breaking the loop
+            cout << "Enter the payment method (1 = Cash, 2 = GCash, 0 = Cancel): ";
+            cin >> paymentMethodInput;
+            if(handleInputError()) return false; // handle invalid inputs
+            if(paymentMethodInput == 0) return true; // cancel the transaction and go back to main menu
 
-            if(paymentMethod != "Cash" && paymentMethod != "GCash"){ // this will check if the inputs are both NOT Cash or GCASH
-                // if we were to use OR (||), it would always be true since the first condition would always be true for one of the options
-                cout << "Invalid payment method. Please enter Cash or GCash only.\n";
-                Sleep(1200);
-                return false;
-            }
+            switch(paymentMethodInput){
+                // to-do : make a function to save to the backup file
+                case 1: { // Cash
+                    string cashUserInput;
+                    paymentMethod = "Cash"; // this will be used for the receipt where it will show the payment method
 
-            if(paymentMethod == "GCash"){ // process GCash payment
-                string gcashUserInput;
-                paymentMethod = "GCash"; // this will be used for the receipt where it will show the payment method
+                    cout << "Enter the customer's money: ";
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    getline(cin, cashUserInput);
 
-                cout << "Enter the money received from the customer: ";
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                getline(cin, gcashUserInput);
+                    // we used cin.ignore() along with getline to get a value that has a decimal point
+                    // this is because cin will stop reading the input at the first whitespace, so if the user enters a decimal point, it will stop reading there
+                    // cin.ignore() will ignore the newline character left in the input buffer by the previous cin
+                    // input buffer means the data that is left in the input stream after a previous input operation
 
-                // we used cin.ignore() along with getline to get a value that has a decimal point
-                // this is because cin will stop reading the input at the first whitespace, so if the user enters a decimal point, it will stop reading there
-                // cin.ignore() will ignore the newline character left in the input buffer by the previous cin
-                // input buffer means the data that is left in the input stream after a previous input operation
-
-                try {
-                    userMoney = stod(gcashUserInput);
-                    if(userMoney < 0){ // money cannot be negative
-                        cout << "Money cannot be negative. Please enter a valid number." << endl;
-                        Sleep(1200);
-                        return false;
-                    }
-                } catch (...) {
-                    cout << "Invalid input for money received. Please enter a valid number.\n";
-                    system("pause");
-                    return false;
-                }
-
-                cout << "Enter the reference id: ";
-                cin >> referenceID;
-                if(handleInputError()) return false; // handle invalid inputs
-
-                // power outtage might happen here after the user had paid, so we need to have a backup that will log the transaction even if the program crashes
-                // in this manner, if the power outtage happens right after the user had paid, we can still recover the transaction from the backup file
-                // start of code for backup redundancy
-                ofstream backupFile("database/transactions/gcash_backup.csv", ios::app); // open in append mode
-                if (!backupFile) {
-                    cout << "Error opening backup file for writing." << endl;
-                    return false;
-                }
-                backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,PmMethod,RefID,Date,Time,Cashier,Status\n" 
-                            << namesStream.str() << ","
-                            << quantitiesStream.str() << ","
-                            << setprecision(2) << fixed << rawPrice << ","
-                            << setprecision(2) << fixed << discountAmount << ","
-                            << setprecision(2) << fixed << vatAmount << ","
-                            << setprecision(2) << fixed << finalAmountDue << ","
-                            << setprecision(2) << fixed << userMoney << ","
-                            << "GCash" << ","
-                            << referenceID << ","
-                            << date << ","
-                            << time << ","
-                            << username << ","
-                            << "Completed" << "\n";
-
-                backupFile.close();
-                // end of code for backup redundancy
-
-                const string productsDatabase = "database/products.csv"; // path to products database, read only
-                ifstream fileIn(productsDatabase); // open the products database to read the current quantities
-                if(!fileIn.is_open()){
-                    cout << "Failed to open file\n";
-                    Sleep(1200);
-                    return false;
-                }
-
-                string fileContent, line;
-                while(getline(fileIn, line)){
-                    stringstream ss(line); // helps us read each line by separating with commas
-                    string productName, productQuantity, token;
-                    getline(ss, token, ',');
-                    getline(ss, productName, ','); // get the product name
-                    getline(ss, token, ','); // skip the sub-category
-                    getline(ss, token, ','); // skip the category
-                    getline(ss, productQuantity, ','); // get the quantity
-
-                    // since there are multiple products, we need to loop through the vector of product names
-                    for(int cart_size = 0; cart_size < cart.size(); cart_size++){ // iterate through the cart
-                        if(productName == cart[cart_size][0]){
-                            int updatedQuantity = stoi(productQuantity) - stoi(cart[cart_size][2]); // subtract the quantity purchased | stoi means string to integer
-                            deductPurchasedQuantities(productsDatabase, productName, username, cart[cart_size][2]);
+                    try {
+                        userMoney = stod(cashUserInput);
+                        if(userMoney < 0){ // money cannot be negative
+                            cout << "Money cannot be negative. Please enter a valid number." << endl;
+                            Sleep(1200);
+                            return false;
                         }
-                    }
-                }
-
-                // remove if not needed
-                remove("database/transactions/gcash_backup.csv");
-                
-                // save the transaction to the main database
-                saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, change, username, "GCash", referenceID); // save the transaction to the database, specifically at the gcash_cashierTransactions.csv
-            } else if(paymentMethod == "Cash"){ // process Cash payment
-                string cashUserInput;
-                paymentMethod = "Cash"; // this will be used for the receipt where it will show the payment method
-
-                cout << "Enter the customer's money: ";
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                getline(cin, cashUserInput);
-
-                // we used cin.ignore() along with getline to get a value that has a decimal point
-                // this is because cin will stop reading the input at the first whitespace, so if the user enters a decimal point, it will stop reading there
-                // cin.ignore() will ignore the newline character left in the input buffer by the previous cin
-                // input buffer means the data that is left in the input stream after a previous input operation
-
-                try {
-                    userMoney = stod(cashUserInput);
-                    if(userMoney < 0){ // money cannot be negative
-                        cout << "Money cannot be negative. Please enter a valid number." << endl;
-                        Sleep(1200);
+                    } catch (...) {
+                        cout << "Invalid input for money received. Please enter a valid number.\n";
+                        system("pause");
                         return false;
                     }
-                } catch (...) {
-                    cout << "Invalid input for money received. Please enter a valid number.\n";
-                    system("pause");
-                    return false;
+
+                    change = stod(cashUserInput) - finalAmountDue; // calculate the change because this is a cash payment
+
+                    // check if the user has sufficient money
+                    if(userMoney < finalAmountDue){
+                        int confirmation;
+                        cout << "Insufficient money. Try again? (1 = Yes, 0 = No): ";
+                        cin >> confirmation;
+
+                        if(handleInputError()) return false; // handle invalid inputs
+
+                        switch(confirmation){
+                            case 1: // try again
+                                return processTransaction(username);
+                            case 0: // cancel transaction and clear the cart
+                                // clear the cart after cancelling the transaction
+                                cart.clear();
+
+                                cout << "Transaction cancelled.\n";
+                                Sleep(1200);
+                                return true;
+                            default:
+                                cout << "Invalid selection.\n"; // fallback, but should not reach here
+                                Sleep(1200);
+                                return true;
+                        }
+                    } else {
+                        // power outtage might happen here after the user had paid, so we need to have a backup that will log the transaction even if the program crashes
+                        // in this manner, if the power outtage happens right after the user had paid, we can still recover the transaction from the backup file
+
+                        // start of code for backup redundancy
+                        ofstream backupFile("database/transactions/cash_backup.csv", ios::app); // open in append mode
+                        if (!backupFile) {
+                            cout << "Error opening backup file for writing." << endl;
+                            return false;
+                        }
+                        backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,PmMethod,Date,Time,Cashier,Status\n" 
+                                    << namesStream.str() << ","
+                                    << quantitiesStream.str() << ","
+                                    << setprecision(2) << fixed << rawPrice << ","
+                                    << setprecision(2) << fixed << discountAmount << ","
+                                    << setprecision(2) << fixed << vatAmount << ","
+                                    << setprecision(2) << fixed << finalAmountDue << ","
+                                    << setprecision(2) << fixed << userMoney << ","
+                                    << setprecision(2) << fixed << change << ","
+                                    << "Cash" << ","
+                                    << date << ","
+                                    << time << ","
+                                    << username << ","
+                                    << "Completed" << "\n";
+
+                        backupFile.close();
+                        // end of code for backup redundancy
+
+                        const string productsDatabase = "database/products.csv"; // path to products database, read only
+                        ifstream fileIn(productsDatabase); // open the products database to read the current quantities
+                        if(!fileIn.is_open()){
+                            cout << "Failed to open file\n";
+                            Sleep(1200);
+                            return false;
+                        }
+                        
+                        string fileContent, line;
+                        while(getline(fileIn, line)){
+                            stringstream ss(line); // helps us read each line by separating with commas
+                            string productName, productQuantity, token;
+                            getline(ss, token, ','); // skip the product id
+                            getline(ss, token, ',');  // skip the category
+                            getline(ss, token, ','); // skip the sub-category
+                            getline(ss, productName, ','); // get the product name
+                            getline(ss, productQuantity, ','); // get the quantity
+
+                            // since there are multiple products, we need to loop through the vector of product names
+                            for(int cart_size = 0; cart_size < cart.size(); cart_size++){ // iterate through the cart
+                                if(productName == cart[cart_size][0]){
+                                    int updatedQuantity = stoi(productQuantity) - stoi(cart[cart_size][2]); // subtract the quantity purchased | stoi means string to integer
+                                    deductPurchasedQuantities(productsDatabase, productName, username, cart[cart_size][2]);
+                                }
+                            }
+                        }
+                        
+                        // save the transaction to the main database
+                        saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, change, username, "Cash");
+
+                        // remove the backup file after saving the transaction to the main database
+                        remove("database/transactions/cash_backup.csv");
+
+                        cout << "Change: " << change << endl;
+                    }
+                    break;
                 }
+                case 2: { // GCash
+                    string gcashUserInput;
+                    paymentMethod = "GCash"; // this will be used for the receipt where it will show the payment method
 
-                change = stod(cashUserInput) - finalAmountDue; // calculate the change because this is a cash payment
+                    cout << "Enter the money received from the customer: ";
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    getline(cin, gcashUserInput);
 
-                // check if the user has sufficient money
-                if(userMoney < finalAmountDue){
-                    int confirmation;
-                    cout << "Insufficient money. Try again? (1 = Yes, 0 = No): ";
-                    cin >> confirmation;
+                    // we used cin.ignore() along with getline to get a value that has a decimal point
+                    // this is because cin will stop reading the input at the first whitespace, so if the user enters a decimal point, it will stop reading there
+                    // cin.ignore() will ignore the newline character left in the input buffer by the previous cin
+                    // input buffer means the data that is left in the input stream after a previous input operation
 
+                    try {
+                        userMoney = stod(gcashUserInput);
+                        if(userMoney < 0){ // money cannot be negative
+                            cout << "Money cannot be negative. Please enter a valid number." << endl;
+                            Sleep(1200);
+                            return false;
+                        }
+                    } catch (...) {
+                        cout << "Invalid input for money received. Please enter a valid number.\n";
+                        system("pause");
+                        return false;
+                    }
+
+                    cout << "Enter the reference id: ";
+                    cin >> referenceID;
                     if(handleInputError()) return false; // handle invalid inputs
 
-                    switch(confirmation){
-                        case 1: // try again
-                            return processTransaction(username);
-                        case 0: // cancel transaction and clear the cart
-                            // clear the cart after cancelling the transaction
-                            cart.clear();
-
-                            cout << "Transaction cancelled.\n";
-                            Sleep(1200);
-                            return true;
-                        default:
-                            cout << "Invalid selection.\n"; // fallback, but should not reach here
-                            Sleep(1200);
-                            return true;
-                    }
-                } else {
                     // power outtage might happen here after the user had paid, so we need to have a backup that will log the transaction even if the program crashes
                     // in this manner, if the power outtage happens right after the user had paid, we can still recover the transaction from the backup file
-
                     // start of code for backup redundancy
-                    ofstream backupFile("database/transactions/cash_backup.csv", ios::app); // open in append mode
+                    ofstream backupFile("database/transactions/gcash_backup.csv", ios::app); // open in append mode
                     if (!backupFile) {
                         cout << "Error opening backup file for writing." << endl;
                         return false;
                     }
-                    backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,PmMethod,Date,Time,Cashier,Status\n" 
+                    backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,PmMethod,RefID,Date,Time,Cashier,Status\n" 
                                 << namesStream.str() << ","
                                 << quantitiesStream.str() << ","
                                 << setprecision(2) << fixed << rawPrice << ","
@@ -573,8 +577,8 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                                 << setprecision(2) << fixed << vatAmount << ","
                                 << setprecision(2) << fixed << finalAmountDue << ","
                                 << setprecision(2) << fixed << userMoney << ","
-                                << setprecision(2) << fixed << change << ","
-                                << "Cash" << ","
+                                << "GCash" << ","
+                                << referenceID << ","
                                 << date << ","
                                 << time << ","
                                 << username << ","
@@ -590,7 +594,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                         Sleep(1200);
                         return false;
                     }
-                    
+
                     string fileContent, line;
                     while(getline(fileIn, line)){
                         stringstream ss(line); // helps us read each line by separating with commas
@@ -609,16 +613,19 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                             }
                         }
                     }
+
+                    // remove if not needed
+                    remove("database/transactions/gcash_backup.csv");
                     
                     // save the transaction to the main database
-                    saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, change, username, "Cash");
-
-                    // remove the backup file after saving the transaction to the main database
-                    remove("database/transactions/cash_backup.csv");
-
-                    cout << "Change: " << change << endl;
+                    saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, change, username, "GCash", referenceID); // save the transaction to the database, specifically at the gcash_cashierTransactions.csv
+                    break;
                 }
-            } 
+                default:
+                    cout << "Invalid payment method selected. Transaction cancelled.\n";
+                    Sleep(1200);
+                    return false;
+            }
             system("pause");
             break;
         }

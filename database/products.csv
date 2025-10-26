@@ -1,2 +1,4 @@
 ProdId,ProdCategory,ProdSubCategory,ProdName,Qty,Price
-1,Tops,T_Shirts,Graphic_Tee,1,75.00
+1,Tops,T_Shirts,Graphic_Tee,0,75.00
+2,Tops,T_Shirts,Plain_Oversized_Tee,10,60.00
+3,Tops,T_Shirts,Vintage_Print_Tee,12,85.00

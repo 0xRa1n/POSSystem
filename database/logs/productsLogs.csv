@@ -101,3 +101,6 @@ UPDATE,Test_to_Rain,10_27_25,12:06:14_AM,Test,Forgotten
 UPDATE,Test_to_Rain,10_27_25,12:08:46_AM,admin,Forgotten
 UPDATE,Graphic_Tee_Quantity_to_1,10_27_25,12:47:53_AM,cashier,Purchased_Quantity_Deducted
 ADD,Graphic_Tee,10_27_25,01:00:25_AM,admin,New_Product_Added
+UPDATE,Graphic_Tee_Quantity_to_1,10_27_25,01:34:46_AM,cashier,Purchased_Quantity_Deducted
+ADD,Plain_Oversized_Tee,10_27_25,01:40:40_AM,admin,New_Product_Added
+ADD,Vintage_Print_Tee,10_27_25,01:43:11_AM,admin,New_Product_Added
