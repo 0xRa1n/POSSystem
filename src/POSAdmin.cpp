@@ -493,7 +493,7 @@ void POSAdmin::getDailySales(){
         getline(ss, transactionDate, ','); // get the date
         
         if(transactionDate == currentDate){ // compare the transaction date with the current date
-            totalCashSales += stoi(cashSalesAmount); // convert to integer and add to total cash sales
+            totalCashSales += stod(cashSalesAmount); // convert to integer and add to total cash sales
             cashTransactions++;
         }
     }
@@ -515,7 +515,7 @@ void POSAdmin::getDailySales(){
         getline(ss, transactionDate, ','); // get the date
 
         if(transactionDate == currentDate){ // compare the transaction date with the current date
-            totalGcashSales += stoi(gcashSalesAmount); // convert to integer and add to total gcash sales
+            totalGcashSales += stod(gcashSalesAmount); // convert to integer and add to total gcash sales
             gcashTransactions++;
         }
     }
@@ -586,7 +586,7 @@ void POSAdmin::getMonthlySales(){
         string transactionYear = transactionDate.substr(6,2); // get the last two characters of the transaction date (which is the year)
         
         if(currentMonth == transactionMonth && currentYear == transactionYear){
-            totalCashSales += stoi(cashSalesAmount); // convert to integer and add to total cash sales
+            totalCashSales += stod(cashSalesAmount); // convert to integer and add to total cash sales
             cashTransactions++;
         }
     }
@@ -611,7 +611,7 @@ void POSAdmin::getMonthlySales(){
         string transactionYear = transactionDate.substr(6,2); // get the last two characters of the transaction date (which is the year)
 
         if(currentMonth == transactionMonth && currentYear == transactionYear){
-            totalGcashSales += stoi(gcashSalesAmount); // convert to integer and add to total gcash sales
+            totalGcashSales += stod(gcashSalesAmount); // convert to integer and add to total gcash sales
             gcashTransactions++;
         }
     }
@@ -679,7 +679,7 @@ void POSAdmin::getYearlySales(){
         string transactionYear = transactionDate.substr(6,2); // get the last two characters of the transaction date (which is the year)
 
         if(transactionYear == currentYear){
-            totalCashSales += stoi(cashSalesAmount); // convert to integer and add to total cash sales
+            totalCashSales += stod(cashSalesAmount); // convert to integer and add to total cash sales
             cashTransactions++;
         }
     }
@@ -703,7 +703,7 @@ void POSAdmin::getYearlySales(){
         string transactionYear = transactionDate.substr(6,2); // get the last two characters of the transaction date (which is the year)
 
         if(transactionYear == currentYear){
-            totalGcashSales += stoi(gcashSalesAmount); // convert to integer and add to total gcash sales
+            totalGcashSales += stod(gcashSalesAmount); // convert to integer and add to total gcash sales
             gcashTransactions++;
         }
     }
@@ -766,7 +766,7 @@ void POSAdmin::getTotalSales(){
         getline(ss, token, ','); // skip the tax amount
         getline(ss, cashSalesAmount, ','); // get the amount (including tax)
                 
-        totalCashSales += stoi(cashSalesAmount); // convert to integer and add to total cash sales
+        totalCashSales += stod(cashSalesAmount); // convert to integer and add to total cash sales
         cashTransactions++;
     }
 
@@ -782,7 +782,7 @@ void POSAdmin::getTotalSales(){
         getline(ss, token, ','); // skip the tax amount
         getline(ss, gcashSalesAmount, ','); // get the amount (including tax)
 
-        totalGcashSales += stoi(gcashSalesAmount); // convert to integer and add to total gcash sales
+        totalGcashSales += stod(gcashSalesAmount); // convert to integer and add to total gcash sales
         gcashTransactions++;
     }
     cashFile.close();
@@ -929,7 +929,7 @@ void POSAdmin::updateProduct(string database, string type, string username){
         // note that the function handleInputError() will only work for INTEGERS entered via cin
         // and this function not only takes integers
         try {
-            int value = stoi(newValue); // convert string to integer
+            int value = stod(newValue); // convert string to integer
             if(value < 0){ // price and quantity cannot be negative
                 cout << "The " + query + " cannot be negative.\n";
                 Sleep(1200);

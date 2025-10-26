@@ -98,7 +98,7 @@ bool POSCashier::viewCart(string username){ // view cart is also bool since if t
         cout << "Quantity: " << item[2] << "\n"; // item[2] is product quantity
         cout << "Price: P" << item[3] << "\n"; // item[3] is product price
 
-        totalAmount += stoi(item[3]) * stoi(item[2]);
+        totalAmount += stod(item[3]) * stod(item[2]);
     }
 
     cout << "\nTotal Amount: P" << totalAmount / 1.12 << endl;
@@ -284,7 +284,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     map<string, int> categoryCounts; // to count the number of items in each category
     for (const auto& item : cart) { // loop through each item in the cart
         categoryCounts[item[1]] += stoi(item[2]); // count the quantity of each category in the cart
-        itemTotal += stoi(item[3]) * stoi(item[2]); // calculate the total price of items before discount and VAT (this will be used for the overall total)
+        itemTotal += stod(item[3]) * stod(item[2]); // calculate the total price of items before discount and VAT (this will be used for the overall total)
         //item[1] is category, item[2] is quantity, item[3] is price
     }
 
@@ -300,8 +300,8 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
             // Find the first 3 items belonging to this category in the cart.
             for (const auto& item : cart) { // loop through each item in the cart
                 if (item[1] == category) { // If the item is in the right category, note that item[1] is the category
-                    int price = stoi(item[3]); // item[3] is the price of the item
-                    int quantity = stoi(item[2]); // item[2] is the quantity of the item
+                    double price = stod(item[3]); // item[3] is the price of the item
+                    double quantity = stod(item[2]); // item[2] is the quantity of the item
 
                     // Process each unit of this item (e.g., if quantity is 2, loop twice)
                     for (int i = 0; i < quantity; ++i) {
@@ -351,7 +351,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
 
     if(handleInputError()) return false; // handle invalid inputs
 
-    int change;
+    double change = 0;
     string paymentMethod;
     switch(confirmation){
         case 1: { // proceed to payment
@@ -372,16 +372,9 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
             if(paymentMethod != "Cash" && paymentMethod != "GCash"){ // this will check if the inputs are both NOT Cash or GCASH
                 // if we were to use OR (||), it would always be true since the first condition would always be true for one of the options
                 cout << "Invalid payment method. Please enter Cash or GCash only.\n";
-                Sleep(1200);
+                system("pause");
                 return false;
             }
-
-            // add validator if the payment method is GCash or Cash, not any special characters
-            // if(regex_search(paymentMethod, disallowed)){
-            //     cout << "Payment method cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
-            //     Sleep(1200);
-            //     return false;
-            // }
 
             if(paymentMethod == "GCash"){ // process GCash payment
                 paymentMethod = "GCash"; // this will be used for the receipt where it will show the payment method
@@ -708,7 +701,7 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
             productName = row[1]; // row[1] is the product name
             productCategory = row[2]; // row[2] is the product category
             productQuantity = stoi(row[4]); // row[4] is the product quantity
-            productPrice = stoi(row[5]); // row[5] is the product price
+            productPrice = stod(row[5]); // row[5] is the product price
 
             if (productQuantity == 0){ // if the product is out of stock
                 cout << "Product is out of stock!\n";
