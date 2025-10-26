@@ -399,7 +399,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                     quantitiesStream << "|";
                 }
             }
-            saveCustomer(namesStream.str(), quantitiesStream.str()); // save the customer purchase logs
+            saveAbandonedCarts(namesStream.str(), quantitiesStream.str()); // save the customer purchase logs
 
             cout << "Enter the payment method (Cash/GCash, 0 = Cancel): ";
             cin >> paymentMethod;
