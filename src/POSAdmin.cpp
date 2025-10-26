@@ -27,7 +27,8 @@ const regex disallowed{R"([^A-Za-z0-9_@#&])"}; // const so that it cannot be cha
 // CREATE
 void POSAdmin::addProduct(string database, string username) {
     string productName, productSubCategory;
-    int quantity, price;
+    int quantity;
+    double price;
 
     // ask the user for the product name (if 0 is entered, it will go back to the menu)
     cout << "Enter the product name (type 0 to go back): ";
@@ -93,17 +94,32 @@ void POSAdmin::addProduct(string database, string username) {
         return;
     }
 
-    cout << "Enter the price (0 to go back): "; // price also should NOT be zero
-    cin >> price;
-    
-    if(handleInputError()) return; // handle invalid inputs
-    if (price == 0) return;
+    // since the input can have a decimal, we should use getline (because if we enter a decimal point, cin will think its the end of input. and it will trigger the invalid input error)
+    string priceInput;
+    cout << "Enter the price (0 to go back): ";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    getline(cin, priceInput);
 
-    if(price < 0){ // price cannot be negative
-        cout << "Price cannot be negative. Please enter a valid integer." << endl;
+    // we used cin.ignore() along with getline to get a value that has a decimal point
+    // this is because cin will stop reading the input at the first whitespace, so if the user enters a decimal point, it will stop reading there
+    // cin.ignore() will ignore the newline character left in the input buffer by the previous cin
+    // input buffer means the data that is left in the input stream after a previous input operation
+
+    if (priceInput == "0") return;
+
+    // try parsing the price and converting it to double
+    try {
+        price = stod(priceInput);
+        if(price < 0){ // price cannot be negative
+            cout << "Price cannot be negative. Please enter a valid number." << endl;
+            Sleep(1200);
+            return;
+        }
+    } catch (...) { // catch any exceptions
+        cout << "Invalid input. Please enter a valid number." << endl;
         Sleep(1200);
         return;
-    } 
+    }
 
     // get the last product id from the database
     int newId = getLastId(database) +  1;
@@ -117,7 +133,7 @@ void POSAdmin::addProduct(string database, string username) {
         << productCategory << ","
         << productSubCategory << ","
         << quantity << ","
-        << price << "\n";
+        << fixed << setprecision(2) << price << "\n";
 
     fout.close(); // close the file
 

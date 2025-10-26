@@ -68,3 +68,13 @@ UPDATE,Cargo_Shorts_Quantity_to_1,10_26_25,10:07:57_AM,cashier,Purchased_Quantit
 UPDATE,Baseball_Cap_Quantity_to_1,10_26_25,10:07:57_AM,cashier,Purchased_Quantity_Deducted
 UPDATE,Plain_Oversized_Tee_Quantity_to_3,10_26_25,10:09:46_AM,cashier,Purchased_Quantity_Deducted
 UPDATE,Windbreaker_Quantity_to_1,10_26_25,10:09:46_AM,cashier,Purchased_Quantity_Deducted
+ADD,test,10_26_25,10:39:57_AM,admin,New_Product_Added
+ADD,TestProduct,10_26_25,10:44:19_AM,admin,New_Product_Added
+ADD,TestProduct,10_26_25,10:45:59_AM,admin,New_Product_Added
+ADD,TestProcut,10_26_25,10:49:13_AM,admin,New_Product_Added
+UPDATE,Checkered_Polo_Quantity_to_3,10_26_25,11:06:05_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,TestProcut_Quantity_to_1,10_26_25,11:06:05_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_1,10_26_25,11:11:31_AM,cashier,Purchased_Quantity_Deducted
+ADD,DemoProduct,10_26_25,11:17:35_AM,admin,New_Product_Added
+UPDATE,Graphic_Tee_Quantity_to_1,10_26_25,11:24:54_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Old_School_Hoodie_Quantity_to_3,10_26_25,11:24:54_AM,cashier,Purchased_Quantity_Deducted

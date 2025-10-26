@@ -5,3 +5,5 @@ TransNum,ProdNames,ProdQtys,Amt,Tax,TotalAmt,Change,Date,Time,CashierName
 1,Shoulder_Bag,1,40.18,4.82,45.00,5.00,10_26_25,01:10:47_PM,cashier
 2,Graphic_Tee|Baseball_Cap|Cargo_Shorts,3|1|1,285.71,34.29,294.80,5.00,10_26_25,10:07:57_AM,cashier
 3,Plain_Oversized_Tee|Windbreaker,3|1,258.93,31.07,269.84,30.16,10_26_25,10:09:46_AM,cashier
+4,TestProcut|Checkered_Polo,1|3,218.74,26.25,225.95,0.03,10_26_25,11:06:05_AM,cashier
+5,Graphic_Tee,1,66.96,8.04,75.00,0.00,10_26_25,11:11:31_AM,cashier

@@ -31,14 +31,14 @@ int getLastId(string filename) {
     string line;
     int lastId = 0;
 
-    while (getline(fin, line)) {
+    while (getline(fin, line)) { // read each line
         if (line.empty()) continue; // skip empty lines
-        stringstream ss(line);
-        string idStr;
+        stringstream ss(line); // helps us read each line by separating with commas (our delimiter)
+        string idStr; // to hold the ID as string
 
-        if (getline(ss, idStr, ',')) {
+        if (getline(ss, idStr, ',')) { // read until the first comma
             try {
-                int id = stoi(idStr);
+                int id = stoi(idStr); // convert string to integer
                 if (id > lastId) lastId = id; // update lastId if current id is greater
             // if it fails, do nothing
             } catch (...) {}

@@ -6,7 +6,6 @@
 #include <iostream>
 #include <cctype> // for toupper()
 #include <sstream> // for stringstream
-#include <algorithm> // used for find
 #include <regex> // for regex
 #include <fstream> // for fstream, ifstream
 #include <iomanip> // for setw and left
@@ -255,7 +254,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     double itemTotal = 0.0;
     int quantity = 0;
     double discountAmount = 0.0;
-    int userMoney;
+    double userMoney;
     
     // map is similar to vector and array, but it uses key-value pairs (just like JSON)
     map<string, double> categoryDiscounts; // expected output: { "Tops": 0.10, "Bottoms": 0.15, ... }
@@ -284,7 +283,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     map<string, int> categoryCounts; // to count the number of items in each category
     for (const auto& item : cart) { // loop through each item in the cart
         categoryCounts[item[1]] += stoi(item[2]); // count the quantity of each category in the cart
-        itemTotal += stod(item[3]) * stod(item[2]); // calculate the total price of items before discount and VAT (this will be used for the overall total)
+        itemTotal += stod(item[3]) * stoi(item[2]); // calculate the total price of items before discount and VAT (this will be used for the overall total)
         //item[1] is category, item[2] is quantity, item[3] is price
     }
 
@@ -301,7 +300,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
             for (const auto& item : cart) { // loop through each item in the cart
                 if (item[1] == category) { // If the item is in the right category, note that item[1] is the category
                     double price = stod(item[3]); // item[3] is the price of the item
-                    double quantity = stod(item[2]); // item[2] is the quantity of the item
+                    double quantity = stoi(item[2]); // item[2] is the quantity of the item
 
                     // Process each unit of this item (e.g., if quantity is 2, loop twice)
                     for (int i = 0; i < quantity; ++i) {
@@ -332,7 +331,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     for(const auto& item : cart){ // for each item in the cart
         cout << left << setw(35) << item[0]  // print with left alignment and width of 35. item[0] is the product name
                 << setw(10) << item[2] // print with width of 10. item[2] is the quantity
-                << "P" << item[3] << endl; // item[3] is the price
+                << "P" << fixed << setprecision(2) << stod(item[3]) << endl; // item[3] is the price, we need to convert it to decimal so that it can get and show two decimal places. if it werent converted, it would show as an integer and will show many zeros
     }
     cout << "\n\n";
 
@@ -377,11 +376,30 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
             }
 
             if(paymentMethod == "GCash"){ // process GCash payment
+                string gcashUserInput;
                 paymentMethod = "GCash"; // this will be used for the receipt where it will show the payment method
 
                 cout << "Enter the money received from the customer: ";
-                cin >> userMoney;
-                if(handleInputError()) return false; // handle invalid inputs
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                getline(cin, gcashUserInput);
+
+                // we used cin.ignore() along with getline to get a value that has a decimal point
+                // this is because cin will stop reading the input at the first whitespace, so if the user enters a decimal point, it will stop reading there
+                // cin.ignore() will ignore the newline character left in the input buffer by the previous cin
+                // input buffer means the data that is left in the input stream after a previous input operation
+
+                try {
+                    userMoney = stod(gcashUserInput);
+                    if(userMoney < 0){ // money cannot be negative
+                        cout << "Money cannot be negative. Please enter a valid number." << endl;
+                        Sleep(1200);
+                        return false;
+                    }
+                } catch (...) {
+                    cout << "Invalid input for money received. Please enter a valid number.\n";
+                    system("pause");
+                    return false;
+                }
 
                 cout << "Enter the reference id: ";
                 cin >> referenceID;
@@ -445,14 +463,32 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                 // save the transaction to the main database
                 saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, change, username, "GCash", referenceID); // save the transaction to the database, specifically at the gcash_cashierTransactions.csv
             } else if(paymentMethod == "Cash"){ // process Cash payment
+                string cashUserInput;
                 paymentMethod = "Cash"; // this will be used for the receipt where it will show the payment method
 
                 cout << "Enter the customer's money: ";
-                cin >> userMoney;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                getline(cin, cashUserInput);
 
-                if(handleInputError()) return false; // handle invalid inputs
+                // we used cin.ignore() along with getline to get a value that has a decimal point
+                // this is because cin will stop reading the input at the first whitespace, so if the user enters a decimal point, it will stop reading there
+                // cin.ignore() will ignore the newline character left in the input buffer by the previous cin
+                // input buffer means the data that is left in the input stream after a previous input operation
 
-                change = userMoney - finalAmountDue; // calculate the change because this is a cash payment
+                try {
+                    userMoney = stod(cashUserInput);
+                    if(userMoney < 0){ // money cannot be negative
+                        cout << "Money cannot be negative. Please enter a valid number." << endl;
+                        Sleep(1200);
+                        return false;
+                    }
+                } catch (...) {
+                    cout << "Invalid input for money received. Please enter a valid number.\n";
+                    system("pause");
+                    return false;
+                }
+
+                change = stod(cashUserInput) - finalAmountDue; // calculate the change because this is a cash payment
 
                 // check if the user has sufficient money
                 if(userMoney < finalAmountDue){
@@ -591,7 +627,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     for(const auto& item : cart){ // for each item in the cart. auto means that the compiler will automatically detect the type of the variable
         cout << left << setw(35) << item[0] // print with left alignment and width of 35. item[0] is the product name
                 << setw(10) << item[2]  // print with width of 10. item[2] is the quantity
-                << "P" << item[3] << endl; // item[3] is the price
+                << "P" << fixed << setprecision(2) << stod(item[3]) << endl; // item[3] is the price, we need to convert it to decimal so that it can get and show two decimal places. if it werent converted, it would show as an integer and will show many zeros
     }
     cout << "\n\n";
 
@@ -683,7 +719,8 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
     }
 
     string productName, productCategory;
-    int productQuantity, productPrice;
+    int productQuantity;
+    double productPrice;
 
     // Get user input for product ID
     int selectedId;
@@ -709,6 +746,7 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
                 return false;
             } else { // just to make sure that the product is found, since this is a loop. we don't want unnecessary iterations
                 found = true;
+                cout << fixed << setprecision(2); // set the decimal places to 2 for integers
                 cout << "\nSelected Product:\n";
                 cout << "Product Name: " << productName << "\n";
                 cout << "Product category: " << productCategory << "\n";
