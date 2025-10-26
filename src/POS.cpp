@@ -18,6 +18,9 @@ enum class AdminState { MainMenu, Inventory, Add, View, ViewLogs, Update, Update
 enum class ManagerState { MainMenu, Inventory, View, ViewLogs, Update, UpdateProduct, Monitoring, Exit };
 enum class CashierState { MainMenu, Tops, Bottoms, Accessories, ViewCart, Exit };
 
+// switch accepts numbers such as int, short, long, char, and enum types
+// enum, behind the scenes, are treated as integers
+
 // here are all member functions of PointOfSale class 
 // member functions refers to functions defined inside a class
 // the double colon (::) is the scope resolution operator, which tells us that the function belongs to the class PointOfSale
@@ -313,7 +316,9 @@ void PointOfSale::managerMenu(string username) {
 
                 switch (selection) {
                     case 1: currentState = ManagerState::Inventory; // below this case, there will be a case named ManagerState::Inventory. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::Inventory case to execute
+                        break;
                     case 2: currentState = ManagerState::Monitoring; // below this case, there will be a case named ManagerState::Monitoring. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::Monitoring case to execute
+                        break;
                     case 3: currentState = ManagerState::Exit; // change the currentState to Exit to logout
                         break;
                     default: 

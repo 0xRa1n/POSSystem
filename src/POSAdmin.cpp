@@ -128,10 +128,17 @@ void POSAdmin::addProduct(string database, string username) {
     fstream fout; // create a file stream object with the variable fout, so that we can write to the file
     fout.open(database, ios::app); // this tells the program that the cursor should be placed at the end of the file, avoiding overwritting existing data
 
+    // fout << newId << ","
+    //     << productName << ","
+    //     << productCategory << ","
+    //     << productSubCategory << ","
+    //     << quantity << ","
+    //     << fixed << setprecision(2) << price << "\n";
+
     fout << newId << ","
-        << productName << ","
         << productCategory << ","
         << productSubCategory << ","
+        << productName << ","
         << quantity << ","
         << fixed << setprecision(2) << price << "\n";
 
@@ -286,7 +293,7 @@ void POSAdmin::saveRefundLogs(int transactionID, string productNames, int produc
         return;
     }
 
-        // get the current date and time
+    // get the current date and time
     time_t timestamp = time(NULL); // get current time, NULL since we are not interested to set a custom timestamp
     struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *
 
@@ -656,13 +663,14 @@ void POSAdmin::getDailySales(){
     double averageDailyCashSales = cashTransactions > 0 ? totalCashSales / cashTransactions : 0; // if cashTransaction is greater than 0, divide totalCashSales by cashTransactions, else return 0
     double averageDailyGcashSales = gcashTransactions > 0 ? totalGcashSales / gcashTransactions : 0; // if gcashTransactions is greater than 0, divide totalGcashSales by gcashTransactions, else return 0
 
-    cout << "Sales from Cash: P" << setprecision(2) << fixed << totalCashSales << endl;
-    cout << "Sales from GCash: P" << setprecision(2) << fixed << totalGcashSales << "\n\n";
+    cout << setprecision(2) << fixed;
+    cout << "Sales from Cash: P" << totalCashSales << endl;
+    cout << "Sales from GCash: P" << totalGcashSales << "\n\n";
 
-    cout << "Average Cash Sale: P" << setprecision(2) << fixed << averageDailyCashSales << endl;
-    cout << "Average GCash Sale: P" << setprecision(2) << fixed << averageDailyGcashSales << "\n\n";
+    cout << "Average Cash Sale: P" << averageDailyCashSales << endl;
+    cout << "Average GCash Sale: P" << averageDailyGcashSales << "\n\n";
 
-    cout << "Total sales today: P" << setprecision(2) << fixed << totalSales << endl;
+    cout << "Total sales today: P" << totalSales << endl;
     cout << "---------------------------------\n";
 }
 
@@ -689,10 +697,6 @@ void POSAdmin::getMonthlySales(){
     string currentMonth(monthChar); // we need to convert it from char array to string for easier comparison later
     string currentYear(yearChar); // we need to convert it from char array to string for easier comparison later
 
-    // if you would notice, in the POSCashier, we used the same format for the date when saving transactions
-    // we do not have to do this conversion in POSCashier.cpp because we are not comparing dates there
-    // because when we compare, we check for the address of the char array, which is not correct, so we convert it to string here
-
     string line;
     double totalCashSales = 0.0;
     double totalGcashSales = 0.0;
@@ -700,9 +704,11 @@ void POSAdmin::getMonthlySales(){
 
     getline(cashFile, line); // skip the header
     while(getline(cashFile, line)){
+        if (line.empty()) continue; // Skip empty lines
         stringstream ss(line);
         string transactionDate, cashSalesAmount, token;
-        // skip the first five tokens
+        
+        // Correctly parse all columns for cash transactions
         getline(ss, token, ','); // skip id
         getline(ss, token, ','); // skip product names
         getline(ss, token, ','); // skip product quantities
@@ -710,53 +716,61 @@ void POSAdmin::getMonthlySales(){
         getline(ss, token, ','); // skip the tax amount
         getline(ss, cashSalesAmount, ','); // get the amount (including tax)
         getline(ss, token, ','); // skip the change
+        getline(ss, token, ','); // skip the refunded amount
         getline(ss, transactionDate, ','); // get the date
         
-        string transactionMonth = transactionDate.substr(0,2); // get the first two characters of the transaction date (which is the month)
-        string transactionYear = transactionDate.substr(6,2); // get the last two characters of the transaction date (which is the year)
-        
-        if(currentMonth == transactionMonth && currentYear == transactionYear){
-            totalCashSales += stod(cashSalesAmount); // convert to integer and add to total cash sales
-            cashTransactions++;
+       if(transactionDate.length() >= 8) { // this make sure that the date is valid (e.g. 10_10_25) before using substr, since it will cause an error if the length is less than 8 (out of range)
+            string transactionMonth = transactionDate.substr(0,2); // get the first two characters of the transaction date (which is the month)
+            string transactionYear = transactionDate.substr(6,2); // get the last two characters of the transaction date (which is the year)
+            
+            if(currentMonth == transactionMonth && currentYear == transactionYear){
+                totalCashSales += stod(cashSalesAmount); // convert to double and add to total cash sales
+                cashTransactions++;
+            }
         }
     }
 
     getline(gcashFile, line); // skip the header
     while(getline(gcashFile, line)){
+        if (line.empty()) continue; // Skip empty lines
         stringstream ss(line);
         string transactionDate, gcashSalesAmount, token;
-        // skip the first five tokens
+        
+        // Correctly parse all columns for gcash transactions
         getline(ss, token, ','); // skip id
         getline(ss, token, ','); // skip product names
         getline(ss, token, ','); // skip product quantities
         getline(ss, token, ','); // skip product amt (not including tax)
         getline(ss, token, ','); // skip the tax amount
         getline(ss, gcashSalesAmount, ','); // get the amount (including tax)
-        // the values will all be replaced, and when it comes to the index five, it will get the amount and save to the variable
         getline(ss, token, ','); // skip the change
         getline(ss, token, ','); // skip the refId
+        getline(ss, token, ','); // skip the refunded amount
         getline(ss, transactionDate, ','); // get the date
 
-        string transactionMonth = transactionDate.substr(0,2); // get the first two characters of the transaction date (which is the month)
-        string transactionYear = transactionDate.substr(6,2); // get the last two characters of the transaction date (which is the year)
-
-        if(currentMonth == transactionMonth && currentYear == transactionYear){
-            totalGcashSales += stod(gcashSalesAmount); // convert to integer and add to total gcash sales
-            gcashTransactions++;
+        if(transactionDate.length() >= 8) { // this make sure that the date is valid (e.g. 10_10_25) before using substr, since it will cause an error if the length is less than 8 (out of range)
+            string transactionMonth = transactionDate.substr(0,2); // get the first two characters of the transaction date (which is the month)
+            string transactionYear = transactionDate.substr(6,2); // get the last two characters of the transaction date (which is the year)
+            
+            if(currentMonth == transactionMonth && currentYear == transactionYear){
+                totalGcashSales += stod(gcashSalesAmount); // convert to double and add to total gcash sales
+                gcashTransactions++;
+            }
         }
     }
     cashFile.close();
     gcashFile.close();
 
-    int totalSales = totalCashSales + totalGcashSales;
+    double totalSales = totalCashSales + totalGcashSales;
     double averageMonthlyCashSales = cashTransactions > 0 ? totalCashSales / cashTransactions : 0; // if cashTransaction is greater than 0, divide totalCashSales by cashTransactions, else return 0
     double averageMonthlyGcashSales = gcashTransactions > 0 ? totalGcashSales / gcashTransactions : 0; // if gcashTransactions is greater than 0, divide totalGcashSales by gcashTransactions, else return 0
 
-    cout << "Sales from Cash: P" << setprecision(2) << fixed << totalCashSales << endl;
-    cout << "Sales from GCash: P" << setprecision(2) << fixed << totalGcashSales << "\n\n";
+    cout << setprecision(2) << fixed;
+    cout << "Sales from Cash: P" << totalCashSales << endl;
+    cout << "Sales from GCash: P" << totalGcashSales << "\n\n";
 
-    cout << "Average Cash Sale: P" << setprecision(2) << fixed << averageMonthlyCashSales << endl;
-    cout << "Average GCash Sale: P" << setprecision(2) << fixed << averageMonthlyGcashSales << "\n\n";
+    cout << "Average Cash Sale: P" << averageMonthlyCashSales << endl;
+    cout << "Average GCash Sale: P" << averageMonthlyGcashSales << "\n\n";
 
     cout << "Total sales this month: P" << setprecision(2) << fixed << totalSales << endl;
     cout << "---------------------------------\n";
@@ -777,80 +791,86 @@ void POSAdmin::getYearlySales(){
     }
 
     // get the current date
-    time_t timestamp = time(NULL); // set the time as null so that it will return the current timestamp
-    struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *, and we used ampersand inside the argument to get the address pointer of the timestamp variable, as it is expecting an address
-    char monthChar[10], yearChar[10]; // since it points to a char array
-    strftime(yearChar, 10, "%y", &datetime); // format the date as yy
-    string currentYear(yearChar); // we need to convert it from char array to string for easier comparison later
-
-    // if you would notice, in the POSCashier, we used the same format for the date when saving transactions
-    // we do not have to do this conversion in POSCashier.cpp because we are not comparing dates there
-    // because when we compare, we check for the address of the char array, which is not correct, so we convert it to string here
+    time_t timestamp = time(NULL);
+    struct tm datetime = *localtime(&timestamp);
+    char yearChar[10];
+    strftime(yearChar, 10, "%y", &datetime);
+    string currentYear(yearChar);
 
     string line;
     double totalCashSales = 0.0;
     double totalGcashSales = 0.0;
     int gcashTransactions = 0, cashTransactions = 0;
 
-    getline(cashFile, line); // skip the header
+    // Process Cash File
+    getline(cashFile, line); // skip header
     while(getline(cashFile, line)){
+        if (line.empty()) continue;
         stringstream ss(line);
-        string transactionDate, cashSalesAmount, token;
-        // skip the first five tokens
-        getline(ss, token, ','); // skip id
-        getline(ss, token, ','); // skip product names
-        getline(ss, token, ','); // skip product quantities
-        getline(ss, token, ','); // skip product amt (not including tax)
-        getline(ss, token, ','); // skip the tax amount
-        getline(ss, cashSalesAmount, ','); // get the amount (including tax)
-        getline(ss, token, ','); // skip the change
-        getline(ss, transactionDate, ','); // get the date
+        string salesAmount, transactionDate, token;
         
-        string transactionYear = transactionDate.substr(6,2); // get the last two characters of the transaction date (which is the year)
-
-        if(transactionYear == currentYear){
-            totalCashSales += stod(cashSalesAmount); // convert to integer and add to total cash sales
-            cashTransactions++;
+        // Explicitly parse all columns for cash transactions
+        getline(ss, token, ','); // id
+        getline(ss, token, ','); // product names
+        getline(ss, token, ','); // product quantities
+        getline(ss, token, ','); // product amt
+        getline(ss, token, ','); // tax amount
+        getline(ss, salesAmount, ','); // total amount
+        getline(ss, token, ','); // change
+        getline(ss, token, ','); // refunded amount
+        getline(ss, transactionDate, ','); // date
+        
+        if (transactionDate.length() >= 8) { // this make sure that the date is valid (e.g. 10_10_25) before using substr, since it will cause an error if the length is less than 8 (out of range)
+            string transactionYear = transactionDate.substr(6, 2);// get the year from the date
+            if(transactionYear == currentYear){ // compare the transaction year with the current year
+                totalCashSales += stod(salesAmount); // convert to double and add to total cash sales
+                cashTransactions++;
+            }
         }
     }
 
-    getline(gcashFile, line); // skip the header
+    // Process GCash File
+    getline(gcashFile, line); // skip header
     while(getline(gcashFile, line)){
+        if (line.empty()) continue;
         stringstream ss(line);
-        string transactionDate, gcashSalesAmount, token;
-        // skip the first five tokens
-        getline(ss, token, ','); // skip id
-        getline(ss, token, ','); // skip product names
-        getline(ss, token, ','); // skip product quantities
-        getline(ss, token, ','); // skip product amt (not including tax)
-        getline(ss, token, ','); // skip the tax amount
-        getline(ss, gcashSalesAmount, ','); // get the amount (including tax)
-        // the values will all be replaced, and when it comes to the index five, it will get the amount and save to the variable
-        getline(ss, token, ','); // skip the change
-        getline(ss, token, ','); // skip the refId
-        getline(ss, transactionDate, ','); // get the date
+        string salesAmount, transactionDate, token;
+        
+        // Explicitly parse all columns for gcash transactions, including refId
+        getline(ss, token, ','); // id
+        getline(ss, token, ','); // product names
+        getline(ss, token, ','); // product quantities
+        getline(ss, token, ','); // product amt
+        getline(ss, token, ','); // tax amount
+        getline(ss, salesAmount, ','); // total amount
+        getline(ss, token, ','); // change
+        getline(ss, token, ','); // refId
+        getline(ss, token, ','); // refunded amount
+        getline(ss, transactionDate, ','); // date
 
-        string transactionYear = transactionDate.substr(6,2); // get the last two characters of the transaction date (which is the year)
-
-        if(transactionYear == currentYear){
-            totalGcashSales += stod(gcashSalesAmount); // convert to integer and add to total gcash sales
-            gcashTransactions++;
+        if (transactionDate.length() >= 8) { // this make sure that the date is valid (e.g. 10_10_25) before using substr, since it will cause an error if the length is less than 8 (out of range)
+            string transactionYear = transactionDate.substr(6, 2); // get the year from the date
+            if(transactionYear == currentYear){ // compare the transaction year with the current year
+                totalGcashSales += stod(salesAmount); // convert to double and add to total gcash sales
+                gcashTransactions++;
+            }
         }
     }
     cashFile.close();
     gcashFile.close();
 
-    int totalSales = totalCashSales + totalGcashSales;
+    double totalSales = totalCashSales + totalGcashSales;
     double averageYearlyCashSales = cashTransactions > 0 ? totalCashSales / cashTransactions : 0; // if cashTransaction is greater than 0, divide totalCashSales by cashTransactions, else return 0
     double averageYearlyGcashSales = gcashTransactions > 0 ? totalGcashSales / gcashTransactions : 0; // if gcashTransactions is greater than 0, divide totalGcashSales by gcashTransactions, else return 0
 
-    cout << "Sales from Cash: P" << setprecision(2) << fixed << totalCashSales << endl;
-    cout << "Sales from GCash: P" << setprecision(2) << fixed << totalGcashSales << "\n\n";
+    cout << setprecision(2) << fixed;
+    cout << "Sales from Cash: P" << totalCashSales << endl;
+    cout << "Sales from GCash: P" << totalGcashSales << "\n\n";
 
-    cout << "Average Cash Sale: P" << setprecision(2) << fixed << averageYearlyCashSales << endl;
-    cout << "Average GCash Sale: P" << setprecision(2) << fixed << averageYearlyGcashSales << "\n\n";
+    cout << "Average Cash Sale: P" << averageYearlyCashSales << endl;
+    cout << "Average GCash Sale: P" << averageYearlyGcashSales << "\n\n";
 
-    cout << "Total sales this year: P" << setprecision(2) << fixed << totalSales << endl;
+    cout << "Total sales this year: P" << totalSales << endl;
     cout << "---------------------------------\n";
 }
 
@@ -1091,10 +1111,10 @@ void POSAdmin::readProductsByCategory(string productsDatabase, string category, 
     bool isFound = false;
     for (auto row : categoryRows) {
         if (stoi(row[0]) == selectedId) { // row[0] is the product ID
-            productName = row[1]; // row[1] is the product name
-            productCategory = row[2]; // row[2] is the product category
-            productQuantity = stoi(row[4]); // row[4] is the product quantity
-            productPrice = stod(row[5]); // row[5] is the product price
+            productName = row[3];
+            productCategory = row[1];
+            productQuantity = stoi(row[4]);
+            productPrice = stod(row[5]);
 
             isFound = true;
             break;
@@ -1319,7 +1339,8 @@ void POSAdmin::readAccounts(string userDatabase, string username){
             string newRole;
             int roleOption;
             cout << "1. Admin\n2. Cashier\nEnter the new role: ";
-            cin >> ws;
+
+            cin >> ws; // used to get rid of any leading whitespace
             getline(cin, newRole);
             if(regex_search(newRole, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
                 cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
@@ -1405,26 +1426,26 @@ void POSAdmin::updateProduct(string filename, string query, string valueToUpdate
         stringstream ss(line); // create a string stream from the line
         string indexOne, indexTwo, indexThree, indexFour, indexFive, indexSix;
         // get a copy of each entries
-        getline(ss, indexOne, ','); // read the id (not used) and save to variable indexOne
-        getline(ss, indexTwo, ','); // read the second entry (username or product name) and save to variable indexTwo
-        getline(ss, indexThree, ','); // read the product category or password and save to variable indexThree
-        getline(ss, indexFour, ','); // read the product subcategory or role and save to variable indexFour
-        getline(ss, indexFive, ','); // get the product quantity and save to variable indexFive
-        getline(ss, indexSix, ','); // get the product price and save to variable indexSix
+        getline(ss, indexOne, ','); // read the product id
+        getline(ss, indexTwo, ','); // read the product category
+        getline(ss, indexThree, ','); // read the product subcategory
+        getline(ss, indexFour, ','); // read the product name
+        getline(ss, indexFive, ','); // read the product quantity
+        getline(ss, indexSix, ','); // read the product price
 
         // if-elseif has been used since switch case does not support strings in C++
         // modify the entry if it matches the query
         if (indexTwo == query) { // This will check each line if the product name matches the query (note that indexTwo holds the product name, and the variable query holds the product name to search for)
             if(type == "productName"){
-                indexTwo = valueToUpdate; // update product name
+                indexFour = valueToUpdate; // update product name
             } else if(type == "productQuantity"){
                 indexFive = valueToUpdate; // update product quantity
             } else if(type == "productPrice"){
                 indexSix = valueToUpdate; // update product price
             }  else if(type == "productSubCategory"){
-                indexFour = valueToUpdate; // update product sub-category
+                indexThree = valueToUpdate; // update product sub-category
             } else if(type == "productCategory"){
-                indexThree = valueToUpdate; // update product category
+                indexTwo = valueToUpdate; // update product category
             }
             found = true;
         }
@@ -1480,8 +1501,6 @@ void POSAdmin::updateAccount(string database, string query, string valueToUpdate
         Sleep(1200);
         return;
     }
-
-
 
     cout << "What is the reason for the update? ";
     cin >> ws;

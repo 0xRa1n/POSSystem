@@ -18,4 +18,4 @@ public:
 
     // UPDATE
     void deductPurchasedQuantities(string productsDatabase, string query, string username, string quantities); // used to deduct the purchased quantities from the inventory
-};
+}; // semicolon to indicate the end of class declaration

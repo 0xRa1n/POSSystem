@@ -703,7 +703,7 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
         Sleep(1200);
         return false;
     }
-    cout << "Format: ID, ProductName, Category, SubCategory, Quantity, Price\n" << endl;
+    cout << "Format: ID, Product Category, Product Sub-Category, Product Name, Quantity, Price\n" << endl;
 
     // Read and filter T-Shirts products
     vector<vector<string>> subCategoryRows;
@@ -717,7 +717,7 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
             // row will look like this: {"ID", "ProductName", "SubCategory", "Quantity", "Price"
         }
         // Only add if ProductSubCategory is the desired sub-category (subCategory)
-        if (row.size() > 3 && row[3] == subCategory) { // if row size is greater than 3 to avoid out of range error and if the sub-category matches the desired sub-category
+        if (row.size() > 2 && row[2] == subCategory) { // if row size is greater than 3 to avoid out of range error and if the sub-category matches the desired sub-category
             subCategoryRows.push_back(row); // add the row to the subCategoryRows
             // subCategoryRows will look like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "T-Shirts", "10", "100"}, ...
             // the contents of the variable row will only be added if the sub-category matches
@@ -778,10 +778,10 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
 
     for (auto row : subCategoryRows) {
         if (stoi(row[0]) == selectedId) { // row[0] is the product ID
-            productName = row[1]; // row[1] is the product name
-            productCategory = row[2]; // row[2] is the product category
-            productQuantity = stoi(row[4]); // row[4] is the product quantity
-            productPrice = stod(row[5]); // row[5] is the product price
+            productName = row[3];
+            productCategory = row[1];
+            productQuantity = stoi(row[4]);
+            productPrice = stod(row[5]);
 
             if (productQuantity == 0){ // if the product is out of stock
                 cout << "Product is out of stock!\n";
