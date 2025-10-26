@@ -31,7 +31,7 @@ void POSAdmin::addProduct(string database, string username) {
     double price;
 
     // ask the user for the product name (if 0 is entered, it will go back to the menu)
-    cout << "Enter the product name (type 0 to go back): ";
+    cout << "Enter the product name (0 = Cancel): ";
     cin >> productName;
     
     // if user changes his mind
@@ -52,7 +52,7 @@ void POSAdmin::addProduct(string database, string username) {
     }
 
     // ask the user for the product category
-    cout << "Enter the product category (Tops/Bottoms/Accessories, 0 to go back): ";
+    cout << "Enter the product category (Tops/Bottoms/Accessories, 0 = Cancel): ";
     string productCategory;
     cin >> productCategory;
 
@@ -71,7 +71,7 @@ void POSAdmin::addProduct(string database, string username) {
     } 
 
     // ask the user if what product sub-category is the product
-    cout << "Enter the product sub-category (0 to go back): "; // no specific sub-categories since they are many
+    cout << "Enter the product sub-category (0 = Cancel): "; // no specific sub-categories since they are many
     cin >> productSubCategory;
 
     if(productSubCategory == "0") return;
@@ -82,7 +82,7 @@ void POSAdmin::addProduct(string database, string username) {
     }
 
     // ask the user for the product's quantity and price
-    cout << "Enter the quantity (0 to go back): "; // and quantity SHOULD not be zero
+    cout << "Enter the quantity (0 = Cancel): "; // and quantity SHOULD not be zero
     cin >> quantity;
 
     if(handleInputError()) return; // handle invalid inputs (if cin fails, it will return true)
@@ -96,7 +96,7 @@ void POSAdmin::addProduct(string database, string username) {
 
     // since the input can have a decimal, we should use getline (because if we enter a decimal point, cin will think its the end of input. and it will trigger the invalid input error)
     string priceInput;
-    cout << "Enter the price (0 to go back): ";
+    cout << "Enter the price (0 = Cancel): ";
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     getline(cin, priceInput);
 
@@ -146,7 +146,7 @@ void POSAdmin::addUser(string database, string accessingUsername){
     string username, password, role;
                             
     // ask the user for the username (if 0 is entered, it will go back to the menu)
-    cout << "Enter the username you want to add (type 0 to go back): ";
+    cout << "Enter the username you want to add (0 = Cancel): ";
     cin >> username;
 
     // use the function to check if the entry is already in the database
@@ -166,7 +166,7 @@ void POSAdmin::addUser(string database, string accessingUsername){
     }
 
     // ask for the password and role
-    cout << "Enter the password (0 to go back): ";
+    cout << "Enter the password (0 = Cancel): ";
     cin >> password;
 
     if (password == "0") return;
@@ -177,7 +177,7 @@ void POSAdmin::addUser(string database, string accessingUsername){
         return;
     }
 
-    cout << "What is the role of the user? (Admin/Manager/Cashier, 0 to go back): ";
+    cout << "What is the role of the user? (Admin/Manager/Cashier, 0 = Cancel): ";
     cin >> role;
 
     if (role == "0") return; // if the user changes his mind
@@ -906,7 +906,7 @@ void POSAdmin::updateProduct(string database, string type, string username){
         return;
     }
 
-    cout << "What is the product name you want to update? (0 to go back): ";
+    cout << "What is the product name you want to update? (0 = Cancel): ";
     cin >> query;
 
     // check if product name exists in the csv
@@ -923,7 +923,7 @@ void POSAdmin::updateProduct(string database, string type, string username){
         return;
     }
 
-    cout << "Enter the new value (0 to go back): ";
+    cout << "Enter the new value (0 = Cancel): ";
     cin >> newValue;
 
     if(newValue == "0") return; // input from cin is always string
@@ -962,7 +962,7 @@ void POSAdmin::updateProduct(string database, string type, string username){
         }
     } 
 
-    cout << "What is the reason for the update? (0 to go back): ";
+    cout << "What is the reason for the update? (0 = Cancel): ";
     cin.ignore(); // ignore any inputs from the last cin (input)
     getline(cin, reason); // get the whole line including the spaces, because if we use cin, it will end at the space (which we don't want)
     if(reason == "0") return;
@@ -1056,7 +1056,7 @@ void POSAdmin::updateAccount(string database, string type, string username){
         return;
     }
 
-    cout << "What is the account username you want to update? (0 to go back): ";
+    cout << "What is the account username you want to update? (0 = Cancel): ";
     cin >> query;
     if(!isAlreadyInCsv(database, query)){ // check if account username exists in the csv
         cout << "Account username '" << query << "' does not exist in the CSV.\n";
@@ -1146,7 +1146,7 @@ void POSAdmin::updateDiscounts(string username) {
         cout << "Failed to open discounts database.\n";
         return;
     }
-    cout << "Enter the category (Tops/Bottoms/Accessories) to update discount (0 to go back): ";
+    cout << "Enter the category (Tops/Bottoms/Accessories) to update discount (0 = Cancel): ";
     cin >> category;
 
     if(category == "0") return;
@@ -1166,7 +1166,7 @@ void POSAdmin::updateDiscounts(string username) {
         return;
     }
 
-    cout << "Enter the new discount percentage (0-100, 0 to go back): ";
+    cout << "Enter the new discount percentage (0-100, 0 = Cancel): ";
     int discountPercentage;
     cin >> discountPercentage;
 
@@ -1219,7 +1219,7 @@ void POSAdmin::updateDiscounts(string username) {
 void POSAdmin::deleteInformation(string type, string filename, string username){
     string deleteProductInput;
 
-    cout << "Enter the entry name you want to delete (type 0 to go back): ";
+    cout << "Enter the entry name you want to delete (0 = Cancel): ";
     cin >> deleteProductInput;
 
     if(regex_search(deleteProductInput, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure

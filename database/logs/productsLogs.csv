@@ -78,3 +78,8 @@ UPDATE,Graphic_Tee_Quantity_to_1,10_26_25,11:11:31_AM,cashier,Purchased_Quantity
 ADD,DemoProduct,10_26_25,11:17:35_AM,admin,New_Product_Added
 UPDATE,Graphic_Tee_Quantity_to_1,10_26_25,11:24:54_AM,cashier,Purchased_Quantity_Deducted
 UPDATE,Old_School_Hoodie_Quantity_to_3,10_26_25,11:24:54_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_1,10_26_25,04:39:58_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Cargo_Shorts_Quantity_to_1,10_26_25,04:43:23_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Shoulder_Bag_Quantity_to_1,10_26_25,04:43:23_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_1,10_26_25,04:47:22_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Baseball_Cap_Quantity_to_1,10_26_25,04:47:22_PM,cashier,Purchased_Quantity_Deducted

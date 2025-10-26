@@ -10,6 +10,7 @@ public:
     // CREATE
     void saveTransaction(string productNames, string productQuantities, double initialAmount, double totalAmount, double change, string cashierName, string paymentMethod, int referenceID = 0); // used to log transactions on the transactions folder
     bool processTransaction(string username); // used to verify the transaction, and afterwards, use the function saveTransaction to log the transaction
+    void saveAbandonedCarts(string productNames, string productQuantities);
 
     // READ
     bool viewCart(string username); // used to view the items in the cart

@@ -95,12 +95,13 @@ bool POSCashier::viewCart(string username){ // view cart is also bool since if t
         cout << "\nProduct name: " << item[0] << "\n"; // item[0] is product name
         cout << "Category: " << item[1] << "\n"; // item[1] is product category
         cout << "Quantity: " << item[2] << "\n"; // item[2] is product quantity
-        cout << "Price: P" << item[3] << "\n"; // item[3] is product price
+        cout << "Price: P" << fixed << setprecision(2) << stod(item[3]) << "\n"; // item[3] is product price
 
         totalAmount += stod(item[3]) * stod(item[2]);
     }
 
-    cout << "\nTotal Amount: P" << totalAmount / 1.12 << endl;
+    cout << fixed << setprecision(2);
+    cout << "\nTotal Amount: P" <<  totalAmount / 1.12 << endl;
     cout << "VAT (12%): P" << (totalAmount) * 0.12 << endl; // to revise
     cout << "Amount Due: P" << totalAmount << endl;
 
@@ -206,8 +207,38 @@ void POSCashier::saveTransaction(string productNames, string productQuantities, 
     }
 }
 
-// CRUD-Related Functions
+void POSCashier::saveAbandonedCarts(string productNames, string productQuantities) { // the purpose of this function is to monitor all the customers who are interested in buying products. So, if they did not proceed to checkout, at least we have a record of the products they were interested in. (and the customer number will be generated here as well)
+    const string database = "database/customers/customers_logs.csv";
+
+    ifstream readFile(database);
+    if(!readFile.is_open()){
+        cout << "Failed to open customer logs file.\n";
+        Sleep(1200);
+        return;
+    }
+
+    // generate an id based on the previous id
+    int newId = getLastId(database) + 1;
+    // get the current date and time
+    time_t timestamp = time(NULL); // get current time, NULL since we are not interested to set a custom timestamp
+    struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *
+    char date[50];
+    char time[50];
+    strftime(date, 50, "%m_%d_%y", &datetime);
+    strftime(time, 50, "%I:%M:%S_%p", &datetime);
+
+    ofstream fout(database, ios::app); // fout is an instance of ofstream, used to write to files
+    // no need to check if file is opened successfully since we already did that above
+    fout << newId << ","
+         << productNames << ","
+         << productQuantities << ","
+         << date << "," 
+         << time << endl;
+    fout.close(); // close the file
+}
+
 bool POSCashier::processTransaction(string username) { // processTransaction is bool to indicate if the transaction was successful, if yes, it will go back to the main menu after the user had paid
+    const string customersDatabase = "database/customers/customers_logs.csv";
     // also, if the user decided to cancel the transaction, it will return false to go back to the main menu without breaking the loop
     if(cart.empty()){ // if the cart is empty
         cout << "Your cart is empty. Cannot process transaction.\n";
@@ -355,7 +386,11 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     switch(confirmation){
         case 1: { // proceed to payment
             int referenceID;
-            stringstream namesStream, quantitiesStream;
+            stringstream namesStream, quantitiesStream; // stringstream is used here to concatenate the product names and quantities easily
+            // while it is possible to use regular string concatenation, using stringstream is more efficient and cleaner for this purpose
+            // the difference between using a stringstream and regular string is the for stringstream, we can easily append strings using the << operator, and we can also easily convert the stream to a string using the str() method
+            // whereas with regular string concatenation, we would have to use the + operator and manage the spaces and delimiters manually (and get all the values for each line, as showed in the deductPurchasedQuantities function)
+
             for(int cart_count = 0; cart_count < cart.size(); cart_count++){ // iterate through the cart, and save it thorugh a stringstream for easier concatenation. we will use this for two purposes later, but, with this, we can get the product names and quantities in a single string, separated by semicolons
                 namesStream << cart[cart_count][0]; // append the product name to the stream
                 quantitiesStream << cart[cart_count][2]; // append the product quantity to the stream
@@ -364,14 +399,16 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                     quantitiesStream << "|";
                 }
             }
+            saveCustomer(namesStream.str(), quantitiesStream.str()); // save the customer purchase logs
 
-            cout << "Enter the payment method (Cash/GCash): ";
+            cout << "Enter the payment method (Cash/GCash, 0 = Cancel): ";
             cin >> paymentMethod;
+            if(paymentMethod == "0") return true; // cancel the transaction and go back to main menu without breaking the loop
 
             if(paymentMethod != "Cash" && paymentMethod != "GCash"){ // this will check if the inputs are both NOT Cash or GCASH
                 // if we were to use OR (||), it would always be true since the first condition would always be true for one of the options
                 cout << "Invalid payment method. Please enter Cash or GCash only.\n";
-                system("pause");
+                Sleep(1200);
                 return false;
             }
 
@@ -619,6 +656,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
 
     cout << "Threads and Charms" << endl;
     cout << date << " " << time << endl; 
+    cout << "CUS_" << getLastId(customersDatabase) << endl; // CUS_ means customer
     cout << "\n";
 
     cout << left << setw(35) << "Product Name" << setw(10) << "Qty" << "Price" << endl; // setw is used to set the width of the column, left is used to align the text to the left
@@ -724,7 +762,7 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
 
     // Get user input for product ID
     int selectedId;
-    cout << "\nEnter product ID to select (0 to go back): ";
+    cout << "\nEnter product ID to select (0 = Cancel): ";
     cin >> selectedId;
 
     if (handleInputError()) return false; // handle invalid inputs
@@ -762,7 +800,7 @@ bool POSCashier::readProductsBySubcategory(string productsDatabase, string subCa
         return false;
     }
 
-    cout << "\nEnter quantity to purchase (0 to go back): ";
+    cout << "\nEnter quantity to purchase (0 = Cancel): ";
     cin >> quantityToPurchase;
 
     if(handleInputError()) return false; // handle invalid inputs
