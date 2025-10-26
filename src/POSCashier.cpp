@@ -166,7 +166,7 @@ void POSCashier::saveTransaction(string productNames, string productQuantities, 
     // open the transactions.csv file in append mode
     ofstream fout(database, ios::app); // fout is an instance of ofstream, used to write to files
     if (!fout.is_open()) { // if file cannot be opened
-        cerr << "Error opening database for writing." << endl;
+        cout << "Error opening database for writing." << endl;
         return;
     }
 
@@ -260,7 +260,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     map<string, double> categoryDiscounts; // expected output: { "Tops": 0.10, "Bottoms": 0.15, ... }
     ifstream discountFile("database/discounts.csv"); // open the discounts file
     if (!discountFile.is_open()) { 
-        cerr << "Error opening discounts file." << endl;
+        cout << "Error opening discounts file." << endl;
         Sleep(1200);
         return false;
     }
@@ -410,7 +410,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                 // start of code for backup redundancy
                 ofstream backupFile("database/transactions/gcash_backup.csv", ios::app); // open in append mode
                 if (!backupFile) {
-                    cerr << "Error opening backup file for writing." << endl;
+                    cout << "Error opening backup file for writing." << endl;
                     return false;
                 }
                 backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,PmMethod,RefID,Date,Time,Cashier\n" 
@@ -520,7 +520,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                     // start of code for backup redundancy
                     ofstream backupFile("database/transactions/cash_backup.csv", ios::app); // open in append mode
                     if (!backupFile) {
-                        cerr << "Error opening backup file for writing." << endl;
+                        cout << "Error opening backup file for writing." << endl;
                         return false;
                     }
                     backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,PmMethod,Date,Time,Cashier\n" 

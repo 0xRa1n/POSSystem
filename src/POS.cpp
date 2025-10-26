@@ -17,7 +17,7 @@ bool PointOfSale::login(string username, string password, string& outRole) { // 
     ifstream file(userAccounts); // open the file in read mode || file is a variable
     
     if (!file.is_open()) { // if the file could not be opened (due to missing file, permission error, etc.)
-        cerr << "Could not open file " << userAccounts << endl;
+        cout << "Could not open file " << userAccounts << endl;
         return false; // login failed
     }
 
