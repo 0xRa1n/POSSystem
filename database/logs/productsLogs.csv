@@ -89,3 +89,9 @@ UPDATE,Cargo_Shorts_Quantity_to_1,10_26_25,05:28:18_PM,cashier,Purchased_Quantit
 UPDATE,Graphic_Tee_Quantity_to_1,10_26_25,05:36:43_PM,cashier,Purchased_Quantity_Deducted
 UPDATE,Graphic_Tee_Quantity_to_2,10_26_25,07:55:14_PM,cashier,Purchased_Quantity_Deducted
 UPDATE,Cargo_Shorts_Quantity_to_2,10_26_25,07:55:26_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Demo_Category_to_Bottoms,10_26_25,11:01:21_PM,admin,Wrong_Category
+UPDATE,Demo_SubCategory_to_Jeans,10_26_25,11:01:40_PM,admin,Wrong_SubCategory
+UPDATE,Demo_Quantity_to_15,10_26_25,11:01:54_PM,admin,Wrong_Quantity
+UPDATE,Demo_Quantity_to_75,10_26_25,11:02:08_PM,admin,Wrong_Price
+UPDATE,Demo_Category_to_Tops,10_26_25,11:12:42_PM,admin,Wrong_Category
+UPDATE,Demo_SubCategory_to_T_Shirts,10_26_25,11:18:11_PM,admin,Wrong_Subcategory

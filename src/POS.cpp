@@ -8,6 +8,16 @@
 
 using namespace std;
 
+// Define all possible menu states for each user role
+// this is what we call an enumeration (enum)
+// it is used to define a group of constants (cannot be changed)
+// enum class acts similarly to class. They can only be accessed through the scope resolution operator (::)
+// e.g., AdminState::MainMenu
+// so that there will be no conflict if there are other enums with the same names in other parts of the program
+enum class AdminState { MainMenu, Utilities, Add, View, ViewLogs, Update, UpdateProduct, UpdateAccount, Delete, DeleteProduct, DeleteAccount, Monitoring, Exit };
+enum class ManagerState { MainMenu, Utilities, View, ViewLogs, Update, UpdateProduct, Monitoring, Exit };
+enum class CashierState { MainMenu, Tops, Bottoms, Accessories, ViewCart, Exit };
+
 // here are all member functions of PointOfSale class 
 // member functions refers to functions defined inside a class
 // the double colon (::) is the scope resolution operator, which tells us that the function belongs to the class PointOfSale
@@ -50,657 +60,538 @@ bool PointOfSale::login(string username, string password, string& outRole) { // 
 }
 
 void PointOfSale::adminMenu(string username) {
+    // path to the databases (const so that they cannot be changed)
     const string productsDatabase = "database/products.csv";
     const string usersDatabase = "database/userAccounts.csv";
 
-    // initalize a loop, where it contains the menu Inventory, Monitoring, and Logout
-    while (true) {
-        system("cls"); // initial clear of the console
-        string menu[] = {"Utilities", "Monitoring", "Logout"}; 
-        int adminSelection = showMenu("P.O.S. (Admin)", menu); // this will print the header, and the numbers for selecting options
-        system("cls"); // if there are error such as invalid input, it will reach this part to clear the screen again
-        // this is same as the following code for the menus
+    AdminState currentState = AdminState::MainMenu; // this is the current state (meaning that this can change where the user want to select) || we tell the compiler that the currentState is MainMenu that is inside of the enum class AdminState
+    AdminState previousState = AdminState::MainMenu; // this will store the previous menu that the user was in (for going back) || we tell the compiler that the currentState is MainMenu that is inside of the enum class AdminState
 
-        switch (adminSelection) {
-            case 1: {  // Inventory submenu
-                // intialize another loop that contains the menu of the admin menu
-                while (true) {
-                    system("cls"); // initial clear of the console
-                    string inventoryMenu[] = {
-                        "Add products",
-                        "Add an account",
-                        "View products, accounts, logs, or backup transaction data",
-                        "Update account, product, discounts, or process refunds",
-                        "Delete a product",
-                        "Delete an account",
-                        "Go back"
-                    };
-                    int inventoryInput = showMenu("Admin utilities", inventoryMenu); // this will print the header, and the numbers for selecting options
-                    system("cls"); // if an error arise, it will reach this part to clear the screen again
-
-                    switch (inventoryInput) {
-                        case 1: // add product
-                            showHeader("Add a product"); // show header with the title Add a product
-                            admin.addProduct(productsDatabase, username); // use the function inside the POSAdmin (we can use this since we are using it inside the PointOfSale class)
-                            break; // break so that after the function, it would stop running the function
-
-                        case 2: // add account
-                            showHeader("Add an account"); // show header with the title Add an account
-                            admin.addUser(usersDatabase, username); // use the function inside the POSAdmin
-                            break;
-
-                        case 3: {
-                            while(true){ // every menu, it corresponds with a loop. so that if the user decides to go back, we can just end the loop to have him or her go back to the previous menu
-                                system("cls"); // initial clearing of the console
-                                string viewMenu[] = {"View all products", "View all accounts", "View all logs", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "Refund logs", "Go back"}; // automatically sets the options for the user to choose
-                                int viewInput = showMenu("View", viewMenu); // show the menu and get the user's input
-                                system("cls");
-
-                                if(viewInput == 7) break; // exit view menu
-
-                                switch(viewInput){
-                                    case 1:
-                                        showHeader("View all products");
-                                        admin.readProducts(productsDatabase);
-                                        system("pause"); // pause to let the user read the products
-                                        break;
-                                    case 2:
-                                        showHeader("View all accounts");
-                                        admin.getAllAccounts(usersDatabase);
-                                        system("pause"); // pause to let the user read the accounts
-                                        break;
-                                    case 3:
-                                        while(true){ // every menu, it corresponds with a loop. so that if the user decides to go back, we can just end the loop to have him or her go back to the previous menu
-                                            system("cls"); // initial clear
-                                            string logsMenu[] = {"Account logs", "Product logs", "Cashier transactions (Cash)", "Cashier transactions (GCash)", "Go back"};
-                                            int logsInput = showMenu("View all logs", logsMenu);
-                                            system("cls"); // clear again after getting input
-
-                                            if (logsInput == 5) break; // exit logs menu
-
-                                            switch(logsInput){
-                                                case 1: // account logs
-                                                    showHeader("Account logs");
-                                                    admin.getAllLogs("accounts");
-                                                    break;
-                                                case 2: // product logs
-                                                    showHeader("Product logs");
-                                                    admin.getAllLogs("products");
-                                                    break;
-                                                case 3: // cashier logs
-                                                    showHeader("Cashier transactions (Cash)");
-                                                    admin.getAllLogs("cashier_cash");
-                                                    break;
-                                                case 4: // cashier logs
-                                                    showHeader("Cashier transactions (GCash)");
-                                                    admin.getAllLogs("cashier_gcash");
-                                                    break;
-                                                default:
-                                                    cout << "Invalid selection";
-                                                    Sleep(1200);
-                                                    break;
-                                            }
-                                        }
-                                        break;
-                                    case 4: // this function is for those who had a transaction right after a  power outage or system crash. in that way, they can update immediately the database
-                                        showHeader("Backup transaction data (Cash)");
-                                        admin.readBackupTransactions("database/transactions/cash_backup.csv");
-                                        system("pause"); // pause to let the user read the backup transactions
-                                        break;
-                                    case 5: // this function is for those who had a transaction right after a  power outage or system crash. in that way, they can update immediately the database
-                                        showHeader("Backup transaction data (GCash)");
-                                        admin.readBackupTransactions("database/transactions/gcash_backup.csv");
-                                        system("pause"); // pause to let the user read the backup transactions
-                                        break;
-                                    case 6: // refund logs
-                                        showHeader("View refund logs");
-                                        admin.readRefundLogs();
-                                        system("pause"); // pause to let the user read the refund logs
-                                        break;
-                                    default: // if the user entered an invalid input, the showMenu function will return -1. meaning that it was an invalid input.
-                                        cout << "Invalid selection";
-                                        Sleep(1200); // wait for 1.2s
-                                        break; // then exit
-                                }
-                            }
-                            break;
-                        }
-                        case 4: { // update
-                            // initialize a loop where it contains the menu Product, Account, and Go back
-                            while(true){
-                                system("cls");
-                                string updateMenu[] = {"Product", "Account", "Discounts", "Process Refunds", "Go back"};
-                                int updateInput = showMenu("Update", updateMenu);
-                                system("cls");
-
-                                // to do: make this a switch instead of if-else statements
-                                if(updateInput == 1){                  
-                                    // initialize a loop to update the information of a product                          
-                                    while(true){
-                                        system("cls");
-                                        string updateProductMenu[] = {"Product name", "Product Sub-Category", "Product Category", "Product quantity", "Product price", "Go back"};
-                                        int updateProductInput = showMenu("Update product", updateProductMenu);
-                                        system("cls");
-
-                                        if(updateProductInput == 6) break; // this will end the loop, and will return to the previous loop
-
-                                        switch(updateProductInput){
-                                            case 1:  // update product name
-                                                showHeader("Update product name");
-                                                admin.updateProduct(productsDatabase, "productName", username);
-                                                break;
-                                            case 2:  // update product sub-category
-                                                showHeader("Update product sub-category");
-                                                admin.updateProduct(productsDatabase, "productSubCategory", username);
-                                                break;
-                                            case 3:  // update product category
-                                                showHeader("Update product category");
-                                                admin.updateProduct(productsDatabase, "productCategory", username);
-                                                break;
-                                            case 4:  // update product quantity
-                                                showHeader("Update product quantity");
-                                                admin.updateProduct(productsDatabase, "productQuantity", username);
-                                                break;
-                                            case 5:  // update product price
-                                                showHeader("Update product price");
-                                                admin.updateProduct(productsDatabase, "productPrice", username);
-                                                break;
-                                            default: // fallback
-                                                cout << "Invalid selection";
-                                                Sleep(1200);
-                                                break;
-                                        }
-                                    }
-                                } else if (updateInput == 2){                                        
-                                    // initialize a loop to update the information of a product                          
-                                    while(true){
-                                        system("cls");
-                                        string updateAccountMenu[] = {"Username", "Password", "Role", "Go back"};
-                                        int updateAccountInput = showMenu("Update account", updateAccountMenu);
-                                        system("cls");
-
-                                        if(updateAccountInput == 4){
-                                            // this will end the loop, and will return to the previous loop
-                                            break;
-                                        }
-
-                                        switch(updateAccountInput){
-                                            case 1:  // update username
-                                                showHeader("Update account username");
-                                                admin.updateAccount(usersDatabase, "accountUsername", username);
-
-                                                break;
-                                            case 2:  // update password
-                                                showHeader("Update account password");
-                                                admin.updateAccount(usersDatabase, "accountPassword", username);
-
-                                                break;
-                                            case 3:  // update role
-                                                showHeader("Update account role");
-                                                admin.updateAccount(usersDatabase, "accountRole", username);
-
-                                                break;
-                                            default:
-                                                cout << "Invalid selection";
-                                                Sleep(1200);
-                                                break;
-                                        }
-                                    }
-                                } else if(updateInput == 3){ // update discounts
-                                    // initialize a loop to update the discounts
-                                    showHeader("Update discounts");
-
-                                    admin.updateDiscounts(username);
-                                } else if(updateInput == 4){ // process refunds
-                                    // initialize a loop to process refunds
-                                    showHeader("Process refunds");
-
-                                    admin.processRefunds(username);
-                                } else if(updateInput == 5){ // go back
-                                    // this will go back to the admin menu
-                                    break;
-                                } else {
-                                    cout << "Invalid selection";
-                                    Sleep(1200);
-                                }
-                            }
-                            break;
-                        }
-                        case 5: // delete product
-                            showHeader("Delete product");
-                            admin.deleteInformation("products", productsDatabase, username);
-
-                            break;
-                        case 6: // delete account
-                            showHeader("Delete account");
-                            admin.deleteInformation("accounts", usersDatabase, username);
-
-                            break;
-                        case 7:
-                            // Go back to admin main menu
-                            goto endInventoryLoop;
-                        default:
-                            cout << "Invalid selection.\n";
-                            Sleep(1200);
-                            break;
-                    }
-                }
-                // this serves as an exit point for the second while loop
-                endInventoryLoop: ; // it will execute this, but will do nothing. this is what is called a label
-                break; // afterwards, it will break the first while loop's switch case
+    while (currentState != AdminState::Exit) { // this checks if the currentState is not Exit, if it is Exit, the loop will end
+        // if the currentState is not AdminState::Exit, continue the loop
+        system("cls");
+        switch (currentState) {
+            case AdminState::MainMenu: { // this will be the main menu for the admin
+                string menu[] = {"Inventory", "Monitoring", "Logout"};
+                int selection = showMenu("P.O.S. (Admin)", menu);
+                switch (selection) {
+                    case 1: 
+                        currentState = AdminState::Utilities; // change the currentState to Utilities
+                        break;
+                    case 2: 
+                        currentState = AdminState::Monitoring; // change the currentState to Monitoring
+                        break;
+                    case 3: 
+                        currentState = AdminState::Exit; // change the currentState to Exit to logout
+                        break;
+                    default: 
+                        cout << "Invalid selection.\n"; 
+                        Sleep(1200); 
+                        break;
+                } 
+                break; // after the user had selected, it will break this case
             }
-            case 2: {
-                while(true){ // loop for the monitoring menu, if the user decides to go back, it will end this loop
-                    system("cls"); // initial clear
-                    string monitoringMenu[] = {"View all products", "View sales", "Go back"};
-                    int monitoringSelection = showMenu("Monitoring", monitoringMenu); // show the menu (automatically assign the option numbers) and get the user's input
-                    system("cls"); // if the are errors such as invalid input, it will reach this part to clear the screen again
+            case AdminState::Utilities: { // after the previous case had been broken, it will go here if the user selected Utilities (if the user exits the first case, it will only end that case and the loop will continue to the next where it will check the currentState again)
+                string menu[] = {"Add Product or Account", "View", "Update Product or Account", "Delete Product or Account", "Go back"};
+                int selection = showMenu("Admin Inventory", menu);
+                previousState = AdminState::MainMenu; // we indicate that the previous state is MainMenu for going back, and if this case breaks, the loop will rerun and go to the AdminState::MainMenu case
 
-                    switch(monitoringSelection){
-                        case 1: // view all products
-                            showHeader("View all products");
-                            admin.readProducts(productsDatabase);
-
-                            system("pause");
-                            break;
-                        case 2:
-                            showHeader("View sales");
-                            cout << "Daily Sales:\n";
-                            admin.getDailySales();
-
-                            cout << "\nMonthly Sales:\n";
-                            admin.getMonthlySales();
-
-                            cout << "\nYearly Sales:\n";
-                            admin.getYearlySales();
-
-                            cout << "\nOverall Sales:\n";
-                            admin.getTotalSales();
-
-                            cout << "\n";
-                            system("pause");
-                            break;
-                        case 3:
-                            // go back to the previous menu
-                            goto endMonitoringLoop; 
-                        default:
-                            cout << "Invalid option\n";
-                            Sleep(1200);
-                            break;
-                    }
+                switch (selection) {
+                    case 1: currentState = AdminState::Add; // call the addProduct function from POSAdmin class
+                        break;
+                    case 2: currentState = AdminState::View; // below this case, there will be a case named AdminState::View. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the AdminState::View case to execute
+                        break;
+                    case 3: currentState = AdminState::Update; // below this case, there will be a case named AdminState::Update. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the AdminState::UpdateProduct case to execute
+                        break;
+                    case 4: currentState = AdminState::Delete; // below this case, there will be a case named AdminState::Delete. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the AdminState::Delete case to execute
+                        break;
+                    case 5: currentState = previousState;  // go back to the previous state (which is MainMenu). Then, break this case. It will find for the case named AdminState::MainMenu to execute
+                        break;
+                    default: // for invalid input
+                        cout << "Invalid selection.\n"; 
+                        Sleep(1200); 
+                        break;
                 }
-                endMonitoringLoop: ; // this is a label, it is still executed but nothing happens, after that, it will execute the break keyword
                 break;
             }
-            case 3:
-                return;
-            default:
-                cout << "Invalid option\n";
-                Sleep(1200);
+            case AdminState::Add: { // Add Product or Account
+                string menu[] = {"Add Product", "Add Account", "Go back"};
+                int selection = showMenu("Add Product or Account", menu);
+                previousState = AdminState::Utilities; // set previous state to Utilities for going back
+
+                switch (selection) {
+                    case 1: showHeader("Add product"); admin.addProduct(productsDatabase, username); // call the addProduct function from POSAdmin class
+                        break;
+                    case 2: showHeader("Add account"); admin.addUser(usersDatabase, username); // call the addUser function from POSAdmin class
+                        break;
+                    case 3: currentState = previousState;  // go back to the previous state (which is Utilities). Then, break this case. It will find for the case named AdminState::Utilities to execute
+                        break;
+                    default: // for invalid input
+                        cout << "Invalid selection.\n"; 
+                        Sleep(1200); 
+                        break;
+                }
                 break;
+            }
+            case AdminState::View: {
+                string menu[] = {"View all accounts", "View all logs", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "Refund logs", "Go back"};
+                int selection = showMenu("View", menu);
+                previousState = AdminState::Utilities; // set previous state to Utilities for going back
+
+                switch (selection) {
+                    case 1: showHeader("View all accounts"); admin.getAllAccounts(usersDatabase); // call the getAllAccounts function from POSAdmin class 
+                        system("pause"); 
+                        break;
+                    case 2: currentState = AdminState::ViewLogs; // below this case, there will be a case named AdminState::ViewLogs. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the AdminState::ViewLogs case to execute
+                        break;
+                    case 3: showHeader("Backup transaction data (Cash)"); admin.readBackupTransactions("database/transactions/cash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
+                        system("pause"); 
+                        break;
+                    case 4: showHeader("Backup transaction data (GCash)"); admin.readBackupTransactions("database/transactions/gcash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
+                        system("pause"); 
+                        break;
+                    case 5: showHeader("View refund logs"); admin.readRefundLogs(); // call the readRefundLogs function from POSAdmin class
+                        system("pause"); 
+                        break;
+                    case 6: currentState = previousState;  // go back to the previous state (which is Utilities). Then, break this case. It will find for the case named AdminState::Utilities to execute
+                        break;
+                    default: // for invalid input
+                        cout << "Invalid selection.\n"; 
+                        Sleep(1200); 
+                        break;
+                }
+                break;
+            }
+            case AdminState::ViewLogs: {
+                string menu[] = {"Account logs", "Product logs", "Cashier transactions (Cash)", "Cashier transactions (GCash)", "Go back"};
+                int selection = showMenu("View All Logs", menu);
+                previousState = AdminState::View; // set previous state to View for going back
+
+                switch(selection) {
+                    case 1: showHeader("Account logs"); admin.getAllLogs("accounts"); // call the getAllLogs function from POSAdmin class
+                        break;
+                    case 2: showHeader("Product logs"); admin.getAllLogs("products"); // call the getAllLogs function from POSAdmin class
+                        break;
+                    case 3: showHeader("Cashier transactions (Cash)"); admin.getAllLogs("cashier_cash"); // call the getAllLogs function from POSAdmin class
+                        break;
+                    case 4: showHeader("Cashier transactions (GCash)"); admin.getAllLogs("cashier_gcash"); // call the getAllLogs function from POSAdmin class
+                        break;
+                    case 5: currentState = previousState;  // go back to the previous state (which is View). Then, break this case. It will find for the case named AdminState::View to execute
+                        break;
+                    default: // for invalid input
+                        cout << "Invalid selection.\n"; 
+                        Sleep(1200); 
+                        break;
+                }
+                break;
+            }
+            case AdminState::Update: {
+                string menu[] = {"Update Product", "Update Account", "Go back"};
+                int selection = showMenu("Update Product or Account", menu);
+
+                switch(selection) {
+                    case 1: currentState = AdminState::UpdateProduct;
+                        break;
+                    case 2: currentState = AdminState::UpdateAccount;
+                        break;
+                    case 3: currentState = previousState;
+                        break;
+                    default:
+                        cout << "Invalid selection.\n";
+                        Sleep(1200);
+                        break;
+                }
+                break;
+            }
+            case AdminState::UpdateProduct: {
+                showHeader("Update products");
+                string category[] = {"Tops", "Bottoms", "Accessories", "Go back"};
+                int selection = showMenu("Select category to update products", category);
+                previousState = AdminState::Utilities; // set previous state to Utilities for going back
+
+                switch(selection) {
+                    case 1:
+                        system("cls");
+                        showHeader("Update Tops");
+                        admin.readProductsByCategory(productsDatabase, "Tops", username);
+                        system("pause");
+                        break;
+                    case 2:
+                        system("cls");
+                        showHeader("Update Bottoms");
+                        admin.readProductsByCategory(productsDatabase, "Bottoms", username);
+                        system("pause");
+                        break;
+                    case 3:
+                        system("cls");
+                        showHeader("Update Accessories");
+                        admin.readProductsByCategory(productsDatabase, "Accessories", username);
+                        system("pause");
+                        break;
+                    case 4:
+                        currentState = previousState;  // go back to the previous state (which is Utilities). Then, break this case. It will find for the case named AdminState::Utilities to execute
+                        break;
+                    default:
+                        cout << "Invalid selection.\n";
+                        Sleep(1200);
+                        break;
+                }
+                break;
+            }
+            case AdminState::UpdateAccount: {
+                string menu[] = {"Username", "Password", "Role", "Go back"};
+                int selection = showMenu("Update account", menu);
+                previousState = AdminState::Update; // set previous state to Update for going back
+
+                switch(selection) {
+                    case 1: showHeader("Update account username"); admin.updateAccount(usersDatabase, "accountUsername", username); // call the updateAccount function from POSAdmin class
+                        break;
+                    case 2: showHeader("Update account password"); admin.updateAccount(usersDatabase, "accountPassword", username); // call the updateAccount function from POSAdmin class
+                        break;
+                    case 3: showHeader("Update account role"); admin.updateAccount(usersDatabase, "accountRole", username); // call the updateAccount function from POSAdmin class
+                        break;
+                    case 4: currentState = previousState; // go back to the previous state (which is Update). Then, break this case. It will find for the case named AdminState::Update to execute
+                        break;
+                    default: // for invalid input
+                        cout << "Invalid selection.\n"; 
+                        Sleep(1200); 
+                        break;
+                }
+                break;
+            }
+            case AdminState::Delete: {
+                string menu[] = {"Delete Product", "Delete Account", "Go back"};
+                int selection = showMenu("Delete Product or Account", menu);
+                previousState = AdminState::Utilities; // set previous state to Utilities for going back
+
+                switch (selection) {
+                    case 1: showHeader("Delete product"); admin.deleteInformation("products", productsDatabase, username); // call the deleteInformation function from POSAdmin class
+                        break;
+                    case 2: showHeader("Delete account"); admin.deleteInformation("accounts", usersDatabase, username); // call the deleteInformation function from POSAdmin class
+                        break;
+                    case 3: currentState = previousState;  // go back to the previous state (which is Utilities). Then, break this case. It will find for the case named AdminState::Utilities to execute
+                        break;
+                    default: // for invalid input
+                        cout << "Invalid selection.\n"; 
+                        Sleep(1200); 
+                        break;
+                }
+                break;
+            }
+            case AdminState::Monitoring: { // case for monitoring sales and products
+                string menu[] = {"View all products", "View sales", "Go back"};
+                int selection = showMenu("Monitoring", menu);
+                previousState = AdminState::MainMenu;
+
+                switch(selection){
+                    case 1: showHeader("View all products"); admin.readProducts(productsDatabase);  // call the readProducts function from POSAdmin class
+                        system("pause"); 
+                        break;
+                    case 2: // view sales
+                        showHeader("View sales");
+                        cout << "Daily Sales:\n"; admin.getDailySales();
+                        cout << "\nMonthly Sales:\n"; admin.getMonthlySales();
+                        cout << "\nYearly Sales:\n"; admin.getYearlySales();
+                        cout << "\nOverall Sales:\n"; admin.getTotalSales();
+                        cout << "\n"; system("pause");
+                        break;
+                    case 3: currentState = previousState; // go back to the previous state (which is MainMenu). Then, break this case. It will find for the case named AdminState::MainMenu to execute
+                        break;
+                    default: 
+                        cout << "Invalid option\n"; // for invalid input
+                        Sleep(1200); 
+                        break;
+                }
+                break;
+            }
         }
     }
 }
 
 void PointOfSale::managerMenu(string username) {
-    // read only, since we don't need to modify these variables
+    // path to the databases (const so that they cannot be changed)
     const string productsDatabase = "database/products.csv";
     const string usersDatabase = "database/userAccounts.csv";
 
-    // initalize a loop, where it contains the menu Inventory, Monitoring, and Logout
-    while (true) {
-        system("cls"); // initial clear of the console
-        string menu[] = {"Utilities", "Monitoring", "Logout"}; // initial loop (main menu for admin)
-        int adminSelection = showMenu("P.O.S. (Manager)", menu); // this will print the header, and the numbers for selecting options. also, it will return the user's input
-        system("cls"); // for errors such as invalid input, it will reach this part to clear the screen again
+    ManagerState currentState = ManagerState::MainMenu; // this is the current state (meaning that this can change where the user want to select)
+    ManagerState previousState = ManagerState::MainMenu; // this will store the previous menu that the user was in (for going back)
 
-        switch (adminSelection) {
-            case 1: {  // Inventory submenu
-                // intialize another loop that contains the menu of the admin menu
-                while (true) {
-                    system("cls"); // initial clearing for this loop
-                    string inventoryMenu[] = {
-                        "Add products",
-                        "View products, accounts, logs, backup transaction data, or refund logs",
-                        "Update product or process refunds",
-                        "Delete a product",
-                        "Go back"
-                    };
-                    int inventoryInput = showMenu("Manager utilities", inventoryMenu);
-                    system("cls"); // if an error arise, it will reach this part to clear the screen again
+    while (currentState != ManagerState::Exit) {
+        system("cls");
+        switch (currentState) {
+            case ManagerState::MainMenu: {
+                string menu[] = {"Inventory", "Monitoring", "Logout"};
+                int selection = showMenu("P.O.S. (Manager)", menu);
 
-                    switch (inventoryInput) {
-                        case 1: // add product
-                            showHeader("Add a product");
-                            admin.addProduct(productsDatabase, username);
-                            break;
-                        case 2: {
-                            while(true){
-                                system("cls");
-                                string viewMenu[] = {"View all products", "View all accounts", "View all logs", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "View refund logs", "Go back"}; // automatically sets the options for the user to choose
-                                int viewInput = showMenu("View", viewMenu); // automatically sets the options for the user to choose, and shows the menu. it also gets the user's input
-                                system("cls");
-
-                                if(viewInput == 7) break; // exit view menu
-
-                                switch(viewInput){
-                                    case 1: // view products
-                                        showHeader("View all products");
-                                        admin.readProducts(productsDatabase);
-                                        system("pause"); // pause to let the user read the products
-                                        break;
-                                    case 2: // view accounts
-                                        showHeader("View all accounts");
-                                        admin.getAllAccounts(usersDatabase);
-                                        system("pause"); // pause to let the user read the accounts
-                                        break;
-                                    case 3: // view logs (account, product, or cashier)
-                                        while(true){ // every menu, it corresponds with a loop. so that if the user decides to go back, we can just end the loop to have him or her go back to the previous menu
-                                            system("cls"); // initial clear
-                                            string logsMenu[] = {"Account logs", "Product logs", "Cashier transactions (Cash)", "Cashier transactions (GCash)", "Go back"};
-                                            int logsInput = showMenu("View all logs", logsMenu);
-                                            system("cls"); // clear again after getting input
-
-                                            if (logsInput == 5) break; // exit logs menu
-
-                                            switch(logsInput){
-                                                case 1: // account logs
-                                                    showHeader("Account logs");
-                                                    admin.getAllLogs("accounts");
-                                                    break;
-                                                case 2: // product logs
-                                                    showHeader("Product logs");
-                                                    admin.getAllLogs("products");
-                                                    break;
-                                                case 3: // cashier logs
-                                                    showHeader("Cashier transactions (Cash)");
-                                                    admin.getAllLogs("cashier_cash");
-                                                    break;
-                                                case 4: // cashier logs
-                                                    showHeader("Cashier transactions (GCash)");
-                                                    admin.getAllLogs("cashier_gcash");
-                                                    break;
-                                                default:
-                                                    cout << "Invalid selection";
-                                                    Sleep(1200);
-                                                    break;
-                                            }
-                                        }
-                                        break;
-                                    case 4: // this function is for those who had a transaction right after a  power outage or system crash. in that way, they can update immediately the database
-                                        showHeader("Backup transaction data (Cash)");
-                                        admin.readBackupTransactions("database/transactions/cash_backup.csv");
-                                        system("pause"); // pause to let the user read the backup transactions
-                                        break;
-                                    case 5: // this function is for those who had a transaction right after a  power outage or system crash. in that way, they can update immediately the database
-                                        showHeader("Backup transaction data (GCash)");
-                                        admin.readBackupTransactions("database/transactions/gcash_backup.csv");
-                                        system("pause"); // pause to let the user read the backup transactions
-                                        break;
-                                    case 6: // view refund logs
-                                        showHeader("View refund logs");
-                                        admin.readRefundLogs();
-                                        system("pause"); // pause to let the user read the refund logs
-                                        break;
-                                    default:
-                                        cout << "Invalid selection";
-                                        Sleep(1200);
-                                        break;
-                                }
-                            }
-                            break;
-                        }
-                        case 3: { // update
-                            // initialize a loop to update the information of a product                          
-                            while(true){
-                                system("cls");
-                                string updateMenu[] = {"Product", "Process Refunds", "Go back"};
-                                int updateInput = showMenu("Update", updateMenu);
-                                system("cls");
-
-                                if(updateInput == 3) break; // go back to the previous menu
-
-                                switch(updateInput){
-                                    case 1: {
-                                        while(true){
-                                            string updateProductMenu[] = {"Product name", "Product sub-category", "Product category", "Product quantity", "Product price", "Go back"};
-                                            int updateProductInput = showMenu("Update product", updateProductMenu);
-
-                                            if(updateProductInput == 6) break; // go to the previous menu (ends this loop)
-
-                                            switch(updateProductInput){
-                                                case 1:  // update product name
-                                                    showHeader("Update product name");
-                                                    admin.updateProduct(productsDatabase, "productName", username);
-                                                    break;
-                                                case 2:  // update product sub-category
-                                                    showHeader("Update product sub-category");
-                                                    admin.updateProduct(productsDatabase, "productSubCategory", username);
-                                                    break;
-                                                case 3:  // update product category
-                                                    showHeader("Update product category");
-                                                    admin.updateProduct(productsDatabase, "productCategory", username);
-                                                    break;
-                                                case 4:  // update product quantity
-                                                    showHeader("Update product quantity");
-                                                    admin.updateProduct(productsDatabase, "productQuantity", username);
-                                                    break;
-                                                case 5:  // update product price
-                                                    showHeader("Update product price");
-                                                    admin.updateProduct(productsDatabase, "productPrice", username);
-                                                    break;
-                                                default: // fallback
-                                                    cout << "Invalid selection";
-                                                    Sleep(1200);
-                                                    break;
-                                            }
-                                        }
-                                        break;
-                                    }
-                                    case 2: // process refunds
-                                        showHeader("Process refunds");
-
-                                        admin.processRefunds(username);
-                                        break;
-                                    default: // fallback
-                                        cout << "Invalid selection";
-                                        Sleep(1200);
-                                        break;
-                                }
-                            }
-                            break;
-                        }
-                        case 4: // delete product
-                            showHeader("Delete product");
-                            admin.deleteInformation("products", productsDatabase, username);
-                            break;
-                        case 5:
-                            // Go back to admin main menu
-                            goto endInventoryLoop;
-                        default:
-                            cout << "Invalid selection.\n";
-                            Sleep(1200);
-                            break;
-                    }
+                switch (selection) {
+                    case 1: currentState = ManagerState::Utilities; // below this case, there will be a case named ManagerState::Utilities. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::Utilities case to execute
+                    case 2: currentState = ManagerState::Monitoring; // below this case, there will be a case named ManagerState::Monitoring. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::Monitoring case to execute
+                    case 3: currentState = ManagerState::Exit; // change the currentState to Exit to logout
+                        break;
+                    default: 
+                        cout << "Invalid selection.\n"; 
+                        Sleep(1200); 
+                        break;
                 }
-                // this serves as an exit point for the second while loop
-                endInventoryLoop: ;
                 break;
             }
-            case 2: {
-                while(true){ // loop for the monitoring menu, if the user decides to go back, it will end this loop
-                    system("cls");
-                    string monitoringMenu[] = {"View all products", "View today's sales","Go back"};
-                    int monitoringSelection = showMenu("Monitoring", monitoringMenu); // show the menu (automatically assign the option numbers) and get the user's input
-                    system("cls");
+            case ManagerState::Utilities: { // case for manager utilities
+                string menu[] = {"Add products", "View...", "Update...", "Delete a product", "Go back"};
+                int selection = showMenu("Manager Utilities", menu);
+                previousState = ManagerState::MainMenu;
 
-                    switch(monitoringSelection){
-                        case 1: // view all products
-                            showHeader("View all products");
-                            admin.readProducts(productsDatabase);
-
-                            system("pause");
-                            break;
-                        case 2: // get daily, monthly, yearly, and total sales
-                            showHeader("View sales");
-                            cout << "Daily Sales:\n";
-                            admin.getDailySales();
-
-                            cout << "\nMonthly Sales:\n";
-                            admin.getMonthlySales();
-
-                            cout << "\nYearly Sales:\n";
-                            admin.getYearlySales();
-
-                            cout << "\nOverall Sales:\n";
-                            admin.getTotalSales();
-
-                            cout << "\n";
-                            system("pause");
-                            break;
-                        case 3:
-                            // go back to the previous menu
-                            goto endMonitoringLoop; // this will jump to the endMonitoringLoop label
-                        default:
-                            cout << "Invalid option\n";
-                            Sleep(1200);
-                            break;
-                    }
+                switch (selection) {
+                    case 1: showHeader("Add a product"); admin.addProduct(productsDatabase, username); // call the addProduct function from POSAdmin class
+                        break;
+                    case 2: currentState = ManagerState::View; // below this case, there will be a case named ManagerState::View. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::View case to execute
+                        break;
+                    case 3: currentState = ManagerState::Update; // below this case, there will be a case named ManagerState::Update. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::Update case to execute
+                        break;
+                    case 4: showHeader("Delete product"); admin.deleteInformation("products", productsDatabase, username); // call the deleteInformation function from POSAdmin class
+                        break;
+                    case 5: currentState = previousState; // go back to the previous state (which is MainMenu). Then, break this case. It will find for the case named ManagerState::MainMenu to execute
+                        break;
+                    default: 
+                        cout << "Invalid selection.\n"; 
+                        Sleep(1200); 
+                        break;
                 }
-                endMonitoringLoop: ; // this is a label, it is still executed but nothing happens, after that, it will execute the break keyword
                 break;
             }
-            case 3:
-                return;
-            default:
-                cout << "Invalid option\n";
-                Sleep(1200);
+            case ManagerState::View: {
+                string menu[] = {"View all products", "View all accounts", "View all logs", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "Refund logs", "Go back"};
+                int selection = showMenu("View", menu);
+                previousState = ManagerState::Utilities; // set previous state to Utilities for going back
+
+                switch (selection) {
+                    case 1: showHeader("View all products"); admin.readProducts(productsDatabase); // call the readProducts function from POSAdmin class
+                        system("pause"); 
+                        break;
+                    case 2: showHeader("View all accounts"); admin.getAllAccounts(usersDatabase); // call the getAllAccounts function from POSAdmin class
+                        system("pause"); 
+                        break;
+                    case 3: currentState = ManagerState::ViewLogs; // below this case, there will be a case named ManagerState::ViewLogs. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::ViewLogs case to execute
+                        break;
+                    case 4: showHeader("Backup transaction data (Cash)"); admin.readBackupTransactions("database/transactions/cash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
+                        system("pause");
+                        break;
+                    case 5: showHeader("Backup transaction data (GCash)"); admin.readBackupTransactions("database/transactions/gcash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
+                        system("pause");
+                        break;
+                    case 6: showHeader("View refund logs"); admin.readRefundLogs(); // call the readRefundLogs function from POSAdmin class
+                        system("pause");
+                        break;
+                    case 7: currentState = previousState; break;
+                    default: 
+                        cout << "Invalid selection.\n"; 
+                        Sleep(1200); 
+                        break;
+                }
                 break;
+            }
+            case ManagerState::ViewLogs: {
+                string menu[] = {"Account logs", "Product logs", "Cashier transactions (Cash)", "Cashier transactions (GCash)", "Go back"};
+                int selection = showMenu("View All Logs", menu);
+                previousState = ManagerState::View; // set previous state to View for going back
+
+                switch(selection) {
+                    case 1: showHeader("Account logs"); admin.getAllLogs("accounts"); // call the getAllLogs function from POSAdmin class
+                        break;
+                    case 2: showHeader("Product logs"); admin.getAllLogs("products"); // call the getAllLogs function from POSAdmin class
+                        break;
+                    case 3: showHeader("Cashier transactions (Cash)"); admin.getAllLogs("cashier_cash"); // call the getAllLogs function from POSAdmin class
+                        break;
+                    case 4: showHeader("Cashier transactions (GCash)"); admin.getAllLogs("cashier_gcash"); // call the getAllLogs function from POSAdmin class
+                        break;
+                    case 5: currentState = previousState; // go back to the previous state (which is View). Then, break this case. It will find for the case named ManagerState::View to execute
+                        break;
+                    default: // for invalid input
+                        cout << "Invalid selection.\n"; 
+                        Sleep(1200); 
+                        break;
+                }
+                break;
+            }
+            case ManagerState::Update: {
+                string menu[] = {"Product", "Process Refunds", "Go back"};
+                int selection = showMenu("Update", menu);
+                previousState = ManagerState::Utilities;
+
+                switch(selection) {
+                    case 1: currentState = ManagerState::UpdateProduct; // below this case, there will be a case named ManagerState::UpdateProduct. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::UpdateProduct case to execute
+                        break;
+                    case 2: showHeader("Process refunds"); admin.processRefunds(username); // call the processRefunds function from POSAdmin class
+                        break;
+                    case 3: currentState = previousState; // go back to the previous state (which is Utilities). Then, break this case. It will find for the case named ManagerState::Utilities to execute
+                        break;
+                    default: // for invalid input
+                        cout << "Invalid selection.\n"; 
+                        Sleep(1200); 
+                        break;
+                }
+                break;
+            }
+            case ManagerState::UpdateProduct: {
+                showHeader("Update products");
+                string category[] = {"Tops", "Bottoms", "Accessories", "Go back"};
+                int selection = showMenu("Select category to update products", category);
+                previousState = ManagerState::Utilities; // set previous state to Utilities for going back
+
+                switch(selection) {
+                    case 1:
+                        system("cls");
+                        showHeader("Update Tops");
+                        admin.readProductsByCategory(productsDatabase, "Tops", username);
+                        system("pause");
+                        break;
+                    case 2:
+                        system("cls");
+                        showHeader("Update Bottoms");
+                        admin.readProductsByCategory(productsDatabase, "Bottoms", username);
+                        system("pause");
+                        break;
+                    case 3:
+                        system("cls");
+                        showHeader("Update Accessories");
+                        admin.readProductsByCategory(productsDatabase, "Accessories", username);
+                        system("pause");
+                        break;
+                    case 4: currentState = previousState;  // go back to the previous state (which is Utilities). Then, break this case. It will find for the case named AdminState::Utilities to execute
+                        break;
+                    default:
+                        cout << "Invalid selection.\n";
+                        Sleep(1200);
+                        break;
+                }
+                break;
+            }
+            case ManagerState::Monitoring: {
+                string menu[] = {"View all products", "View sales", "Go back"};
+                int selection = showMenu("Monitoring", menu);
+                previousState = ManagerState::MainMenu;
+                 switch(selection){
+                    case 1: showHeader("View all products"); admin.readProducts(productsDatabase); // call the readProducts function from POSAdmin class
+                        system("pause"); 
+                        break;
+                    case 2: // view sales
+                        showHeader("View sales");
+                        cout << "Daily Sales:\n"; admin.getDailySales();
+                        cout << "\nMonthly Sales:\n"; admin.getMonthlySales();
+                        cout << "\nYearly Sales:\n"; admin.getYearlySales();
+                        cout << "\nOverall Sales:\n"; admin.getTotalSales();
+                        cout << "\n"; system("pause");
+                        break;
+                    case 3: 
+                        currentState = previousState; // go back to the previous state (which is MainMenu). Then, break this case. It will find for the case named ManagerState::MainMenu to execute
+                        break;
+                    default: // for invalid input
+                        cout << "Invalid option\n";
+                        Sleep(1200); 
+                        break;
+                }
+                break;
+            }
         }
     }
 }
 
 void PointOfSale::cashierMenu(string username) {
     const string productsDatabase = "database/products.csv";
-    while(true){
-        system("cls"); // initial clearing, usually starts when logging in as cashier or when going back to this menu
-        string menu[] = {"Tops", "Bottoms", "Accessories", "View Cart", "Logout"};
-        int cashierSelection = showMenu("P.O.S. (Cashier)", menu);
-        system("cls"); // if an error input was received, it will reach this part, so that it will print the error and go back to the menu
+    CashierState currentState = CashierState::MainMenu; // this is the current state (meaning that this can change where the user want to select)
 
-        switch (cashierSelection) {
-            case 1: { // Tops
-                bool transactionMade = false; // the purpose of this boolean here is to exit or end this sub-category loop and go back to the main menu if the transaction is complete (since we don't want to go to the sub-category menu again after a transaction is made)
-                while(true){
-                    system("cls");
-                    string topsSubCategory[] = {"T-Shirts", "Polo Shirts", "Jackets", "Go back"};
-                    int topsSelection = showMenu("Tops", topsSubCategory); // show the menu and get the user's input
-                    system("cls");
+    while (currentState != CashierState::Exit) {
+        system("cls");
+        bool transactionMade = false; // this will be used to determine if there was a transaction made
 
-                    if(topsSelection == 4) break; // Go back to the main cashier menu
-
-                    switch(topsSelection){
-                        case 1: // t-shirts
-                            showHeader("T-Shirts");
-                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "T_Shirts", username); // this will return either true or false depending if a transaction was made
-                            break;
-                        case 2: // polo shirts
-                            showHeader("Polo Shirts");
-                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Polo_Shirts", username); // this will return either true or false depending if a transaction was made
-                            break;
-                        case 3:
-                            showHeader("Jackets");
-                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Jackets", username); // this will return either true or false depending if a transaction was made
-                            break;
-                        default: // for invalid input
-                            cout << "Invalid selection\n";
-                            Sleep(1200);
-                            break;
-                    }
-                    // If a transaction was completed, break out of the sub-category loop
-                    // because if a transaction was made, we want to go back to the main cashier menu
-                    // otherwise after the transaction, it will still be in the sub-category menu
-                    if(transactionMade) break;
-                }
-                break; // end of case 1 (Tops), also, so that this case will stop and not go to the next case
-            }
-            case 2: { // Bottoms
-                bool transactionMade = false; // the purpose of this boolean here is to exit or end this sub-category loop and go back to the main menu if the transaction is complete (since we don't want to go to the sub-category menu again after a transaction is made)
-                while(true){
-                    system("cls");
-                    string bottomsSubCategory[] = {"Jeans", "Shorts", "Skirts", "Go back"};
-                    int bottomsSelection = showMenu("Bottoms", bottomsSubCategory);
-                    system("cls");
-
-                    if(bottomsSelection == 4) break; // Go back to the main cashier menu
-
-                    switch(bottomsSelection){
-                        case 1: // jeans
-                            showHeader("Jeans");
-                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Jeans", username);
-                            break;
-                        case 2: // shorts
-                            showHeader("Shorts");
-                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Shorts", username);
-                            break;
-                        case 3: // skirts
-                            showHeader("Skirts");
-                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Skirts", username);
-                            break;
-                        default: // for invalid input
-                            cout << "Invalid option\n";
-                            Sleep(1200);
-                            break;
-                    }
-                    // If a transaction was completed, break out of the sub-category loop
-                    if(transactionMade) break;
+        switch (currentState) {
+            case CashierState::MainMenu: {
+                string menu[] = {"Tops", "Bottoms", "Accessories", "View Cart", "Logout"};
+                int selection = showMenu("P.O.S. (Cashier)", menu);
+                switch (selection) {
+                    case 1: currentState = CashierState::Tops; // below this case, there will be a case named CashierState::Tops. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the CashierState::Tops case to execute
+                        break;
+                    case 2: currentState = CashierState::Bottoms; // below this case, there will be a case named CashierState::Bottoms. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the CashierState::Bottoms case to execute
+                        break;
+                    case 3: currentState = CashierState::Accessories; // below this case, there will be a case named CashierState::Accessories. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the CashierState::Accessories case to execute
+                        break;
+                    case 4: currentState = CashierState::ViewCart; // below this case, there will be a case named CashierState::ViewCart. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the CashierState::ViewCart case to execute
+                        break;
+                    case 5: currentState = CashierState::Exit; // change the currentState to Exit to logout
+                        break;
+                    default: // for invalid input
+                        cout << "Invalid option\n"; 
+                        Sleep(1000); 
+                        break;
                 }
                 break;
             }
-            case 3: { // Accessories
-                bool transactionMade = false; // the purpose of this boolean here is to exit or end this sub-category loop and go back to the main menu if the transaction is complete (since we don't want to go to the sub-category menu again after a transaction is made)
-                while(true){
-                    system("cls");
-                    string accessoriesSubCategory[] = {"Bags", "Headware", "Wallets", "Go back"};
-                    int accessoriesSelection = showMenu("Accessories", accessoriesSubCategory);
-                    system("cls");
-                    
-                    if(accessoriesSelection == 4) break; // Go back to the main cashier menu
-
-                    switch(accessoriesSelection){
-                        case 1: // bags
-                            showHeader("Bags");
-                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Bags", username);
-                            break;
-                        case 2: // headware
-                            showHeader("Headware");
-                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Headware", username);
-                            break;
-                        case 3: // wallets
-                            showHeader("Wallets");
-                            transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Wallets", username);
-                            break;
-                        default: // for invalid input
-                            cout << "Invalid selection\n";
-                            Sleep(1200);
-                            break;
-                    }
-                    // If a transaction was completed, break out of the sub-category loop
-                    if(transactionMade) break;
+            case CashierState::Tops: { // state for tops
+                string menu[] = {"T-Shirts", "Polo Shirts", "Jackets", "Go back"};
+                int selection = showMenu("Tops", menu);
+                switch (selection) {
+                    case 1: showHeader("T-Shirts"); transactionMade = cashier.readProductsBySubcategory(productsDatabase, "T_Shirts", username); // call the readProductsBySubcategory function from POSCashier class
+                        break;
+                    case 2: showHeader("Polo Shirts"); transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Polo_Shirts", username); // call the readProductsBySubcategory function from POSCashier class
+                        break;
+                    case 3: showHeader("Jackets"); transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Jackets", username); // call the readProductsBySubcategory function from POSCashier class
+                        break;
+                    case 4: currentState = CashierState::MainMenu; // go back to main menu
+                        break;
+                    default: // invalid input
+                        cout << "Invalid selection\n"; 
+                        Sleep(1200); 
+                        break;
                 }
+                if (transactionMade) currentState = CashierState::MainMenu; // Go back to main menu after a sale
                 break;
             }
-            case 4: {
-                bool transactionMade = cashier.viewCart(username); // this is boolean because if the user proceeds to checkout, we need to know in the main menu to not break the loop
-                // and if the user cancels the transaction and he went with the view cart, it will just return to the main menu
+            case CashierState::Bottoms: { // state for bottoms
+                string menu[] = {"Jeans", "Shorts", "Skirts", "Go back"};
+                int selection = showMenu("Bottoms", menu);
+
+                switch (selection) {
+                    case 1: showHeader("Jeans"); transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Jeans", username); // call the readProductsBySubcategory function from POSCashier class
+                        break;
+                    case 2: showHeader("Shorts"); transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Shorts", username); // call the readProductsBySubcategory function from POSCashier class
+                        break;
+                    case 3: showHeader("Skirts"); transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Skirts", username); // call the readProductsBySubcategory function from POSCashier class
+                        break;
+                    case 4: currentState = CashierState::MainMenu; // go back to main menu
+                        break;
+                    default: // invalid input
+                        cout << "Invalid option\n"; 
+                        Sleep(1200); 
+                        break;
+                }
+                if (transactionMade) currentState = CashierState::MainMenu; // Go back to main menu after a sale
                 break;
             }
-            case 5:
-                return; // Logout
-            default: // for invalid input
-                cout << "Invalid option\n";
-                Sleep(1000);
+            case CashierState::Accessories: {
+                string menu[] = {"Bags", "Headware", "Wallets", "Go back"};
+                int selection = showMenu("Accessories", menu);
+                switch (selection) {
+                    case 1: showHeader("Bags"); transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Bags", username); // call the readProductsBySubcategory function from POSCashier class
+                        break;
+                    case 2: showHeader("Headware"); transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Headware", username); // call the readProductsBySubcategory function from POSCashier class
+                        break;
+                    case 3: showHeader("Wallets"); transactionMade = cashier.readProductsBySubcategory(productsDatabase, "Wallets", username); // call the readProductsBySubcategory function from POSCashier class
+                        break;
+                    case 4: currentState = CashierState::MainMenu; // go back to main menu
+                        break;
+                    default: // invalid input
+                        cout << "Invalid selection\n"; 
+                        Sleep(1200); 
+                        break;
+                }
+                if (transactionMade) currentState = CashierState::MainMenu; // Go back to main menu after a sale
                 break;
+            }
+            case CashierState::ViewCart: { // state for viewing cart
+                showHeader("View Cart");
+                cashier.viewCart(username);
+                currentState = CashierState::MainMenu; // Always return to main menu after viewing/processing cart
+                break;
+            }
         }
     }
 }

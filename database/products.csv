@@ -26,4 +26,4 @@ ProductNumber,ProductName,ProductCategory,ProductSubCategory,Quantity,Price
 25,Leather_Wallet,Accessories,Wallets,18,35.00
 26,Fabric_Wallet,Accessories,Wallets,10,25.00
 27,Coin_Purse,Accessories,Wallets,18,20.00
-28,TestProcut,Tops,T_Shirts,0,19.99
+28,Demo,Tops,T_Shirts,75,20.00

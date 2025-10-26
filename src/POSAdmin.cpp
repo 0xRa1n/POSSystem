@@ -97,7 +97,7 @@ void POSAdmin::addProduct(string database, string username) {
     // since the input can have a decimal, we should use getline (because if we enter a decimal point, cin will think its the end of input. and it will trigger the invalid input error)
     string priceInput;
     cout << "Enter the price (0 = Cancel): ";
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin >> ws;
     getline(cin, priceInput);
 
     // we used cin.ignore() along with getline to get a value that has a decimal point
@@ -1010,56 +1010,226 @@ void POSAdmin::getAllLogs(string type){
     system("pause");
 }
 
-// UPDATE
-void POSAdmin::updateProduct(string database, string type, string username){
-    string query, newValue, reason;
+void POSAdmin::readProductsByCategory(string productsDatabase, string category, string username){
+    ifstream file(productsDatabase);
+            
+    if (!file.is_open()) {
+        cout << "Failed to open file\n";
+        Sleep(1200);
+        return;
+    }
+    cout << "Format: ID, ProductName, Category, SubCategory, Quantity, Price\n" << endl;
 
-    ifstream readFile(database); // open the file as an ifstream since we are reading from it
+    // Read and filter T-Shirts products
+    vector<vector<string>> categoryRows;
+    string line;
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string cell;
+        vector<string> row;
+        while (getline(ss, cell, ',')) {
+            row.push_back(cell); // add each cell to the row
+            // row will look like this: {"ID", "ProductName", "SubCategory", "Quantity", "Price"
+        }
+        // Only add if ProductSubCategory is the desired sub-category (subCategory)
+        if (row.size() > 2 && row[2] == category) { // if row size is greater than 2 to avoid out of range error and if the sub-category matches the desired sub-category
+            categoryRows.push_back(row); // add the row to the categoryRows
+            // subCategoryRows will look like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "T-Shirts", "10", "100"}, ...
+            // the contents of the variable row will only be added if the sub-category matches
+            // this way, we only have the products that belong to the desired sub-category
+        }
+    }
+    file.close();
+
+    if (categoryRows.empty()) {
+        cout << "No products available in this sub-category.\n";
+        Sleep(1200);
+        return;
+    }
+
+    // print all the products in the said subcategory
+    // Find max width of each column
+    size_t cols = 0;
+    for (auto &r : categoryRows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
+    // no brackets since its a single controlled statement
+    vector<size_t> widths(cols, 0); // initialize a vector with widths of 0
+    // initially: widths is {0, 0, 0, 0, 0} for 5 columns
+    // then the following code will update the widths for each row
+
+    // after we get the maximum number, we will update the widths vector
+    for (auto &r : categoryRows) { // using the reference, we can directly access the value
+        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
+            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
+            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
+            // there is no curly braces here because it is a single controlled statement
+    }
+
+    // Add a little padding for readability
+    for (auto &w : widths) w += 2;
+
+    // Print
+    for (auto &r : categoryRows) { // using the reference, we can directly access the value
+        for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
+            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
+            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
+        }
+        cout << '\n';
+    }
+
+    string productName, productCategory;
+    int productQuantity;
+    double productPrice;
+
+    // Get user input for product ID
+    int selectedId;
+    cout << "\nEnter product ID to select (0 = Cancel): ";
+    cin >> selectedId;
+
+    if (handleInputError()) return; // handle invalid inputs
+    if (selectedId == 0) return;
+
+    bool isFound = false;
+    for (auto row : categoryRows) {
+        if (stoi(row[0]) == selectedId) { // row[0] is the product ID
+            productName = row[1]; // row[1] is the product name
+            productCategory = row[2]; // row[2] is the product category
+            productQuantity = stoi(row[4]); // row[4] is the product quantity
+            productPrice = stod(row[5]); // row[5] is the product price
+
+            isFound = true;
+            break;
+        }
+    }
+
+    if(!isFound){
+        cout << "Product with ID " << selectedId << " not found in this category.\n";
+        Sleep(1200);
+        return;
+    }
+
+    cout << "1. Update Category\n2. Update Sub-Category\n3. Update Product Name\n4. Update Quantity\n5. Update Price\n6. Go Back\nEnter the field you want to edit: ";
+    cin >> selectedId;
+    cout << "\n";
+
+    if(selectedId == 6) return;
+
+    if (handleInputError()) return; // handle invalid inputs
+    switch (selectedId) {
+        case 1: {
+            string newProductCategory; // for storing the new category
+            int categoryOption; // for storing the input
+            cout << "1. Tops\n2. Bottoms\n3. Outerwear\n4. Accessories\nEnter the new category: ";
+            cin >> categoryOption;
+
+            if(handleInputError()) return; // handle invalid inputs
+
+            switch(categoryOption){
+                case 1: newProductCategory = "Tops"; break;
+                case 2: newProductCategory = "Bottoms"; break;
+                case 3: newProductCategory = "Accessories"; break;
+                default: cout << "Invalid category option.\n"; Sleep(1200); break;
+            }
+            
+            updateProduct(productsDatabase, productName, newProductCategory, "productCategory", username);
+            break;
+        }
+        case 2: {
+            string newProductSubCategory;
+            int subCategoryOption;
+            cout << "1. T-Shirts\n2. Polo Shirts\n3. Jackets\n4. Jeans\n5. Shorts\n6. Skirts\n7. Bags\n8. Headwear\n9. Wallets\nEnter the new sub-category: ";
+            cin >> subCategoryOption;
+
+            if(handleInputError()) return; // handle invalid inputs
+
+            switch(subCategoryOption){
+                case 1: newProductSubCategory = "T_Shirts"; break;
+                case 2: newProductSubCategory = "Polo_Shirts"; break;
+                case 3: newProductSubCategory = "Jackets"; break;
+                case 4: newProductSubCategory = "Jeans"; break;
+                case 5: newProductSubCategory = "Shorts"; break;
+                case 6: newProductSubCategory = "Skirts"; break;
+                case 7: newProductSubCategory = "Bags"; break;
+                case 8: newProductSubCategory = "Headwear"; break;
+                case 9: newProductSubCategory = "Wallets"; break;
+                default: cout << "Invalid sub-category option.\n"; Sleep(1200); break;
+            }
+
+            updateProduct(productsDatabase, productName, newProductSubCategory, "productSubCategory", username);
+            break;
+        }
+        case 3: {
+            string newProductName;
+            cout << "Enter new Product Name: ";
+            cin >> newProductName;
+
+            updateProduct(productsDatabase, productName, newProductName, "productName", username);
+            break;
+        }
+        case 4: {
+            int newProductQuantity;
+            cout << "Enter new Quantity: ";
+            cin >> newProductQuantity;
+            
+            updateProduct(productsDatabase, productName, to_string(newProductQuantity), "productQuantity", username);
+            break;
+        }
+        case 5: {
+            double newProductPrice;
+            cout << "Enter new Price: ";
+            cin >> newProductPrice;
+
+            stringstream priceStream; // this will treat anything inserted into it as a string
+            priceStream << fixed << setprecision(2) << newProductPrice; // format the price to 2 decimal places
+            string formattedPrice = priceStream.str(); // get the formatted price as a string
+
+            updateProduct(productsDatabase, productName, formattedPrice, "productPrice", username);
+            break;
+        }
+        default:
+            cout << "Invalid option selected.\n";
+            Sleep(1200);
+            return;
+    }
+};
+// UPDATE
+void POSAdmin::updateProduct(string filename, string query, string valueToUpdate, string type, string username){
+    string reason;
+
+    ifstream readFile(filename); // open the file as an ifstream since we are reading from it
     if(!readFile.is_open()){
         cout << "Failed to open file\n";
         return;
     }
 
-    cout << "What is the product name you want to update? (0 = Cancel): ";
-    cin >> query;
-
-    // check if product name exists in the csv
-    if(!isAlreadyInCsv(database, query)){
-        cout << "Product name '" << query << "' does not exist in the CSV.\n";
+    cout << "What is the reason for the update? (0 = Cancel): ";
+    cin >> ws; // eat up any leading whitespace
+    getline(cin, reason); // get the whole line including the spaces, because if we use cin, it will end at the space (which we don't want)
+    
+    if(reason == "0") return;
+    if(regex_search(reason, disallowed)){
+        cout << "Reason cannot contain commas or any other special character besides: _ @ # &\n";
         Sleep(1200);
         return;
     }
-
-    if (query == "0") return;
-    if(regex_search(query, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
-        cout << "Product name cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
-        Sleep(1200);
-        return;
-    }
-
-    cout << "Enter the new value (0 = Cancel): ";
-    cin >> newValue;
-
-    if(newValue == "0") return; // input from cin is always string
 
     // error handling for different fields in a product
-    if(query == "productName" || query == "productSubCategory" || query == "productCategory"){ // only these two fields are strings
-        if(regex_search(newValue, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
+    if(type == "productName" || type == "productSubCategory" || type == "productCategory"){ // only these two fields are strings
+        if(regex_search(valueToUpdate, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
             cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
             Sleep(1200);
             return;
         } 
-        if(query == "name" && isAlreadyInCsv(database, newValue)){ // check if the user wants to update a product name to another product name that already exists
-            cout << "Product name '" << newValue << "' is already in the CSV.\n"; // since duplicate product names are not allowed
+        if(type == "productName" && isAlreadyInCsv(filename, valueToUpdate)){ // check if the user wants to update a product name to another product name that already exists
+            cout << "Product name '" << valueToUpdate << "' is already in the CSV.\n"; // since duplicate product names are not allowed
             Sleep(1200);
             return;
         }
-    } else if(query == "price" || query == "quantity"){ // only these two fields are integers
+    } else if(type == "productPrice" || type == "productQuantity"){ // only these two fields are integers
         // make sure that the new input is a valid integer
         // note that the function handleInputError() will only work for INTEGERS entered via cin
         // and this function not only takes integers
         try {
-            int value = stod(newValue); // convert string to integer
+            int value = stod(valueToUpdate); // convert string to integer
             if(value < 0){ // price and quantity cannot be negative
                 cout << "The " + query + " cannot be negative.\n";
                 Sleep(1200);
@@ -1075,16 +1245,6 @@ void POSAdmin::updateProduct(string database, string type, string username){
             return;
         }
     } 
-
-    cout << "What is the reason for the update? (0 = Cancel): ";
-    cin.ignore(); // ignore any inputs from the last cin (input)
-    getline(cin, reason); // get the whole line including the spaces, because if we use cin, it will end at the space (which we don't want)
-    if(reason == "0") return;
-    if(regex_search(reason, disallowed)){
-        cout << "Reason cannot contain commas or any other special character besides: _ @ # &\n";
-        Sleep(1200);
-        return;
-    }
 
     string fileContent, line;
     bool found = false; // to check if the query was found
@@ -1104,15 +1264,15 @@ void POSAdmin::updateProduct(string database, string type, string username){
         // modify the entry if it matches the query
         if (indexTwo == query) { // This will check each line if the product name matches the query (note that indexTwo holds the product name, and the variable query holds the product name to search for)
             if(type == "productName"){
-                indexTwo = newValue; // update product name
+                indexTwo = valueToUpdate; // update product name
             } else if(type == "productQuantity"){
-                indexFive = newValue; // update product quantity
+                indexFive = valueToUpdate; // update product quantity
             } else if(type == "productPrice"){
-                indexSix = newValue; // update product price
+                indexSix = valueToUpdate; // update product price
             }  else if(type == "productSubCategory"){
-                indexFour = newValue; // update product sub-category
+                indexFour = valueToUpdate; // update product sub-category
             } else if(type == "productCategory"){
-                indexThree = newValue; // update product category
+                indexThree = valueToUpdate; // update product category
             }
             found = true;
         }
@@ -1127,7 +1287,7 @@ void POSAdmin::updateProduct(string database, string type, string username){
         return; // query not found, will exit the function
     } 
 
-    ofstream fileOut(database); // open the file as an ofstream since we are writing to it
+    ofstream fileOut(filename); // open the file as an ofstream since we are writing to it
     if (!fileOut) { // if the file cannot be written
         cout << "Cannot write to file." << endl;
         Sleep(1200);
@@ -1137,23 +1297,23 @@ void POSAdmin::updateProduct(string database, string type, string username){
     fileOut << fileContent; // write the updated content back to the file
     fileOut.close();
 
-    // we will log EVERY action made by the manager or admin
+    //we will log EVERY action made by the manager or admin
     if(type == "productName"){ // if the user updated a product name
-        saveLogs("products", "UPDATE", query + "_to_" + newValue, username, reason);
+        saveLogs("products", "UPDATE", query + "_to_" + valueToUpdate, username, reason);
     } else {
         if(type == "productPrice"){ // if the user updated a product price
-            saveLogs("products", "UPDATE", query + "_Price_to_" + newValue, username, reason);
+            saveLogs("products", "UPDATE", query + "_Price_to_" + valueToUpdate, username, reason);
         } else if(type == "productQuantity"){ // if the user updated a product quantity
-            saveLogs("products", "UPDATE", query + "_Quantity_to_" + newValue, username, reason);
+            saveLogs("products", "UPDATE", query + "_Quantity_to_" + valueToUpdate, username, reason);
         } else if(type == "productSubCategory"){ // if the user updated a product sub-category
-            saveLogs("products", "UPDATE", query + "_SubCategory_to_" + newValue, username, reason);
+            saveLogs("products", "UPDATE", query + "_SubCategory_to_" + valueToUpdate, username, reason);
         } else if(type == "productCategory"){ // if the user updated a product category
-            saveLogs("products", "UPDATE", query + "_Category_to_" + newValue, username, reason);
+            saveLogs("products", "UPDATE", query + "_Category_to_" + valueToUpdate, username, reason);
         } else { // for any other type of update
-            saveLogs("products", "UPDATE", query + "_to_" + newValue, username, reason);
+            saveLogs("products", "UPDATE", query + "_to_" + valueToUpdate, username, reason);
         }
     }
-    cout << "Successfully updated product " << query << " with " << newValue << " as a new " << type << endl;
+    cout << "Successfully updated product " << query << " with " << valueToUpdate << " as a new " << type << "\n\n";
 
     Sleep(1200);
     return;
