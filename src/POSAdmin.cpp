@@ -278,8 +278,122 @@ void POSAdmin::saveLogs(string type, string operation, string affectedEntry, str
     // if not closed, it may lead to data loss or corruption if the program ends unexpectedly
 }
 
+void POSAdmin::saveRefundLogs(int transactionID, string productNames, int productQuantities, double amountRefunded, string transactionPaymentMethod, string username){
+    const string database = "database/logs/refundLogs.csv";
+    ofstream fout(database, ios::app);
+    if (!fout) {
+        cout << "Error opening database for writing." << endl;
+        return;
+    }
+
+        // get the current date and time
+    time_t timestamp = time(NULL); // get current time, NULL since we are not interested to set a custom timestamp
+    struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *
+
+    // dereference means that we get the value that the pointer is pointing to, because if it wasn't, it will return the address only (e.g. 0x123ff456)
+
+    // we used ampersand in the timestamp to get the address pointer of the timestamp variable, otherwise, it will return an error since it expects a pointer, not an integer
+
+    char date[50];
+    char time[50];
+
+    strftime(date, 50, "%m_%d_%y", &datetime);
+    strftime(time, 50, "%I:%M:%S_%p", &datetime);
+
+    // strftime = format date and time as string
+
+    // 50 means the maximum size of the char array
+    // %m == month
+    // %d == day
+    // %y == year (last two digits)
+
+    // %I == hour (12-hour clock)
+    // %M == minute
+    // %S == second
+    // %p == AM or PM
+
+    // &datetime == pointer to struct tm
+
+    // write the refund details to the file (according to the header format in the CSV file)
+    fout << transactionID << ","
+        << productNames << ","
+        << productQuantities << ","
+        << amountRefunded << ","
+        << transactionPaymentMethod << ","
+        << date << ","
+        << time << ","
+        << username << endl;
+
+    fout.close(); // close the file
+    // if not closed, it may lead to data loss or corruption if the program ends unexpectedly
+}
+
 // READ
 void POSAdmin::readProducts(string database) {
+    // Open the file
+    ifstream file(database);
+
+    // check if file exists
+    if (!file.is_open()) {
+        cout << "Failed to open file\n";
+        return;
+    }
+
+    // Read all rows first
+    vector<vector<string>> rows; // 2D vector to hold rows and columns || the output should looks like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "SubCat1", "10", "100"}, ...}
+    string line;
+    while (getline(file, line)) {
+        stringstream ss(line); // lets us read each line
+        string cell; // temporary variable to hold each cell value
+        vector<string> row; // temporary vector to hold each row
+        while (getline(ss, cell, ',')) { // split by comma
+            row.push_back(cell); // add each cell to the row || row will look like this: {"ID", "ProductName", "SubCategory", "Quantity", "Price"}
+        }
+        rows.push_back(row); // add the row to the list of rows || rows will look like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "SubCat1", "10", "100"}, ...
+    }
+    file.close(); // close the file
+
+    // stop if the rows are empty
+    if (rows.empty()){
+        cout << "No products found in the database.\n";
+        return;
+    }
+
+    // Find the maximum number of columns
+    size_t cols = 0;
+    for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
+    // no brackets since its a single controlled statement
+
+    vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
+    // if there are 6 columns in the csv, then cols = 6 and it will initialize widths to {0, 0, 0, 0, 0, 0}
+
+    // after we get the maximum number, we will update the widths vector
+    // this will make sure that each value will not overlap with each other
+
+    for (auto &r : rows) { 
+        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
+            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
+            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
+            // there is no curly braces here because it is a single controlled statement
+
+            // it does this for each value in the widths vector
+    }
+
+    // Add a little padding for readability
+    for (auto &w : widths) w += 2;
+
+    // Print
+    for (auto &r : rows) {
+        for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
+            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
+            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
+        }
+        cout << '\n';
+    }
+}
+
+void POSAdmin::readRefundLogs(){
+    const string database = "database/logs/refundLogs.csv";
     // Open the file
     ifstream file(database);
 
@@ -1215,8 +1329,9 @@ void POSAdmin::updateDiscounts(string username) {
 }
 
 void POSAdmin::processRefunds(string username){
-    int transactionID;
+    int transactionID, productQuantityRefunded;
     string transactionPaymentMethod, transactionDatabase, amountToRefund;
+    string productsRefunded;
     bool isFound = false;
 
     cout << "Which payment method was used for the transaction to refund? (Cash/GCash, 0 = Cancel): ";
@@ -1292,8 +1407,10 @@ void POSAdmin::processRefunds(string username){
                 return;
             } else {
                 isFound = true;
-                status = "Voided"; // update status to VOID
+                status = "Voided"; // update status to Voided
                 amountToRefund = totalAmt; // get the amount to refund
+                productsRefunded = productNames;
+                productQuantityRefunded = stoi(productQuantities);
             }
             isFound = true;
         }
@@ -1324,7 +1441,7 @@ void POSAdmin::processRefunds(string username){
     transactionFileOut << fileContent; // write the updated content back to the file
     transactionFileOut.close(); // close the file
     cout << "Transaction ID " << transactionID << " has been successfully voided. Amount to refund: P" << amountToRefund << "\n\n";
-    // saveLogs("accounts", "REFUND", to_string(transactionID),  username, "Transaction_Refunded");
+    saveRefundLogs(transactionID, productsRefunded, productQuantityRefunded, stod(amountToRefund), transactionPaymentMethod, username);
     system("pause");
     return;
 }

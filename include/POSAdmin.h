@@ -10,9 +10,11 @@ public:
     void addProduct(string database, string username); // used to add products to the inventory 
     void addUser(string database, string accessingUsername); // used to add new user accounts
     void saveLogs(string type, string operation, string affectedEntry, string adminName, string message); // used to save logs for auditing purposes
+    void saveRefundLogs(int transactionID, string productNames, int productQuantities, double amountRefunded, string transactionPaymentMethod, string username); // used to save logs for refunds
 
     // READ
     void readProducts(string database); // read and display all products from the inventory
+    void readRefundLogs(); // read and display all refund logs
     void getDailySales(); // get the daily sales from the database
     void getTotalSales(); // get the total sales from the database
     void getMonthlySales(); // get the monthly sales from the database

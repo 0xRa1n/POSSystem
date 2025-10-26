@@ -92,11 +92,11 @@ void PointOfSale::adminMenu(string username) {
                         case 3: {
                             while(true){ // every menu, it corresponds with a loop. so that if the user decides to go back, we can just end the loop to have him or her go back to the previous menu
                                 system("cls"); // initial clearing of the console
-                                string viewMenu[] = {"View all products", "View all accounts", "View all logs", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "Go back"}; // automatically sets the options for the user to choose
+                                string viewMenu[] = {"View all products", "View all accounts", "View all logs", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "Refund logs", "Go back"}; // automatically sets the options for the user to choose
                                 int viewInput = showMenu("View", viewMenu); // show the menu and get the user's input
                                 system("cls");
 
-                                if(viewInput == 6) break; // exit view menu
+                                if(viewInput == 7) break; // exit view menu
 
                                 switch(viewInput){
                                     case 1:
@@ -151,6 +151,11 @@ void PointOfSale::adminMenu(string username) {
                                         showHeader("Backup transaction data (GCash)");
                                         admin.readBackupTransactions("database/transactions/gcash_backup.csv");
                                         system("pause"); // pause to let the user read the backup transactions
+                                        break;
+                                    case 6: // refund logs
+                                        showHeader("View refund logs");
+                                        admin.readRefundLogs();
+                                        system("pause"); // pause to let the user read the refund logs
                                         break;
                                     default: // if the user entered an invalid input, the showMenu function will return -1. meaning that it was an invalid input.
                                         cout << "Invalid selection";
@@ -356,7 +361,7 @@ void PointOfSale::managerMenu(string username) {
                     system("cls"); // initial clearing for this loop
                     string inventoryMenu[] = {
                         "Add products",
-                        "View products, accounts, logs, or backup transaction data",
+                        "View products, accounts, logs, backup transaction data, or refund logs",
                         "Update product or process refunds",
                         "Delete a product",
                         "Go back"
@@ -372,11 +377,11 @@ void PointOfSale::managerMenu(string username) {
                         case 2: {
                             while(true){
                                 system("cls");
-                                string viewMenu[] = {"View all products", "View all accounts", "View all logs", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "Go back"}; // automatically sets the options for the user to choose
+                                string viewMenu[] = {"View all products", "View all accounts", "View all logs", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "View refund logs", "Go back"}; // automatically sets the options for the user to choose
                                 int viewInput = showMenu("View", viewMenu); // automatically sets the options for the user to choose, and shows the menu. it also gets the user's input
                                 system("cls");
 
-                                if(viewInput == 5) break; // exit view menu
+                                if(viewInput == 7) break; // exit view menu
 
                                 switch(viewInput){
                                     case 1: // view products
@@ -431,6 +436,11 @@ void PointOfSale::managerMenu(string username) {
                                         showHeader("Backup transaction data (GCash)");
                                         admin.readBackupTransactions("database/transactions/gcash_backup.csv");
                                         system("pause"); // pause to let the user read the backup transactions
+                                        break;
+                                    case 6: // view refund logs
+                                        showHeader("View refund logs");
+                                        admin.readRefundLogs();
+                                        system("pause"); // pause to let the user read the refund logs
                                         break;
                                     default:
                                         cout << "Invalid selection";
