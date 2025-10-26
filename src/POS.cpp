@@ -70,7 +70,7 @@ void PointOfSale::adminMenu(string username) {
                         "Add products",
                         "Add an account",
                         "View products, accounts, logs, or backup transaction data",
-                        "Update account, product, or discounts",
+                        "Update account, product, discounts, or process refunds",
                         "Delete a product",
                         "Delete an account",
                         "Go back"
@@ -164,10 +164,11 @@ void PointOfSale::adminMenu(string username) {
                             // initialize a loop where it contains the menu Product, Account, and Go back
                             while(true){
                                 system("cls");
-                                string updateMenu[] = {"Product", "Account", "Discounts", "Go back"};
+                                string updateMenu[] = {"Product", "Account", "Discounts", "Process Refunds", "Go back"};
                                 int updateInput = showMenu("Update", updateMenu);
                                 system("cls");
 
+                                // to do: make this a switch instead of if-else statements
                                 if(updateInput == 1){                  
                                     // initialize a loop to update the information of a product                          
                                     while(true){
@@ -245,7 +246,12 @@ void PointOfSale::adminMenu(string username) {
                                     showHeader("Update discounts");
 
                                     admin.updateDiscounts(username);
-                                } else if(updateInput == 4){ // go back
+                                } else if(updateInput == 4){ // process refunds
+                                    // initialize a loop to process refunds
+                                    showHeader("Process refunds");
+
+                                    admin.processRefunds(username);
+                                } else if(updateInput == 5){ // go back
                                     // this will go back to the admin menu
                                     break;
                                 } else {
@@ -351,7 +357,7 @@ void PointOfSale::managerMenu(string username) {
                     string inventoryMenu[] = {
                         "Add products",
                         "View products, accounts, logs, or backup transaction data",
-                        "Update product",
+                        "Update product or process refunds",
                         "Delete a product",
                         "Go back"
                     };
@@ -437,31 +443,54 @@ void PointOfSale::managerMenu(string username) {
                         case 3: { // update
                             // initialize a loop to update the information of a product                          
                             while(true){
-                                string updateProductMenu[] = {"Product name", "Product sub-category", "Product category", "Product quantity", "Product price", "Go back"};
-                                int updateProductInput = showMenu("Update product", updateProductMenu);
+                                system("cls");
+                                string updateMenu[] = {"Product", "Process Refunds", "Go back"};
+                                int updateInput = showMenu("Update", updateMenu);
+                                system("cls");
 
-                                if(updateProductInput == 6) break; // go to the previous menu (ends this loop)
+                                if(updateInput == 3) break; // go back to the previous menu
 
-                                switch(updateProductInput){
-                                    case 1:  // update product name
-                                        showHeader("Update product name");
-                                        admin.updateProduct(productsDatabase, "productName", username);
+                                switch(updateInput){
+                                    case 1: {
+                                        while(true){
+                                            string updateProductMenu[] = {"Product name", "Product sub-category", "Product category", "Product quantity", "Product price", "Go back"};
+                                            int updateProductInput = showMenu("Update product", updateProductMenu);
+
+                                            if(updateProductInput == 6) break; // go to the previous menu (ends this loop)
+
+                                            switch(updateProductInput){
+                                                case 1:  // update product name
+                                                    showHeader("Update product name");
+                                                    admin.updateProduct(productsDatabase, "productName", username);
+                                                    break;
+                                                case 2:  // update product sub-category
+                                                    showHeader("Update product sub-category");
+                                                    admin.updateProduct(productsDatabase, "productSubCategory", username);
+                                                    break;
+                                                case 3:  // update product category
+                                                    showHeader("Update product category");
+                                                    admin.updateProduct(productsDatabase, "productCategory", username);
+                                                    break;
+                                                case 4:  // update product quantity
+                                                    showHeader("Update product quantity");
+                                                    admin.updateProduct(productsDatabase, "productQuantity", username);
+                                                    break;
+                                                case 5:  // update product price
+                                                    showHeader("Update product price");
+                                                    admin.updateProduct(productsDatabase, "productPrice", username);
+                                                    break;
+                                                default: // fallback
+                                                    cout << "Invalid selection";
+                                                    Sleep(1200);
+                                                    break;
+                                            }
+                                        }
                                         break;
-                                    case 2:  // update product sub-category
-                                        showHeader("Update product sub-category");
-                                        admin.updateProduct(productsDatabase, "productSubCategory", username);
-                                        break;
-                                    case 3:  // update product category
-                                        showHeader("Update product category");
-                                        admin.updateProduct(productsDatabase, "productCategory", username);
-                                        break;
-                                    case 4:  // update product quantity
-                                        showHeader("Update product quantity");
-                                        admin.updateProduct(productsDatabase, "productQuantity", username);
-                                        break;
-                                    case 5:  // update product price
-                                        showHeader("Update product price");
-                                        admin.updateProduct(productsDatabase, "productPrice", username);
+                                    }
+                                    case 2: // process refunds
+                                        showHeader("Process refunds");
+
+                                        admin.processRefunds(username);
                                         break;
                                     default: // fallback
                                         cout << "Invalid selection";

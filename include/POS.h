@@ -20,4 +20,4 @@ public:
     void adminMenu(string username); 
     void managerMenu(string username);
     void cashierMenu(string username);
-};
+}; // semicolon to indicate the end of class declaration

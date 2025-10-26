@@ -183,7 +183,8 @@ void POSCashier::saveTransaction(string productNames, string productQuantities, 
                 << setprecision(2) << fixed << change << ","
                 << date << ","
                 << time << ","
-                << cashierName << endl;
+                << cashierName << ","
+                << "Completed" << endl;
         fout.close(); // close the file
         // if not closed, it may lead to data loss or corruption if the program ends unexpectedly
     } else if(paymentMethod == "GCash"){
@@ -197,7 +198,8 @@ void POSCashier::saveTransaction(string productNames, string productQuantities, 
                 << referenceID << ","
                 << date << ","
                 << time << ","
-                << cashierName << endl;
+                << cashierName << ","
+                << "Completed" << endl;
         fout.close(); // close the file
         // if not closed, it may lead to data loss or corruption if the program ends unexpectedly
     } else {
@@ -210,8 +212,8 @@ void POSCashier::saveTransaction(string productNames, string productQuantities, 
 void POSCashier::saveAbandonedCarts(string productNames, string productQuantities) { // the purpose of this function is to monitor all the customers who are interested in buying products. So, if they did not proceed to checkout, at least we have a record of the products they were interested in. (and the customer number will be generated here as well)
     const string database = "database/customers/customers_logs.csv";
 
-    ifstream readFile(database);
-    if(!readFile.is_open()){
+    ifstream readFile(database); // open the file as an ifstream since we are reading from it
+    if(!readFile.is_open()){ // if file cannot be opened
         cout << "Failed to open customer logs file.\n";
         Sleep(1200);
         return;
@@ -450,7 +452,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                     cout << "Error opening backup file for writing." << endl;
                     return false;
                 }
-                backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,PmMethod,RefID,Date,Time,Cashier\n" 
+                backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,PmMethod,RefID,Date,Time,Cashier,Status\n" 
                             << namesStream.str() << ","
                             << quantitiesStream.str() << ","
                             << setprecision(2) << fixed << rawPrice << ","
@@ -462,8 +464,9 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                             << referenceID << ","
                             << date << ","
                             << time << ","
-                            << username << "\n";
-                            
+                            << username << ","
+                            << "Completed" << "\n";
+
                 backupFile.close();
                 // end of code for backup redundancy
 
@@ -560,8 +563,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                         cout << "Error opening backup file for writing." << endl;
                         return false;
                     }
-                    backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,PmMethod,Date,Time,Cashier\n" 
-                    
+                    backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,PmMethod,Date,Time,Cashier,Status\n" 
                                 << namesStream.str() << ","
                                 << quantitiesStream.str() << ","
                                 << setprecision(2) << fixed << rawPrice << ","
@@ -573,8 +575,9 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                                 << "Cash" << ","
                                 << date << ","
                                 << time << ","
-                                << username << "\n";
-                                
+                                << username << ","
+                                << "Completed" << "\n";
+
                     backupFile.close();
                     // end of code for backup redundancy
 
@@ -655,8 +658,8 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     cout << "---------------------------------" << endl;
 
     cout << "Threads and Charms" << endl;
-    cout << date << " " << time << endl; 
-    cout << "CUS_" << getLastId(customersDatabase) << endl; // CUS_ means customer
+    cout << "Transaction Date: " << date << " " << time << endl; 
+    cout << "Transaction #: " << getLastId(customersDatabase) << endl; // CUS_ means customer
     cout << "\n";
 
     cout << left << setw(35) << "Product Name" << setw(10) << "Qty" << "Price" << endl; // setw is used to set the width of the column, left is used to align the text to the left
@@ -678,8 +681,8 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     cout << "Total before VAT: P" << discountedTotal << endl;
     cout << "VAT (12%): P" << vatAmount << endl;
     cout << "Amount Due: P" << finalAmountDue << endl;
-    cout << "Payment Method: " << paymentMethod << endl;
     cout << "Change: P" << change << endl;
+    cout << "Payment Method: " << paymentMethod << endl;
 
     cout << "\n";
 

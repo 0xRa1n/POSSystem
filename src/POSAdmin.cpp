@@ -988,8 +988,7 @@ void POSAdmin::updateProduct(string database, string type, string username){
 
         // if-elseif has been used since switch case does not support strings in C++
         // modify the entry if it matches the query
-        if (indexTwo == query) {
-            // update the corresponding field
+        if (indexTwo == query) { // This will check each line if the product name matches the query (note that indexTwo holds the product name, and the variable query holds the product name to search for)
             if(type == "productName"){
                 indexTwo = newValue; // update product name
             } else if(type == "productQuantity"){
@@ -1215,8 +1214,123 @@ void POSAdmin::updateDiscounts(string username) {
     Sleep(1200);
 }
 
+void POSAdmin::processRefunds(string username){
+    int transactionID;
+    string transactionPaymentMethod, transactionDatabase, amountToRefund;
+    bool isFound = false;
+
+    cout << "Which payment method was used for the transaction to refund? (Cash/GCash, 0 = Cancel): ";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // clear the input buffer
+    getline(cin, transactionPaymentMethod);
+
+    if(transactionPaymentMethod == "0") return;
+    if(transactionPaymentMethod != "Cash" && transactionPaymentMethod != "GCash"){
+        cout << "Invalid payment method. Please enter Cash or GCash.\n";
+        Sleep(1200);
+        return;
+    }
+    if(regex_search(transactionPaymentMethod, disallowed)){
+        cout << "Payment method cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+        Sleep(1200);
+        return;
+    }
+    
+    // use the correct file based on the payment method (this is much cleaner over using multiple if-else statements later)
+    if(transactionPaymentMethod == "Cash"){
+        transactionDatabase = "database/transactions/cash_cashierTransactions.csv";
+    } else if(transactionPaymentMethod == "GCash"){
+        transactionDatabase = "database/transactions/gcash_cashierTransactions.csv";
+    }
+
+    cout << "Enter the transaction ID (0 = Cancel): ";
+    cin >> transactionID;
+
+    if(handleInputError()) return; // handle invalid inputs
+    if(transactionID == 0) return;
+
+    // after getting the payment method used and the transaction id, we should 
+    // first: find the transaction in the corresponding file
+    // second: get the specific line, and copy the amount to refund
+    // third, we should be able to update the status column from completed to void
+
+    string line;
+    string fileContent;
+    ifstream transactionFile(transactionDatabase); // open the file as an ifstream since we are reading from it
+    if(!transactionFile.is_open()){ // if file cannot be opened
+        cout << "Failed to open transaction file.\n";
+        Sleep(1200);
+        return;
+    }
+
+    getline(transactionFile, line); // skip the header since we are comparing something (the id from the csv and transaction id from user input)
+    fileContent += line + "\n"; // add the header back to the file content
+    // since we are dealing with int comparison, we need to manually add the header since it will return an error because the header (specifically the first column, named TransNum) is not an int. therefore, we skip it first before the while loop, then, we add it back to the file conten
+
+    while(getline(transactionFile, line)){
+        stringstream ss(line); // helps us read the line and get the values that are separated by commas
+        string id, productNames, productQuantities, productAmt, taxAmt, totalAmt,changeAmt, refId, date, time, status;
+
+        // get a copy of each entries
+        getline(ss, id, ','); // read the id
+        getline(ss, productNames, ','); // read the product names
+        getline(ss, productQuantities, ','); // read the product quantities
+        getline(ss, productAmt, ','); // read the product amount (not including tax)
+        getline(ss, taxAmt, ','); // read the tax amount
+        getline(ss, totalAmt, ','); // read the total amount (including tax)
+        getline(ss, changeAmt, ','); // read the change amount
+        if(transactionPaymentMethod == "GCash"){
+            getline(ss, refId, ','); // read the refId (only for GCash)
+        }
+        getline(ss, date, ','); // read the date
+        getline(ss, time, ','); // read the time
+        getline(ss, status); // read the status
+
+        if(stoi(id) == transactionID){ // if the id matches the transaction id
+            if(status == "VOID"){
+                cout << "Transaction ID " << transactionID << " has already been voided.\n";
+                Sleep(1200);
+                return;
+            } else {
+                isFound = true;
+                status = "Voided"; // update status to VOID
+                amountToRefund = totalAmt; // get the amount to refund
+            }
+            isFound = true;
+        }
+        // write back to the file content
+        fileContent += id + "," + productNames + "," + productQuantities + "," + productAmt + "," + taxAmt + "," + totalAmt + "," + changeAmt + ",";
+        if(transactionPaymentMethod == "GCash"){
+            fileContent += refId + ","; // add refId only for GCash
+        }
+        fileContent += date + "," + time + "," + status + "\n"; // add date, time and status
+
+        // we cannot use the variable line here since it still holds the old value, and this function's purpose is to update the value
+        // the expected output of this would be something like this:
+        // 1,ProductA|ProductB,1|2,100.00,12.00,112.00,0.00,REF123,12_31_23,10:00:00_AM,VOID
+        // 2,ProductC,1,50.00,6.00,56.00,0.00,,12_31_23,10:00:00_AM,VOID
+        // as you can see, the first fileContent line stops at changeAmt. This is because we have two payment methods: Cash and GCash
+        // the refId column is only present in GCash transactions, so we only add it if the payment method is GCash (the reference id or transaction number in the receipt will act as its reference id, this is present in the first column)
+    }
+    transactionFile.close(); // close the file
+
+    if(!isFound){
+        cout << "Transaction ID " << transactionID << " not found in the " << transactionPaymentMethod << " transactions.\n";
+        Sleep(1200);
+        return;
+    }
+    
+    ofstream transactionFileOut(transactionDatabase); // open the file as an ofstream since we are writing to it
+
+    transactionFileOut << fileContent; // write the updated content back to the file
+    transactionFileOut.close(); // close the file
+    cout << "Transaction ID " << transactionID << " has been successfully voided. Amount to refund: P" << amountToRefund << "\n\n";
+    // saveLogs("accounts", "REFUND", to_string(transactionID),  username, "Transaction_Refunded");
+    system("pause");
+    return;
+}
+
 // DELETE
-void POSAdmin::deleteInformation(string type, string filename, string username){
+void POSAdmin::deleteInformation(string type, string filename, string username){    
     string deleteProductInput;
 
     cout << "Enter the entry name you want to delete (0 = Cancel): ";

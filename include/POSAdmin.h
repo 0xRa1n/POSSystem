@@ -25,7 +25,8 @@ public:
     void updateProduct(string filename, string type, string username); // used to update product's name, price, quantity, category, or sub-category
     void updateAccount(string filename, string type, string username); // used to update user's password, role, or status
     void updateDiscounts(string username); // used to update discounts on a product category
+    void processRefunds(string username); // used to process refunds for a transaction
 
     // DELETE
     void deleteInformation(string type, string filename, string username); // used to delete products or accounts from the database
-};
+}; // semicolon to indicate the end of class declaration
