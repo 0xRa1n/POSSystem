@@ -1,4 +1,3 @@
 TransNum,ProdNames,ProdQtys,AmtRefunded,TransPmMethod,Date,Time,User
-1,Shoulder_Bag,1,45,Cash,10_26_25,07:24:21_PM,admin
-1,Shoulder_Bag,1,45,Cash,10_26_25,07:25:29_PM,admin
-2,Graphic_Tee|Old_School_Hoodie,1,399.72,GCash,10_26_25,07:25:52_PM,manager
+1,Cargo_Shorts,2,110,Cash,10_26_25,08:30:33_PM,admin
+1,Cargo_Shorts,2,110,Cash,10_26_25,08:32:03_PM,admin

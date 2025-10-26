@@ -10,3 +10,5 @@ CustomerID,ProductNames,ProductQuantities,Date,Time1,Graphic_Tee,1,10_26_25,04:2
 9,Graphic_Tee|Graphic_Tee,1|1,10_26_25,05:22:22_PM
 10,Cargo_Shorts,1,10_26_25,05:28:15_PM
 11,Graphic_Tee,1,10_26_25,05:36:37_PM
+12,Graphic_Tee,2,10_26_25,07:55:06_PM
+13,Cargo_Shorts,2,10_26_25,07:55:24_PM
