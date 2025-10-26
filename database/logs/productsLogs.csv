@@ -95,3 +95,7 @@ UPDATE,Demo_Quantity_to_15,10_26_25,11:01:54_PM,admin,Wrong_Quantity
 UPDATE,Demo_Quantity_to_75,10_26_25,11:02:08_PM,admin,Wrong_Price
 UPDATE,Demo_Category_to_Tops,10_26_25,11:12:42_PM,admin,Wrong_Category
 UPDATE,Demo_SubCategory_to_T_Shirts,10_26_25,11:18:11_PM,admin,Wrong_Subcategory
+UPDATE,Test_to_Rain,10_27_25,12:04:33_AM,Test,Forgotten
+UPDATE,Test_to_Forgotten,10_27_25,12:05:06_AM,Test,Forgotten
+UPDATE,Test_to_Rain,10_27_25,12:06:14_AM,Test,Forgotten
+UPDATE,Test_to_Rain,10_27_25,12:08:46_AM,admin,Forgotten

@@ -3,3 +3,8 @@ ADD,testAcc,10_22_25,09:28:04_PM,admin,New_User_Added
 UPDATE,testAcc_to_Demo,10_22_25,09:28:24_PM,admin,Incorrect_Username
 UPDATE,Demo_PW_to_NewPassword,10_22_25,09:28:52_PM,admin,Forgotten_Password
 UPDATE,Demo_to_Cashier,10_22_25,09:29:03_PM,admin,Demoted
+ADD,Test,10_26_25,11:47:22_PM,admin,New_User_Added
+UPDATE,Test_to_Rain,10_27_25,12:10:03_AM,admin,Forgotten
+UPDATE,Rain_PW_to_NewPW,10_27_25,12:10:26_AM,admin,Forgor
+UPDATE,Rain_to_Cashier,10_27_25,12:10:37_AM,admin,Demoted
+UPDATE,Rain_to_RRR,10_27_25,12:14:22_AM,admin,Forgotten

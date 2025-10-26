@@ -1191,6 +1191,158 @@ void POSAdmin::readProductsByCategory(string productsDatabase, string category, 
             return;
     }
 };
+
+void POSAdmin::readAccounts(string userDatabase, string username){
+    ifstream file(userDatabase);
+
+    if (!file.is_open()) {
+        cout << "Failed to open file\n";
+        Sleep(1200);
+        return;
+    }
+    cout << "Format: ID, Username, Password, Role\n" << endl;
+
+    // Read and filter accounts
+    vector<vector<string>> accountRows;
+    string line;
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string cell;
+        vector<string> row;
+        while (getline(ss, cell, ',')) {
+            row.push_back(cell); // add each cell to the row
+            // row will look like this: {"ID", "ProductName", "SubCategory", "Quantity", "Price"
+        }
+        accountRows.push_back(row); // add the row to the categoryRows
+    }
+    file.close();
+
+    if (accountRows.empty()) {
+        cout << "No accounts found.\n";
+        Sleep(1200);
+        return;
+    }
+
+    // print all the products in the said subcategory
+    // Find max width of each column
+    size_t cols = 0;
+    for (auto &r : accountRows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
+    // no brackets since its a single controlled statement
+    vector<size_t> widths(cols, 0); // initialize a vector with widths of 0
+    // initially: widths is {0, 0, 0, 0, 0} for 5 columns
+    // then the following code will update the widths for each row
+
+    // after we get the maximum number, we will update the widths vector
+    for (auto &r : accountRows) { // using the reference, we can directly access the value
+        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
+            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
+            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
+            // there is no curly braces here because it is a single controlled statement
+    }
+
+    // Add a little padding for readability
+    for (auto &w : widths) w += 2;
+
+    // Print
+    for (auto &r : accountRows) { // using the reference, we can directly access the value
+        for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
+            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
+            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
+        }
+        cout << '\n';
+    }
+
+    string accountUsername, accountPassword, accountRole;
+
+    // Get user input for product ID
+    int selectedId;
+    cout << "\nEnter account ID to select (0 = Cancel): ";
+    cin >> selectedId;
+
+    if (handleInputError()) return; // handle invalid inputs
+    if (selectedId == 0) return;
+
+    bool isFound = false;
+    for (size_t i = 1; i < accountRows.size(); ++i) { // for loop is used so that it can skip the header row
+        const auto& row = accountRows[i];
+        if (stoi(row[0]) == selectedId) { // row[0] is the account ID
+            accountUsername = row[1]; // row[1] is the account username
+            accountPassword = row[2]; // row[2] is the account password
+            accountRole = row[3]; // row[3] is the account role
+            isFound = true;
+            break;
+        }
+    }
+    if(!isFound){
+        cout << "Account with ID " << selectedId << " not found in this category.\n";
+        Sleep(1200);
+        return;
+    }
+
+    cout << "1. Update Username\n2. Update Password\n3. Update Role\n4. Go Back\nEnter the field you want to edit: ";
+    cin >> selectedId;
+    cout << "\n";
+    
+    if (handleInputError()) return; // handle invalid inputs
+    if(selectedId == 4) return;
+
+    switch(selectedId) {
+        case 1: {
+            string newUsername;
+            cout << "Enter new Username: ";
+            cin >> ws;
+            getline(cin, newUsername);
+            if(regex_search(newUsername, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
+                cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+                Sleep(1200);
+                return;
+            }
+
+            updateAccount(userDatabase, accountUsername, newUsername, "accountUsername", username);
+            break;
+        }
+        case 2: {
+            string newPassword;
+            cout << "Enter new Password: ";
+            cin >> ws;
+            getline(cin, newPassword);
+            if(regex_search(newPassword, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
+                cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+                Sleep(1200);
+                return;
+            }
+
+            updateAccount(userDatabase, accountUsername, newPassword, "accountPassword", username);
+            break;
+        }
+        case 3: {
+            string newRole;
+            int roleOption;
+            cout << "1. Admin\n2. Cashier\nEnter the new role: ";
+            cin >> ws;
+            getline(cin, newRole);
+            if(regex_search(newRole, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
+                cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+                Sleep(1200);
+                return;
+            }
+
+            switch(roleOption){
+                case 1: newRole = "Admin"; break;
+                case 2: newRole = "Cashier"; break;
+                default: cout << "Invalid role option.\n"; Sleep(1200); break;
+            }
+
+            updateAccount(userDatabase, accountUsername, newRole, "accountRole", username);
+            break;
+        }
+        default:
+            cout << "Invalid option selected.\n";
+            Sleep(1200);
+            return;
+    }
+};
+
 // UPDATE
 void POSAdmin::updateProduct(string filename, string query, string valueToUpdate, string type, string username){
     string reason;
@@ -1319,8 +1471,8 @@ void POSAdmin::updateProduct(string filename, string query, string valueToUpdate
     return;
 }
 
-void POSAdmin::updateAccount(string database, string type, string username){
-    string query, newValue, reason;
+void POSAdmin::updateAccount(string database, string query, string valueToUpdate, string type, string username){
+    string reason;
     ifstream readFile(database); // open the file as an ifstream since we are reading from it
 
     if(!readFile.is_open()){ // if file cannot be opened
@@ -1329,25 +1481,10 @@ void POSAdmin::updateAccount(string database, string type, string username){
         return;
     }
 
-    cout << "What is the account username you want to update? (0 = Cancel): ";
-    cin >> query;
-    if(!isAlreadyInCsv(database, query)){ // check if account username exists in the csv
-        cout << "Account username '" << query << "' does not exist in the CSV.\n";
-        Sleep(1200);
-        return;
-    }
 
-    cout << "What is the new value you want to set? ";
-    cin >> newValue;
-    
-    if(regex_search(newValue, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
-        cout << "Invalid input, it cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
-        Sleep(1200);
-        return;
-    }
 
     cout << "What is the reason for the update? ";
-    cin.ignore(); // ignore previous user inputs
+    cin >> ws;
     getline(cin, reason); // get the whole line including spaces 
     if(regex_search(reason, disallowed)){
         cout << "Reason cannot contain commas or any other special character besides: _ @ # &\n";
@@ -1372,11 +1509,11 @@ void POSAdmin::updateAccount(string database, string type, string username){
         if (indexTwo == query) {
             // update the corresponding field
             if(type == "accountUsername"){
-                indexTwo = newValue; // update account username 
+                indexTwo = valueToUpdate; // update account username
             } else if(type == "accountPassword"){
-                indexThree = newValue; // update account password
+                indexThree = valueToUpdate; // update account password
             } else if(type == "accountRole"){
-                indexFour = newValue; // update account role
+                indexFour = valueToUpdate; // update account role
             }
             found = true;
         }
@@ -1402,11 +1539,11 @@ void POSAdmin::updateAccount(string database, string type, string username){
 
     // we will log EVERY action made by the admin
     if(type == "accountPassword"){ // if the user updated a password
-        saveLogs("accounts", "UPDATE", query + "_PW_to_" + newValue, username, reason);
+        saveLogs("accounts", "UPDATE", query + "_PW_to_" + valueToUpdate, username, reason);
     } else { // for any other type of update
-        saveLogs("accounts", "UPDATE", query + "_to_" + newValue, username, reason);
+        saveLogs("accounts", "UPDATE", query + "_to_" + valueToUpdate, username, reason);
     }
-    cout << "Successfully updated account " << query << " with " << newValue << " as a new " << type << endl;
+    cout << "Successfully updated account " << query << " with " << valueToUpdate << " as a new " << type << endl;
     
     Sleep(1200);
     return;

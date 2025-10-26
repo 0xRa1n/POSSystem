@@ -23,10 +23,11 @@ public:
     void getAllLogs(string type); // get all logs of a specific type
     void readBackupTransactions(string database); // read and display the backup transaction from a power outage or system crash
     void readProductsByCategory(string productsDatabase, string category, string username);
+    void readAccounts(string usersDatabase, string username); // read and display all user accounts from the database
 
     // UPDATE
     void updateProduct(string filename, string query, string valueToUpdate, string type, string username); // used to update product's name, price, quantity, category, or sub-category
-    void updateAccount(string filename, string type, string username); // used to update user's password, role, or status
+    void updateAccount(string database, string query, string valueToUpdate, string type, string username); // used to update user's password, role, or status
     void updateDiscounts(string username); // used to update discounts on a product category
     void processRefunds(string username); // used to process refunds for a transaction
 
