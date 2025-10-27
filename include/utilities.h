@@ -10,6 +10,7 @@ void showHeader(string headerTitle); // display a header with the given title
 bool handleInputError(); // handle input errors ONLY for integer inputs
 int getLastId(string filename); // get the last ID from a CSV file
 bool isAlreadyInCsv(string filename, string productNameToCheck); // check if a product name already exists in the CSV file
+void readCSV(string database); // read and display the contents of a CSV file
 
 template<size_t N>
 // the template size_t N is used so that the function will know the size of the array passed to it

@@ -13,18 +13,13 @@ public:
     void saveRefundLogs(int transactionID, string productNames, int productQuantities, double amountRefunded, string transactionPaymentMethod, string username); // used to save logs for refunds
 
     // READ
-    void readProducts(string database); // read and display all products from the inventory
-    void readRefundLogs(); // read and display all refund logs
     void getDailySales(); // get the daily sales from the database
     void getTotalSales(); // get the total sales from the database
     void getMonthlySales(); // get the monthly sales from the database
     void getYearlySales(); // get the yearly sales from the database
-    void getAllAccounts(string database); // get all user accounts from the database
-    void getAllLogs(string type); // get all logs of a specific type
-    void readBackupTransactions(string database); // read and display the backup transaction from a power outage or system crash
     void readProductsByCategory(string productsDatabase, string category, string username);
     void readAccounts(string usersDatabase, string username); // read and display all user accounts from the database
-    void readReceipts(); // read and display all receipts based on payment method (Cash or GCash)
+    void readReceipts(string database, int receiptIdChoiceInput, string paymentMethod); // read and display all receipts based on payment method (Cash or GCash)
 
     // UPDATE
     void updateProduct(string filename, string query, string valueToUpdate, string type, string username); // used to update product's name, price, quantity, category, or sub-category

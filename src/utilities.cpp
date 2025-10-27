@@ -7,6 +7,8 @@
 #include <limits>    // For numeric_limits
 #include <fstream> // for fstream, ifstream
 #include <sstream> // for stringstream
+#include <iomanip> // for setw and left
+#include <vector> // for vector
 
 void showHeader(string headerTitle){
     system("cls");
@@ -58,4 +60,65 @@ bool isAlreadyInCsv(string filename, string productNameToCheck) {
         }
     }
     return false;
+}
+
+void readCSV(string database) {
+    // Open the file as ifstream, so that we can read it
+    ifstream file(database);
+
+    // check if file exists
+    if (!file.is_open()) {
+        cout << "Failed to open file\n";
+        return;
+    }
+
+    // Read all rows first
+    vector<vector<string>> rows; // 2D vector to hold rows and columns
+    string line;
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string cell;
+        vector<string> row; // this will hold a single row, example output of this is {"ADD", "Product1", "12_31_23", "10:00:00_AM", "AdminUser"} 
+        while (getline(ss, cell, ',')) { // split by comma
+            row.push_back(cell); // add each cell to the row
+        }
+        rows.push_back(row); // add the row to the list of rows
+    }
+    file.close(); // close the file
+
+    // stop if the rows are empty
+    if (rows.empty()){
+        cout << "No records found in the database.\n";
+        return;
+    }
+
+    // Find max width of each column
+    size_t cols = 0;
+    for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
+    vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
+    // if there are 6 columns in the csv, then cols = 6 and it will initialize widths to {0, 0, 0, 0, 0, 0}
+
+    // after we get the maximum number, we will update the widths vector
+    // this will make sure that each value will not overlap with each other
+
+    for (auto &r : rows) { // for each row
+        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
+            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
+            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
+            // there is no curly braces here because it is a single controlled statement
+
+            // it does this for each value in the widths vector
+    }
+
+    // Add a little padding for readability
+    for (auto &w : widths) w += 2;
+
+    // Print
+    for (auto &r : rows) {
+        for (size_t c = 0; c < r.size(); ++c) {  // for each column in the row
+            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
+            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
+        }
+        cout << '\n';
+    }
 }

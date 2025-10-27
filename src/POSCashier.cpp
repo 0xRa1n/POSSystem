@@ -9,6 +9,7 @@
 #include <regex> // for regex
 #include <fstream> // for fstream, ifstream
 #include <iomanip> // for setw and left
+#include <vector> // for vector
 
 // the cart
 vector<vector<string>> cart; // 2D vector to hold cart items: { {productName, productCategory, quantity, price}, ... }

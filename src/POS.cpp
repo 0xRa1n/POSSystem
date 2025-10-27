@@ -141,19 +141,49 @@ void PointOfSale::adminMenu(string username) {
                 previousState = AdminState::Inventory; // set previous state to Inventory for going back
 
                 switch (selection) {
-                    case 1: showHeader("View all accounts"); admin.getAllAccounts(usersDatabase); // call the getAllAccounts function from POSAdmin class 
+                    case 1: showHeader("View all accounts"); readCSV(usersDatabase); // call the getAllAccounts function from POSAdmin class 
                         system("pause"); 
                         break;
                     case 2: currentState = AdminState::ViewLogs; // below this case, there will be a case named AdminState::ViewLogs. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the AdminState::ViewLogs case to execute
                         break;
-                    case 3: showHeader("View Receipts"); admin.readReceipts(); break;
-                    case 4: showHeader("Backup transaction data (Cash)"); admin.readBackupTransactions("database/transactions/cash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
+                    case 3: { 
+                        string database, paymentMethod;
+                        int receiptsChoiceInput, receiptIdChoiceInput;
+
+                        showHeader("View Receipts"); 
+                    
+                        cout << "1. Cash Receipts\n2. GCash Receipts\n3. Go back\nEnter your choice: ";
+                        cin >> receiptsChoiceInput;
+                        if(handleInputError()) return; // handle invalid inputs 
+                        if(receiptsChoiceInput == 3) return;
+
+                        switch(receiptsChoiceInput){
+                            case 1: database = "database/transactions/cash_cashierTransactions.csv"; paymentMethod = "cash";
+                                break;
+                            case 2: database = "database/transactions/gcash_cashierTransactions.csv"; paymentMethod = "gcash";
+                                break;
+                            default:
+                                cout << "Invalid choice.\n";
+                                Sleep(1200);
+                                return;
+                        }
+
+                        cout << "Enter Receipt ID to view (0 = Cancel): ";
+                        cin >> receiptIdChoiceInput;
+                        if(handleInputError()) return; // handle invalid inputs
+                        if(receiptIdChoiceInput == 0) return;
+
+                        admin.readReceipts(database, receiptIdChoiceInput, paymentMethod); // call the readReceipts function from POSAdmin class
+                        system("pause");
+                        break;
+                    }
+                    case 4: showHeader("Backup transaction data (Cash)"); readCSV("database/transactions/cash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
                         system("pause"); 
                         break;
-                    case 5: showHeader("Backup transaction data (GCash)"); admin.readBackupTransactions("database/transactions/gcash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
+                    case 5: showHeader("Backup transaction data (GCash)"); readCSV("database/transactions/gcash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
                         system("pause"); 
                         break;
-                    case 6: showHeader("View refund logs"); admin.readRefundLogs(); // call the readRefundLogs function from POSAdmin class
+                    case 6: showHeader("View refund logs"); readCSV("database/transactions/refund_logs.csv"); // call the readRefundLogs function from POSAdmin class
                         system("pause"); 
                         break;
                     case 7: currentState = previousState;  // go back to the previous state (which is Inventory). Then, break this case. It will find for the case named AdminState::Inventory to execute
@@ -171,13 +201,13 @@ void PointOfSale::adminMenu(string username) {
                 previousState = AdminState::View; // set previous state to View for going back
 
                 switch(selection) {
-                    case 1: showHeader("Account logs"); admin.getAllLogs("accounts"); // call the getAllLogs function from POSAdmin class
+                    case 1: showHeader("Account logs"); readCSV("database/logs/adminUserLogs.csv"); // call the getAllLogs function from POSAdmin class
                         break;
-                    case 2: showHeader("Product logs"); admin.getAllLogs("products"); // call the getAllLogs function from POSAdmin class
+                    case 2: showHeader("Product logs"); readCSV("database/logs/productsLogs.csv"); // call the getAllLogs function from POSAdmin class
                         break;
-                    case 3: showHeader("Cashier transactions (Cash)"); admin.getAllLogs("cashier_cash"); // call the getAllLogs function from POSAdmin class
+                    case 3: showHeader("Cashier transactions (Cash)"); readCSV("database/transactions/cash_cashierTransactions.csv"); // call the getAllLogs function from POSAdmin class
                         break;
-                    case 4: showHeader("Cashier transactions (GCash)"); admin.getAllLogs("cashier_gcash"); // call the getAllLogs function from POSAdmin class
+                    case 4: showHeader("Cashier transactions (GCash)"); readCSV("database/transactions/gcash_cashierTransactions.csv"); // call the getAllLogs function from POSAdmin class
                         break;
                     case 5: currentState = previousState;  // go back to the previous state (which is View). Then, break this case. It will find for the case named AdminState::View to execute
                         break;
@@ -275,7 +305,7 @@ void PointOfSale::adminMenu(string username) {
                 previousState = AdminState::MainMenu;
 
                 switch(selection){
-                    case 1: showHeader("View all products"); admin.readProducts(productsDatabase);  // call the readProducts function from POSAdmin class
+                    case 1: showHeader("View all products"); readCSV(productsDatabase);  // call the readProducts function from POSAdmin class
                         system("pause"); 
                         break;
                     case 2: // view sales
@@ -365,19 +395,49 @@ void PointOfSale::managerMenu(string username) {
                 previousState = ManagerState::Inventory; // set previous state to Inventory for going back
 
                 switch (selection) {
-                    case 1: showHeader("View all accounts"); admin.getAllAccounts(usersDatabase); // call the getAllAccounts function from POSAdmin class 
+                    case 1: showHeader("View all accounts"); readCSV(usersDatabase); // call the getAllAccounts function from POSAdmin class 
                         system("pause"); 
                         break;
                     case 2: currentState = ManagerState::ViewLogs; // below this case, there will be a case named ManagerState::ViewLogs. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::ViewLogs case to execute
                         break;
-                    case 3: showHeader("View Receipts"); admin.readReceipts(); break;
-                    case 4: showHeader("Backup transaction data (Cash)"); admin.readBackupTransactions("database/transactions/cash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
+                    case 3: { 
+                        string database, paymentMethod;
+                        int receiptsChoiceInput, receiptIdChoiceInput;
+
+                        showHeader("View Receipts"); 
+                    
+                        cout << "1. Cash Receipts\n2. GCash Receipts\n3. Go back\nEnter your choice: ";
+                        cin >> receiptsChoiceInput;
+                        if(handleInputError()) return; // handle invalid inputs 
+                        if(receiptsChoiceInput == 3) return;
+
+                        switch(receiptsChoiceInput){
+                            case 1: database = "database/transactions/cash_cashierTransactions.csv"; paymentMethod = "cash";
+                                break;
+                            case 2: database = "database/transactions/gcash_cashierTransactions.csv"; paymentMethod = "gcash";
+                                break;
+                            default:
+                                cout << "Invalid choice.\n";
+                                Sleep(1200);
+                                return;
+                        }
+
+                        cout << "Enter Receipt ID to view (0 = Cancel): ";
+                        cin >> receiptIdChoiceInput;
+                        if(handleInputError()) return; // handle invalid inputs
+                        if(receiptIdChoiceInput == 0) return;
+
+                        admin.readReceipts(database, receiptIdChoiceInput, paymentMethod); // call the readReceipts function from POSAdmin class
+                        system("pause");
+                        break;
+                    }
+                    case 4: showHeader("Backup transaction data (Cash)"); readCSV("database/transactions/cash_backup.csv"); // call the readCSV function
                         system("pause"); 
                         break;
-                    case 5: showHeader("Backup transaction data (GCash)"); admin.readBackupTransactions("database/transactions/gcash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
+                    case 5: showHeader("Backup transaction data (GCash)"); readCSV("database/transactions/gcash_backup.csv"); // call the readCSV function 
                         system("pause"); 
                         break;
-                    case 6: showHeader("View refund logs"); admin.readRefundLogs(); // call the readRefundLogs function from POSAdmin class
+                    case 6: showHeader("View refund logs"); readCSV("database/transactions/refund_logs.csv"); // call the readCSV function
                         system("pause"); 
                         break;
                     case 7: currentState = previousState;  // go back to the previous state (which is Inventory). Then, break this case. It will find for the case named AdminState::Inventory to execute
@@ -395,13 +455,13 @@ void PointOfSale::managerMenu(string username) {
                 previousState = ManagerState::View; // set previous state to View for going back
 
                 switch(selection) {
-                    case 1: showHeader("Account logs"); admin.getAllLogs("accounts"); // call the getAllLogs function from POSAdmin class
+                    case 1: showHeader("Account logs"); readCSV("database/logs/adminUserLogs.csv"); // call the getAllLogs function from POSAdmin class
                         break;
-                    case 2: showHeader("Product logs"); admin.getAllLogs("products"); // call the getAllLogs function from POSAdmin class
+                    case 2: showHeader("Product logs"); readCSV("database/logs/productsLogs.csv"); // call the getAllLogs function from POSAdmin class
                         break;
-                    case 3: showHeader("Cashier transactions (Cash)"); admin.getAllLogs("cashier_cash"); // call the getAllLogs function from POSAdmin class
+                    case 3: showHeader("Cashier transactions (Cash)"); readCSV("database/transactions/cash_cashierTransactions.csv"); // call the getAllLogs function from POSAdmin class
                         break;
-                    case 4: showHeader("Cashier transactions (GCash)"); admin.getAllLogs("cashier_gcash"); // call the getAllLogs function from POSAdmin class
+                    case 4: showHeader("Cashier transactions (GCash)"); readCSV("database/transactions/gcash_cashierTransactions.csv"); // call the getAllLogs function from POSAdmin class
                         break;
                     case 5: currentState = previousState;  // go back to the previous state (which is View). Then, break this case. It will find for the case named AdminState::View to execute
                         break;
@@ -458,7 +518,7 @@ void PointOfSale::managerMenu(string username) {
                 previousState = ManagerState::MainMenu;
 
                 switch(selection){
-                    case 1: showHeader("View all products"); admin.readProducts(productsDatabase);  // call the readProducts function from POSAdmin class
+                    case 1: showHeader("View all products"); readCSV(productsDatabase);  // call the readProducts function from POSAdmin class
                         system("pause"); 
                         break;
                     case 2: // view sales

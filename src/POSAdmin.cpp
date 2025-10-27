@@ -9,6 +9,7 @@
 #include <regex> // for regex
 #include <fstream> // for fstream, ifstream
 #include <iomanip> // for setw and left
+#include <vector> // for vector
 
 // ifstream == reading the file
 // offstream == writing to the file
@@ -109,31 +110,19 @@ void POSAdmin::addProduct(string database, string username) {
     }
 
     // since the input can have a decimal, we should use getline (because if we enter a decimal point, cin will think its the end of input. and it will trigger the invalid input error)
-    string priceInput;
+    double priceInput;
     cout << "Enter the price (0 = Cancel): ";
-    cin >> ws;
-    getline(cin, priceInput);
+    cin >> priceInput;
 
-    // we used cin.ignore() along with getline to get a value that has a decimal point
-    // this is because cin will stop reading the input at the first whitespace, so if the user enters a decimal point, it will stop reading there
-    // cin.ignore() will ignore the newline character left in the input buffer by the previous cin
-    // input buffer means the data that is left in the input stream after a previous input operation
-
-    if (priceInput == "0") return;
-
-    // try parsing the price and converting it to double
-    try {
-        price = stod(priceInput);
-        if(price < 0){ // price cannot be negative
-            cout << "Price cannot be negative. Please enter a valid number." << endl;
-            Sleep(1200);
-            return;
-        }
-    } catch (...) { // catch any exceptions
-        cout << "Invalid input. Please enter a valid number." << endl;
+    if(handleInputError()) return; // handle invalid inputs
+    if (priceInput == 0) return;
+    if(priceInput < 0){ // price cannot be negative
+        cout << "Price cannot be negative. Please enter a valid amount." << endl;
         Sleep(1200);
         return;
     }
+
+    price = priceInput;
 
     // get the last product id from the database
     int newId = getLastId(database) +  1;
@@ -148,7 +137,6 @@ void POSAdmin::addProduct(string database, string username) {
         << productName << ","
         << quantity << ","
         << fixed << setprecision(2) << price << "\n";
-
     fout.close(); // close the file
 
     saveLogs("products", "ADD", productName, username, "New_Product_Added"); // log the addition of product to productsLogs.csv
@@ -163,16 +151,15 @@ void POSAdmin::addUser(string database, string accessingUsername){
     cout << "Enter the username you want to add (0 = Cancel): ";
     cin >> username;
 
-    // use the function to check if the entry is already in the database
+    // if the user decides to change his mind
+    if (username == "0") return;
+
+    // use the function to check if the entry is already in the database || we use if and if not else if, because we want both conditions to be checked regardless (if it was elseif, the second condition would not be checked if the first condition was true)
     if(isAlreadyInCsv(database, username)){
         cout << "User is already in the database!";
         Sleep(1200);
         return;
     }
-
-    // if the user decides to change his mind
-    if (username == "0") return;
-
     if(regex_search(username, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
         cout << "Username cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
         Sleep(1200);
@@ -184,7 +171,6 @@ void POSAdmin::addUser(string database, string accessingUsername){
     cin >> password;
 
     if (password == "0") return;
-
     if(regex_search(password, disallowed)){
         cout << "Password cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
         Sleep(1200);
@@ -195,13 +181,11 @@ void POSAdmin::addUser(string database, string accessingUsername){
     cin >> role;
 
     if (role == "0") return; // if the user changes his mind
-
     if(regex_search(role, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
         cout << "Role cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
         Sleep(1200);
         return;
     }
-
     if(role != "Admin" && role != "Manager" && role != "Cashier"){
         cout << "Invalid role. Please enter Admin, Manager, or Cashier only.\n";
         Sleep(1200);
@@ -209,8 +193,7 @@ void POSAdmin::addUser(string database, string accessingUsername){
     } 
 
     // get the last user id from the dtabase
-    int lastUserId = getLastId(database);
-    int newUserId = lastUserId + 1;
+    int newUserId = getLastId(database) + 1;
 
     fstream fout; // create a file stream object with the variable fout, so that we can write to the file
     fout.open(database, ios::app); // output or append mode
@@ -220,8 +203,8 @@ void POSAdmin::addUser(string database, string accessingUsername){
         << username << ","
         << password << ","
         << role << "\n";
-
     fout.close(); // close the file
+
     cout << "Successfully added user " << username << endl;
     saveLogs("accounts", "ADD", username, accessingUsername, "New_User_Added"); // log the addition of user to adminUserLogs.csv
 
@@ -244,11 +227,8 @@ void POSAdmin::saveLogs(string type, string operation, string affectedEntry, str
 
     // get the current date and time
     time_t timestamp = time(nullptr); // we do not need to assign a timestamp, we need the current time only, so nullptr is used
-
     struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *
-
     // dereference means that we get the value that the pointer is pointing to, because if it wasn't, it will return the address only (e.g. 0x123ff456)
-
     // we used ampersand in the timestamp to get the address pointer of the timestamp variable, otherwise, it will return an error since it expects a pointer, not an integer
 
     char date[50];
@@ -260,12 +240,10 @@ void POSAdmin::saveLogs(string type, string operation, string affectedEntry, str
     strftime(time, 50, "%I:%M:%S_%p", &datetime);
 
     // strftime = format date and time as string
-
     // 50 means the maximum size of the char array
     // %m == month
     // %d == day
     // %y == year (last two digits)
-
     // %I == hour (12-hour clock)
     // %M == minute
     // %S == second
@@ -287,7 +265,6 @@ void POSAdmin::saveLogs(string type, string operation, string affectedEntry, str
         << time << ","
         << adminName << ","
         << message << endl;
-
     fout.close(); // close the file
     // if not closed, it may lead to data loss or corruption if the program ends unexpectedly
 }
@@ -303,9 +280,7 @@ void POSAdmin::saveRefundLogs(int transactionID, string productNames, int produc
     // get the current date and time
     time_t timestamp = time(NULL); // get current time, NULL since we are not interested to set a custom timestamp
     struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *
-
     // dereference means that we get the value that the pointer is pointing to, because if it wasn't, it will return the address only (e.g. 0x123ff456)
-
     // we used ampersand in the timestamp to get the address pointer of the timestamp variable, otherwise, it will return an error since it expects a pointer, not an integer
 
     char date[50];
@@ -315,12 +290,10 @@ void POSAdmin::saveRefundLogs(int transactionID, string productNames, int produc
     strftime(time, 50, "%I:%M:%S_%p", &datetime);
 
     // strftime = format date and time as string
-
     // 50 means the maximum size of the char array
     // %m == month
     // %d == day
     // %y == year (last two digits)
-
     // %I == hour (12-hour clock)
     // %M == minute
     // %S == second
@@ -343,255 +316,6 @@ void POSAdmin::saveRefundLogs(int transactionID, string productNames, int produc
 }
 
 // READ
-void POSAdmin::readProducts(string database) {
-    // Open the file
-    ifstream file(database);
-
-    // check if file exists
-    if (!file.is_open()) {
-        cout << "Failed to open file\n";
-        return;
-    }
-
-    // Read all rows first
-    vector<vector<string>> rows; // 2D vector to hold rows and columns || the output should looks like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "SubCat1", "10", "100"}, ...}
-    string line;
-    while (getline(file, line)) {
-        stringstream ss(line); // lets us read each line
-        string cell; // temporary variable to hold each cell value
-        vector<string> row; // temporary vector to hold each row
-        while (getline(ss, cell, ',')) { // split by comma
-            row.push_back(cell); // add each cell to the row || row will look like this: {"ID", "ProductName", "SubCategory", "Quantity", "Price"}
-        }
-        rows.push_back(row); // add the row to the list of rows || rows will look like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "SubCat1", "10", "100"}, ...
-    }
-    file.close(); // close the file
-
-    // stop if the rows are empty
-    if (rows.empty()){
-        cout << "No products found in the database.\n";
-        return;
-    }
-
-    // Find the maximum number of columns
-    size_t cols = 0;
-    for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
-    // no brackets since its a single controlled statement
-
-    vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
-    // if there are 6 columns in the csv, then cols = 6 and it will initialize widths to {0, 0, 0, 0, 0, 0}
-
-    // after we get the maximum number, we will update the widths vector
-    // this will make sure that each value will not overlap with each other
-
-    for (auto &r : rows) { 
-        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
-            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
-            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
-            // there is no curly braces here because it is a single controlled statement
-
-            // it does this for each value in the widths vector
-    }
-
-    // Add a little padding for readability
-    for (auto &w : widths) w += 2;
-
-    // Print
-    for (auto &r : rows) {
-        for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
-            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
-            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
-        }
-        cout << '\n';
-    }
-}
-
-void POSAdmin::readRefundLogs(){
-    const string database = "database/logs/refundLogs.csv";
-    // Open the file
-    ifstream file(database);
-
-    // check if file exists
-    if (!file.is_open()) {
-        cout << "Failed to open file\n";
-        return;
-    }
-
-    // Read all rows first
-    vector<vector<string>> rows; // 2D vector to hold rows and columns || the output should looks like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "SubCat1", "10", "100"}, ...}
-    string line;
-    while (getline(file, line)) {
-        stringstream ss(line); // lets us read each line
-        string cell; // temporary variable to hold each cell value
-        vector<string> row; // temporary vector to hold each row
-        while (getline(ss, cell, ',')) { // split by comma
-            row.push_back(cell); // add each cell to the row || row will look like this: {"ID", "ProductName", "SubCategory", "Quantity", "Price"}
-        }
-        rows.push_back(row); // add the row to the list of rows || rows will look like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "SubCat1", "10", "100"}, ...
-    }
-    file.close(); // close the file
-
-    // stop if the rows are empty
-    if (rows.empty()){
-        cout << "No products found in the database.\n";
-        return;
-    }
-
-    // Find the maximum number of columns
-    size_t cols = 0;
-    for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
-    // no brackets since its a single controlled statement
-
-    vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
-    // if there are 6 columns in the csv, then cols = 6 and it will initialize widths to {0, 0, 0, 0, 0, 0}
-
-    // after we get the maximum number, we will update the widths vector
-    // this will make sure that each value will not overlap with each other
-
-    for (auto &r : rows) { 
-        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
-            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
-            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
-            // there is no curly braces here because it is a single controlled statement
-
-            // it does this for each value in the widths vector
-    }
-
-    // Add a little padding for readability
-    for (auto &w : widths) w += 2;
-
-    // Print
-    for (auto &r : rows) {
-        for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
-            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
-            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
-        }
-        cout << '\n';
-    }
-}
-
-void POSAdmin::readBackupTransactions(string database){
-    // Open the file
-    ifstream file(database);
-
-    // check if file exists
-    if (!file.is_open()) {
-        cout << "File could not be opened.\n";
-        return;
-    }
-
-    // Read all rows first
-    vector<vector<string>> rows; // 2D vector to hold rows and columns || the output should looks like this: {{"ID", "Username", "Password", "Role"}, {"1", "User1", "Pass1", "Admin"}, ...}
-    string line;
-    while (getline(file, line)) {
-        stringstream ss(line);
-        string cell;
-        vector<string> row; 
-        while (getline(ss, cell, ',')) { // split by comma
-            row.push_back(cell); // add each cell to the row || row will look like this: {"ID", "Username", "Password", "Role"}
-        }
-        rows.push_back(row); // add the row to the list of rows || rows will look like this: {{"ID", "Username", "Password", "Role"}, {"1", "User1", "Pass1", "Admin"}, ...
-    }
-    file.close(); // close the file
-
-    // stop if the rows are empty
-    if (rows.empty()){
-        cout << "No backup transactions found in the database.\n";
-        return;
-    }
-
-    // Find max width of each column
-    size_t cols = 0;
-    for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
-    // no brackets since its a single controlled statement
-    vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
-    // initially: widths is {0, 0, 0, 0} for 4 columns
-
-    // after we get the maximum number, we will update the widths vector
-    // this will make sure that each value will not overlap with each other
-
-    for (auto &r : rows) { 
-        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
-            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
-            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
-            // there is no curly braces here because it is a single controlled statement
-            
-            // it does this for each value in the widths vector
-    }
-
-    // Add a little padding for readability
-    for (auto &w : widths) w += 2;
-    // Print
-    for (auto &r : rows) {
-        for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
-            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
-            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
-        }
-        cout << '\n';
-    }
-}
-
-void POSAdmin::getAllAccounts(string database) {
-    // Open the file
-    ifstream file(database);
-
-    // check if file exists
-    if (!file.is_open()) {
-        cout << "Failed to open file\n";
-        return;
-    }
-
-    // Read all rows first
-    vector<vector<string>> rows; // 2D vector to hold rows and columns || the output should looks like this: {{"ID", "Username", "Password", "Role"}, {"1", "User1", "Pass1", "Admin"}, ...}
-    string line;
-    while (getline(file, line)) {
-        stringstream ss(line);
-        string cell;
-        vector<string> row; 
-        while (getline(ss, cell, ',')) { // split by comma
-            row.push_back(cell); // add each cell to the row || row will look like this: {"ID", "Username", "Password", "Role"}
-        }
-        rows.push_back(row); // add the row to the list of rows || rows will look like this: {{"ID", "Username", "Password", "Role"}, {"1", "User1", "Pass1", "Admin"}, ...
-    }
-    file.close(); // close the file
-
-    // stop if the rows are empty
-    if (rows.empty()){
-        cout << "No accounts found in the database.\n";
-        return;
-    }
-
-    // Find max width of each column
-    size_t cols = 0;
-    for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
-    // no brackets since its a single controlled statement
-    vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
-    // initially: widths is {0, 0, 0, 0} for 4 columns
-
-    // after we get the maximum number, we will update the widths vector
-    // this will make sure that each value will not overlap with each other
-
-    for (auto &r : rows) { 
-        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
-            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
-            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
-            // there is no curly braces here because it is a single controlled statement
-            
-            // it does this for each value in the widths vector
-    }
-
-    // Add a little padding for readability
-    for (auto &w : widths) w += 2;
-    // Print
-    for (auto &r : rows) {
-        for (size_t c = 0; c < r.size(); ++c) { // for each column in the row
-            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
-            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
-        }
-        cout << '\n';
-    }
-}
-
 void POSAdmin::getDailySales(){
     // location of the gcash and cash transactions
     string cashDatabase = "database/transactions/cash_cashierTransactions.csv";
@@ -979,84 +703,6 @@ void POSAdmin::getTotalSales(){
     cout << "---------------------------------\n";
 }
 
-void POSAdmin::getAllLogs(string type){
-    string database;
-    // use different log files for different types
-    if(type == "accounts"){
-        database = "database/logs/adminUserLogs.csv";
-    } else if(type == "products"){
-        database = "database/logs/productsLogs.csv";
-    } else if(type == "cashier_cash"){
-        database = "database/transactions/cash_cashierTransactions.csv";
-    } else if(type == "cashier_gcash"){
-        database = "database/transactions/gcash_cashierTransactions.csv";
-    } else {
-        cout << "Invalid log type specified." << endl;
-        Sleep(1200);
-        return;
-    }
-
-    // Open the file as ifstream, so that we can read it
-    ifstream file(database);
-
-    // check if file exists
-    if (!file.is_open()) {
-        cout << "Failed to open file\n";
-        return;
-    }
-
-    // Read all rows first
-    vector<vector<string>> rows; // 2D vector to hold rows and columns
-    string line;
-    while (getline(file, line)) {
-        stringstream ss(line);
-        string cell;
-        vector<string> row; // this will hold a single row, example output of this is {"ADD", "Product1", "12_31_23", "10:00:00_AM", "AdminUser"} 
-        while (getline(ss, cell, ',')) { // split by comma
-            row.push_back(cell); // add each cell to the row
-        }
-        rows.push_back(row); // add the row to the list of rows
-    }
-    file.close(); // close the file
-
-    // stop if the rows are empty
-    if (rows.empty()){
-        cout << "No logs found in the database.\n";
-        return;
-    }
-
-    // Find max width of each column
-    size_t cols = 0;
-    for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
-    vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
-    // if there are 6 columns in the csv, then cols = 6 and it will initialize widths to {0, 0, 0, 0, 0, 0}
-
-    // after we get the maximum number, we will update the widths vector
-    // this will make sure that each value will not overlap with each other
-
-    for (auto &r : rows) { // for each row
-        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
-            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
-            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
-            // there is no curly braces here because it is a single controlled statement
-
-            // it does this for each value in the widths vector
-    }
-
-    // Add a little padding for readability
-    for (auto &w : widths) w += 2;
-
-    // Print
-    for (auto &r : rows) {
-        for (size_t c = 0; c < r.size(); ++c) {  // for each column in the row
-            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
-            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
-        }
-        cout << '\n';
-    }
-    system("pause");
-}
-
 void POSAdmin::readProductsByCategory(string productsDatabase, string category, string username){
     ifstream file(productsDatabase);
             
@@ -1239,7 +885,7 @@ void POSAdmin::readProductsByCategory(string productsDatabase, string category, 
     }
 };
 
-void POSAdmin::readAccounts(string userDatabase, string username){
+void POSAdmin::readAccounts(string userDatabase, string operatorUsername){
     ifstream file(userDatabase);
 
     if (!file.is_open()) {
@@ -1248,6 +894,8 @@ void POSAdmin::readAccounts(string userDatabase, string username){
         return;
     }
     cout << "Format: ID, Username, Password, Role\n" << endl;
+
+    // we reused the function from the utilities because we want to get something, not just read
 
     // Read and filter accounts
     vector<vector<string>> accountRows;
@@ -1310,8 +958,8 @@ void POSAdmin::readAccounts(string userDatabase, string username){
     if (selectedId == 0) return;
 
     bool isFound = false;
-    for (size_t i = 1; i < accountRows.size(); ++i) { // for loop is used so that it can skip the header row
-        const auto& row = accountRows[i];
+    for (size_t i = 1; i < accountRows.size(); ++i) { // for loop is used so that it can skip the header row (we started at 1 to skip header)
+        const auto& row = accountRows[i]; // this holds the value for each row (skipping the header)
         if (stoi(row[0]) == selectedId) { // row[0] is the account ID
             accountUsername = row[1]; // row[1] is the account username
             accountPassword = row[2]; // row[2] is the account password
@@ -1345,7 +993,7 @@ void POSAdmin::readAccounts(string userDatabase, string username){
                 return;
             }
 
-            updateAccount(userDatabase, accountUsername, newUsername, "accountUsername", username);
+            updateAccount(userDatabase, accountUsername, newUsername, "accountUsername", operatorUsername);
             break;
         }
         case 2: {
@@ -1359,7 +1007,7 @@ void POSAdmin::readAccounts(string userDatabase, string username){
                 return;
             }
 
-            updateAccount(userDatabase, accountUsername, newPassword, "accountPassword", username);
+            updateAccount(userDatabase, accountUsername, newPassword, "accountPassword", operatorUsername);
             break;
         }
         case 3: {
@@ -1381,7 +1029,7 @@ void POSAdmin::readAccounts(string userDatabase, string username){
                 default: cout << "Invalid role option.\n"; Sleep(1200); break;
             }
 
-            updateAccount(userDatabase, accountUsername, newRole, "accountRole", username);
+            updateAccount(userDatabase, accountUsername, newRole, "accountRole", operatorUsername);
             break;
         }
         default:
@@ -1391,31 +1039,7 @@ void POSAdmin::readAccounts(string userDatabase, string username){
     }
 };
 
-void POSAdmin::readReceipts(){
-    string database, paymentMethod;
-    int receiptsChoiceInput, receiptIdChoiceInput;
-
-    cout << "1. Cash Receipts\n2. GCash Receipts\n3. Go back\nEnter your choice: ";
-    cin >> receiptsChoiceInput;
-    if(handleInputError()) return; // handle invalid inputs 
-    if(receiptsChoiceInput == 3) return;
-
-    switch(receiptsChoiceInput){
-        case 1: database = "database/transactions/cash_cashierTransactions.csv"; paymentMethod = "cash";
-            break;
-        case 2: database = "database/transactions/gcash_cashierTransactions.csv"; paymentMethod = "gcash";
-            break;
-        default:
-            cout << "Invalid choice.\n";
-            Sleep(1200);
-            return;
-    }
-
-    cout << "Enter Receipt ID to view (0 = Cancel): ";
-    cin >> receiptIdChoiceInput;
-    if(handleInputError()) return; // handle invalid inputs
-    if(receiptIdChoiceInput == 0) return;
-
+void POSAdmin::readReceipts(string database, int receiptIdChoiceInput, string paymentMethod){
     ifstream file(database);
     if (!file.is_open()) {
         cout << "Failed to open file\n";
@@ -1427,6 +1051,7 @@ void POSAdmin::readReceipts(){
     while(getline(file, line)){
         stringstream ss(line);
         string id, productNames, productQuantities, productAmt, taxAmt, totalAmt, discount, moneyTendered, changeAmt, refId, refundedAmt, date, time;
+        
         getline(ss, id, ',');
         getline(ss, productNames, ',');
         getline(ss, productQuantities, ',');
@@ -1479,6 +1104,7 @@ void POSAdmin::readReceipts(){
 
     if(!isFound){
         cout << "Receipt with ID " << receiptIdChoiceInput << " not found.\n";
+        return;
     }
 
     file.close();
@@ -1519,10 +1145,7 @@ void POSAdmin::updateProduct(string filename, string query, string valueToUpdate
             return;
         }
     } else if(type == "productPrice" || type == "productQuantity"){ // only these two fields are integers
-        // make sure that the new input is a valid integer
-        // note that the function handleInputError() will only work for INTEGERS entered via cin
-        // and this function not only takes integers
-        try {
+        try { // make sure that the new input is a valid integer. 
             int value = stod(valueToUpdate); // convert string to integer
             if(value < 0){ // price and quantity cannot be negative
                 cout << "The " + query + " cannot be negative.\n";
