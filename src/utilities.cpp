@@ -92,11 +92,10 @@ void readCSV(string database) {
         return;
     }
 
-    // Find max width of each column
-    size_t cols = 0;
-    for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
+    size_t cols = 0; // set the initial column number to 0
+    for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number of columns for all rows
     vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
-    // if there are 6 columns in the csv, then cols = 6 and it will initialize widths to {0, 0, 0, 0, 0, 0}
+    // if there are 6 columns in the csv, then cols = 6 and it will initialize widths to {1, 4, 8, 13, 0, 0}
 
     // after we get the maximum number, we will update the widths vector
     // this will make sure that each value will not overlap with each other
@@ -114,7 +113,7 @@ void readCSV(string database) {
     for (auto &w : widths) w += 2;
 
     // Print
-    for (auto &r : rows) {
+    for (auto &r : rows) { // for each rows
         for (size_t c = 0; c < r.size(); ++c) {  // for each column in the row
             cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
             // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison

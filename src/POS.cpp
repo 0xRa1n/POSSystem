@@ -394,17 +394,14 @@ void PointOfSale::managerMenu(string username) {
                 break;
             }
             case ManagerState::View: {
-                string menu[] = {"View all accounts", "View all logs", "View Receipts", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "Refund logs", "Go back"};
+                string menu[] = {"View all logs", "View Receipts", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "Refund logs", "Go back"};
                 int selection = showMenu("View", menu);
                 previousState = ManagerState::Inventory; // set previous state to Inventory for going back
 
                 switch (selection) {
-                    case 1: showHeader("View all accounts"); readCSV(usersDatabase); // call the getAllAccounts function from POSAdmin class 
-                        system("pause"); 
+                    case 1: currentState = ManagerState::ViewLogs; // below this case, there will be a case named ManagerState::ViewLogs. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::ViewLogs case to execute
                         break;
-                    case 2: currentState = ManagerState::ViewLogs; // below this case, there will be a case named ManagerState::ViewLogs. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::ViewLogs case to execute
-                        break;
-                    case 3: { 
+                    case 2: { 
                         string database, paymentMethod;
                         int receiptsChoiceInput, receiptIdChoiceInput;
 
@@ -435,16 +432,16 @@ void PointOfSale::managerMenu(string username) {
                         system("pause");
                         break;
                     }
-                    case 4: showHeader("Backup transaction data (Cash)"); readCSV("database/transactions/cash_backup.csv"); // call the readCSV function
+                    case 3: showHeader("Backup transaction data (Cash)"); readCSV("database/transactions/cash_backup.csv"); // call the readCSV function
                         system("pause"); 
                         break;
-                    case 5: showHeader("Backup transaction data (GCash)"); readCSV("database/transactions/gcash_backup.csv"); // call the readCSV function 
+                    case 4: showHeader("Backup transaction data (GCash)"); readCSV("database/transactions/gcash_backup.csv"); // call the readCSV function 
                         system("pause"); 
                         break;
-                    case 6: showHeader("View refund logs"); readCSV("database/logs/refundLogs.csv"); // call the readCSV function
+                    case 5: showHeader("View refund logs"); readCSV("database/logs/refundLogs.csv"); // call the readCSV function
                         system("pause"); 
                         break;
-                    case 7: currentState = previousState;  // go back to the previous state (which is Inventory). Then, break this case. It will find for the case named AdminState::Inventory to execute
+                    case 6: currentState = previousState;  // go back to the previous state (which is Inventory). Then, break this case. It will find for the case named AdminState::Inventory to execute
                         break;
                     default: // for invalid input
                         cout << "Invalid selection.\n"; 
@@ -454,24 +451,21 @@ void PointOfSale::managerMenu(string username) {
                 break;
             }
             case ManagerState::ViewLogs: {
-                string menu[] = {"Account logs", "Product logs", "Cashier transactions (Cash)", "Cashier transactions (GCash)", "Go back"};
+                string menu[] = {"Product logs", "Cashier transactions (Cash)", "Cashier transactions (GCash)", "Go back"};
                 int selection = showMenu("View All Logs", menu);
                 previousState = ManagerState::View; // set previous state to View for going back
 
                 switch(selection) {
-                    case 1: showHeader("Account logs"); readCSV("database/logs/adminUserLogs.csv"); // call the readCSV function
-                        system("pause");    
-                        break;
-                    case 2: showHeader("Product logs"); readCSV("database/logs/productsLogs.csv"); // call the readCSV function
+                    case 1: showHeader("Product logs"); readCSV("database/logs/productsLogs.csv"); // call the readCSV function
                         system("pause");      
                         break;
-                    case 3: showHeader("Cashier transactions (Cash)"); readCSV("database/transactions/cash_cashierTransactions.csv"); // call the readCSV function
+                    case 2: showHeader("Cashier transactions (Cash)"); readCSV("database/transactions/cash_cashierTransactions.csv"); // call the readCSV function
                         system("pause");    
                         break;
-                    case 4: showHeader("Cashier transactions (GCash)"); readCSV("database/transactions/gcash_cashierTransactions.csv"); // call the readCSV function
+                    case 3: showHeader("Cashier transactions (GCash)"); readCSV("database/transactions/gcash_cashierTransactions.csv"); // call the readCSV function
                         system("pause");  
                         break;
-                    case 5: currentState = previousState;  // go back to the previous state (which is View). Then, break this case. It will find for the case named AdminState::View to execute
+                    case 4: currentState = previousState;  // go back to the previous state (which is View). Then, break this case. It will find for the case named AdminState::View to execute
                         break;
                     default: // for invalid input
                         cout << "Invalid selection.\n"; 

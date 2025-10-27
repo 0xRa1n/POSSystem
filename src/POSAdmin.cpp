@@ -57,8 +57,7 @@ void POSAdmin::addProduct(string database, string username) {
     cout << "Enter the product category: ";
     cin >> userCategoryInput;
 
-    if(handleInputError()) return; // handle invalid inputs
-    if (userCategoryInput == 4) return;
+    if(handleInputError() || userCategoryInput == 4) return; // handle invalid inputs
 
     // if productCategory input from user is neither tops, bottoms, or accessories
     if(userCategoryInput != 1 && userCategoryInput != 2 && userCategoryInput != 3){
@@ -113,6 +112,11 @@ void POSAdmin::addProduct(string database, string username) {
     double priceInput;
     cout << "Enter the price (0 = Cancel): ";
     cin >> priceInput;
+    
+    // to do: make sure to only get the first two decimal places
+    stringstream ss;
+    ss << fixed << setprecision(2) << priceInput;
+    ss >> priceInput;
 
     if(handleInputError()) return; // handle invalid inputs
     if (priceInput == 0) return;
@@ -197,7 +201,7 @@ void POSAdmin::addUser(string database, string accessingUsername){
     int newUserId = getLastId(database) + 1;
 
     fstream fout; // create a file stream object with the variable fout, so that we can write to the file
-    fout.open(database, ios::app); // output or append mode
+    fout.open(database, ios::app); // append mode
 
     // open the database file, and add the new product
     fout << newUserId << ","
@@ -341,7 +345,7 @@ void POSAdmin::getDailySales(){
     string line;
     double totalCashSales = 0.0;
     double totalGcashSales = 0.0;
-    int gcashTransactions = 0, cashTransactions = 0;
+    int gcashTransactions = 0, cashTransactions = 0; // to get the average
 
     // cash
     getline(cashFile, line); // skip the header
@@ -1080,6 +1084,7 @@ void POSAdmin::readReceipts(string database, int receiptIdChoiceInput, string pa
         stringstream ss(line);
         string id, productNames, productQuantities, productAmt, taxAmt, totalAmt, discount, moneyTendered, changeAmt, refId, refundedAmt, date, time;
         
+        // split the line by comma and store each value in its respective variable
         getline(ss, id, ',');
         getline(ss, productNames, ',');
         getline(ss, productQuantities, ',');
@@ -1287,7 +1292,7 @@ void POSAdmin::updateAccount(string database, string query, string valueToUpdate
     }
 
     cout << "What is the reason for the update? ";
-    cin >> ws;
+    cin >> ws; // eat up any leading whitespace
     getline(cin, reason); // get the whole line including spaces 
     if(regex_search(reason, disallowed)){
         cout << "Reason cannot contain commas or any other special character besides: _ @ # &\n";
@@ -1428,7 +1433,6 @@ void POSAdmin::updateDiscounts(string username) {
     Sleep(1200);
 }
 
-// ...existing code...
 void POSAdmin::processRefunds(string username){
     int transactionPaymentMethodInput, transactionID;
     string transactionPaymentMethod, transactionDatabase, amountToRefundForLog;
