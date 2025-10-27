@@ -1581,12 +1581,12 @@ void POSAdmin::processRefunds(string username){
 
     cout << "Transaction ID " << transactionID << " has been successfully voided. Amount to refund: P" << amountToRefundForLog << "\n\n";
 
-    // 6. FIX: Correctly calculate total quantity for logging to prevent crash
     int totalQuantitiesForLog = 0;
-    stringstream logQuants(productQuantitiesRefundedForLog);
+    stringstream logQuants(productQuantitiesRefundedForLog); // this will return, for example, 1|2
     string logQuant;
-    while(getline(logQuants, logQuant, '|')){
-        if(!logQuant.empty()) totalQuantitiesForLog += stoi(logQuant);
+    // this loop will: 1. split the quantities by '|', 2. convert each quantity to integer, and 3. sum them up
+    while(getline(logQuants, logQuant, '|')){ // iterate for each quantity one by one
+        totalQuantitiesForLog += stoi(logQuant); // sum up the total quantities refunded
     }
 
     saveRefundLogs(transactionID, productsRefundedForLog, totalQuantitiesForLog, stod(amountToRefundForLog), transactionPaymentMethod, username);
