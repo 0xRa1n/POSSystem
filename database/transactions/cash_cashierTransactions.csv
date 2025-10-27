@@ -1,3 +1,4 @@
 TransNum,ProdNames,ProdQtys,Amt,Tax,TotalAmt,Disc,MnyTendered,Change,AmtRefunded,Date,Time,CashrName,Status
-33,Vintage_Print_Tee|Graphic_Tee|Graphic_Tee,1|1|1,209.82,25.18,208.68,23.50,300.00,91.32,0.00,10_27_25,11:14:18_AM,cashier,Completed
-34,Graphic_Tee|Plain_Oversized_Tee,1|1,120.54,14.46,135.00,0.00,200.00,65.00,0.00,10_27_25,01:58:40_PM,cashier,Completed
+35,Graphic_Tee|Vintage_Print_Tee,2|1,209.82,25.18,208.68,23.50,300.00,91.32,0.00,10_27_25,05:57:20_PM,cashier,Completed
+36,Graphic_Tee|Vintage_Print_Tee,2|1,209.82,25.18,208.68,23.50,210.00,1.32,0.00,10_27_25,06:47:13_PM,cashier,Completed
+37,Demo,1,4.46,0.54,5.00,0.00,5.00,0.00,5.00,10_27_25,06:48:00_PM,cashier,Voided

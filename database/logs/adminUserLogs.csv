@@ -8,3 +8,7 @@ UPDATE,Test_to_Rain,10_27_25,12:10:03_AM,admin,Forgotten
 UPDATE,Rain_PW_to_NewPW,10_27_25,12:10:26_AM,admin,Forgor
 UPDATE,Rain_to_Cashier,10_27_25,12:10:37_AM,admin,Demoted
 UPDATE,Rain_to_RRR,10_27_25,12:14:22_AM,admin,Forgotten
+DELETE,RRR,10_27_25,03:15:19_PM,admin,Account_Deleted
+ADD,GUT,10_27_25,03:17:33_PM,admin,New_User_Added
+DELETE,GUT,10_27_25,03:17:40_PM,admin,Account_Deleted
+DELETE,_ID_4,10_27_25,05:40:15_PM,admin,Deleted_Entry

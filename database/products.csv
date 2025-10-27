@@ -1,5 +1,5 @@
 ProdId,ProdCategory,ProdSubCategory,ProdName,Qty,Price
-1,Tops,T_Shirts,Graphic_Tee,3,75.00
-2,Tops,T_Shirts,Plain_Oversized_Tee,6,60.00
-3,Tops,T_Shirts,Vintage_Print_Tee,9,85.00
-4,Tops,Polo_Shirts,Striped_Polo,19,65.00
+1,Tops,T_Shirts,Graphic_Tee,2,75.00
+2,Tops,T_Shirts,Plain_Oversized_Tee,7,60.00
+3,Tops,T_Shirts,Vintage_Print_Tee,8,85.00
+4,Tops,T_Shirts,Demo,100,5.00

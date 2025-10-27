@@ -9,3 +9,9 @@ TransNum,ProdNames,ProdQtys,AmtRefunded,TransPmMethod,Date,Time,User
 1,Vintage_Print_Tee,2,170,Cash,10_27_25,11:03:25_AM,admin
 1,Vintage_Print_Tee,2,170,Cash,10_27_25,11:06:28_AM,admin
 3,Graphic_Tee|Plain_Oversized_Tee,1,135,Cash,10_27_25,11:06:48_AM,admin
+34,Graphic_Tee|Plain_Oversized_Tee,1,135,Cash,10_27_25,05:51:05_PM,admin
+35,Graphic_Tee|Vintage_Print_Tee,2,208.68,Cash,10_27_25,05:57:49_PM,admin
+37,Demo,1,5,Cash,10_27_25,06:48:38_PM,admin
+37,Demo,1,5,Cash,10_27_25,06:49:30_PM,admin
+37,Demo,1,5,Cash,10_27_25,06:54:03_PM,admin
+37,Demo,1,5,Cash,10_27_25,06:58:37_PM,admin

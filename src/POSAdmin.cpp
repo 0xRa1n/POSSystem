@@ -146,6 +146,7 @@ void POSAdmin::addProduct(string database, string username) {
 
 void POSAdmin::addUser(string database, string accessingUsername){
     string username, password, role;
+    int roleInput;
                             
     // ask the user for the username (if 0 is entered, it will go back to the menu)
     cout << "Enter the username you want to add (0 = Cancel): ";
@@ -177,20 +178,20 @@ void POSAdmin::addUser(string database, string accessingUsername){
         return;
     }
 
-    cout << "What is the role of the user? (Admin/Manager/Cashier, 0 = Cancel): ";
-    cin >> role;
+    cout << "What is the role of the user? (1 = Admin, 2 = Manager, 3 = Cashier, 0 = Cancel): ";
+    cin >> roleInput;
+    if(handleInputError()) return; // handle invalid inputs
+    if (roleInput == 0) return;
 
-    if (role == "0") return; // if the user changes his mind
-    if(regex_search(role, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
-        cout << "Role cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
-        Sleep(1200);
-        return;
+    switch(roleInput){
+        case 1: role = "Admin"; break;
+        case 2: role = "Manager"; break;
+        case 3: role = "Cashier"; break;
+        default:
+            cout << "Invalid role. Please enter Admin, Manager, or Cashier only.\n";
+            Sleep(1200);
+            return;
     }
-    if(role != "Admin" && role != "Manager" && role != "Cashier"){
-        cout << "Invalid role. Please enter Admin, Manager, or Cashier only.\n";
-        Sleep(1200);
-        return;
-    } 
 
     // get the last user id from the dtabase
     int newUserId = getLastId(database) + 1;
@@ -322,87 +323,85 @@ void POSAdmin::getDailySales(){
     string gcashDatabase = "database/transactions/gcash_cashierTransactions.csv";
 
     // read sales from both databases
-    ifstream cashFile(cashDatabase);
-    ifstream gcashFile(gcashDatabase);
+    ifstream cashFile(cashDatabase); // read the contents of the cash transactions file
+    ifstream gcashFile(gcashDatabase); // read the contents of the gcash transactions file
 
-    if(!cashFile.is_open() || !gcashFile.is_open()){
+    if(!cashFile.is_open() || !gcashFile.is_open()){ // check if one of the files cannot open
         cout << "Failed to open one or both transaction files.\n";
         return;
     }
 
     // get the current date
-    time_t timestamp = time(NULL); // set the time as null so that it will return the current timestamp
-    struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *, and we used ampersand inside the argument to get the address pointer of the timestamp variable, as it is expecting an address
-    char date[50]; // since it points to a char array
-    strftime(date, 50, "%m_%d_%y", &datetime); // format the date as mm_dd_yy. 50 means the maximum length (size) of the char array
-    string currentDate(date); // we need to convert it from char array to string for easier comparison later
-    // if you would notice, in the POSCashier, we used the same format for the date when saving transactions
-    // we do not have to do this conversion in POSCashier.cpp because we are not comparing dates there
-    // because, when we compare, we check for the address of the char array, which is not correct, so we convert it to string here
+    time_t timestamp = time(NULL);
+    struct tm datetime = *localtime(&timestamp); // get the value of the pointer returned by localtime
+    char date[50];
+    strftime(date, 50, "%m_%d_%y", &datetime); // format the date as mm_dd_yy
+    string currentDate(date);
 
-    // now, read the csv files and only get the totalAmt column (column index 5)
     string line;
     double totalCashSales = 0.0;
     double totalGcashSales = 0.0;
     int gcashTransactions = 0, cashTransactions = 0;
 
+    // cash
     getline(cashFile, line); // skip the header
     while(getline(cashFile, line)){
-        stringstream ss(line);
-        string transactionDate, cashSalesAmount, refundedAmount, token;
-        // skip the first five tokens
-        getline(ss, token, ','); // skip id
-        getline(ss, token, ','); // skip product names
-        getline(ss, token, ','); // skip product quantities
-        getline(ss, token, ','); // skip product amt (not including tax)
-        getline(ss, token, ','); // skip the tax amount
-        getline(ss, cashSalesAmount, ','); // get the amount (including tax)
-        getline(ss, token, ','); // skip the discount
-        getline(ss, token, ','); // skip the money tendered
-        getline(ss, token, ','); // skip the change
-        getline(ss, refundedAmount, ','); // get the refunded amount
-        getline(ss, transactionDate, ','); // get the date
-        
-        if(transactionDate == currentDate){ // compare the transaction date with the current date
-            totalCashSales += stod(cashSalesAmount); // convert to integer and add to total cash sales
-            totalCashSales -= stod(refundedAmount); // subtract the refunded amount from the total cash sales
-            cashTransactions++;
-        }
-    }
+        if (line.empty()) continue; // Skip empty lines
 
+        stringstream ss(line); // helps to split the line by comma
+        vector<string> cols; // to store the value of each column
+        string cell; // to temporarily hold each cell value
+        while(getline(ss, cell, ',')) {
+            cols.push_back(cell); // add each cell value to the cols vector
+        }
+        // the expected output of this are: {id, product names, product quantities, product amt (not including tax), tax amount, total amount (including tax), discount, money tendered, change, refunded amount, date}
+        // in short, vector cols would be the representation of a row in the csv file, where each index corresponds to a column
+
+        // Check if the row has enough columns to be valid
+        // Cash CSV has about 12 columns. We need at least 11 (up to the date).
+        if (cols.size() > 10) { // every row, get the date column
+            string transactionDate = cols[10];
+            if (transactionDate == currentDate) { // after the transaction date matches the current day, get the salesAmount and refundedAmount on that row
+                double salesAmount = stod(cols[5]); // Total Amount is at index 5
+                double refundedAmount = stod(cols[9]); // Refunded Amount is at index 9
+                totalCashSales += salesAmount - refundedAmount; // calculate net sales after refund
+                cashTransactions++; // we will need this to calculate the average cash sales
+            }
+        }
+    } // this will run until the very last row (or line) of the csv file
+
+    // gcash
     getline(gcashFile, line); // skip the header
     while(getline(gcashFile, line)){
-        stringstream ss(line);
-        string transactionDate, gcashSalesAmount, refundedAmount, token;
-        // skip the first five tokens
-        getline(ss, token, ','); // skip id
-        getline(ss, token, ','); // skip product names
-        getline(ss, token, ','); // skip product quantities
-        getline(ss, token, ','); // skip product amt (not including tax)
-        getline(ss, token, ','); // skip the tax amount
-        getline(ss, gcashSalesAmount, ','); // get the amount (including tax)
-        // the values will all be replaced, and when it comes to the index five, it will get the amount and save to the variable
-        getline(ss, token, ','); // skip the discount
-        getline(ss, token, ','); // skip the money tendered
-        getline(ss, token, ','); // skip the change
-        getline(ss, token, ','); // skip the reference id
-        getline(ss, refundedAmount, ','); // get the refunded amount
-        getline(ss, transactionDate, ','); // get the date
+        if (line.empty()) continue;
 
-        if(transactionDate == currentDate){ // compare the transaction date with the current date
-            totalGcashSales += stod(gcashSalesAmount); // convert to integer and add to total gcash sales
-            totalGcashSales -= stod(refundedAmount); // subtract the refunded amount from the total gcash sales
-            gcashTransactions++;
+        stringstream ss(line); // helps to split the line by comma
+        vector<string> cols; // to store the value of each column
+        string cell; // to temporarily hold each cell value
+        while(getline(ss, cell, ',')) {
+            cols.push_back(cell); // add each cell value to the cols vector
         }
-    }
+
+        // GCash CSV has an extra 'refId' column. We need at least 12.
+        if (cols.size() > 11) { // every row, get the date column
+            string transactionDate = cols[11];
+            if (transactionDate == currentDate) { // after the transaction date matches the current day, get the salesAmount and refundedAmount on that row
+                double salesAmount = stod(cols[5]); // Total Amount is at index 5
+                double refundedAmount = stod(cols[10]); // Refunded Amount is at index 10
+                totalGcashSales += salesAmount - refundedAmount; // calculate net sales after refund
+                gcashTransactions++; // we will need this to calculate the average gcash sales
+            }
+        }
+    } // this will run until the very last row (or line) of the csv file
     cashFile.close();
     gcashFile.close();
 
-    int totalSales = totalCashSales + totalGcashSales;
-    double averageDailyCashSales = cashTransactions > 0 ? totalCashSales / cashTransactions : 0; // if cashTransaction is greater than 0, divide totalCashSales by cashTransactions, else return 0
+    double totalSales = totalCashSales + totalGcashSales; // total sales from both payment methods
+    double averageDailyCashSales = cashTransactions > 0 ? totalCashSales / cashTransactions : 0;  // if cashTransactions is greater than 0, divide totalCashSales by cashTransactions, else return 0
     double averageDailyGcashSales = gcashTransactions > 0 ? totalGcashSales / gcashTransactions : 0; // if gcashTransactions is greater than 0, divide totalGcashSales by gcashTransactions, else return 0
 
-    cout << setprecision(2) << fixed;
+    // setprecision(2) is used to set the number of decimal places to 2, and fixed is used to ensure that the decimal places are always shown (even if they are zeros, and also avoid rounding up)
+    cout << setprecision(2) << fixed << fixed;
     cout << "Sales from Cash: P" << totalCashSales << endl;
     cout << "Sales from GCash: P" << totalGcashSales << "\n\n";
 
@@ -428,88 +427,85 @@ void POSAdmin::getMonthlySales(){
     }
 
     // get the current date
-    time_t timestamp = time(NULL); // set the time as null so that it will return the current timestamp
-    struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *, and we used ampersand inside the argument to get the address pointer of the timestamp variable, as it is expecting an address
-    char monthChar[10], yearChar[10]; // since it points to a char array
-    strftime(monthChar, 10, "%m", &datetime); // format the date as mm
-    strftime(yearChar, 10, "%y", &datetime); // format the date as yy
-    string currentMonth(monthChar); // we need to convert it from char array to string for easier comparison later
-    string currentYear(yearChar); // we need to convert it from char array to string for easier comparison later
+    time_t timestamp = time(NULL);
+    struct tm datetime = *localtime(&timestamp); // get the value of the pointer returned by localtime
+    char monthChar[10], yearChar[10]; 
+    strftime(monthChar, 10, "%m", &datetime); // get current month in mm format
+    strftime(yearChar, 10, "%y", &datetime); // get current year in yy format
+    string currentMonth(monthChar); // get current month as string (for comparison purposes)
+    string currentYear(yearChar); // get current year as string (for comparison purposes)
 
     string line;
     double totalCashSales = 0.0;
     double totalGcashSales = 0.0;
     int gcashTransactions = 0, cashTransactions = 0;
 
+    // cash
     getline(cashFile, line); // skip the header
     while(getline(cashFile, line)){
         if (line.empty()) continue; // Skip empty lines
-        stringstream ss(line);
-        string transactionDate, cashSalesAmount, refundedAmount, token;
         
-        // skip the first five tokens
-        getline(ss, token, ','); // skip id
-        getline(ss, token, ','); // skip product names
-        getline(ss, token, ','); // skip product quantities
-        getline(ss, token, ','); // skip product amt (not including tax)
-        getline(ss, token, ','); // skip the tax amount
-        getline(ss, cashSalesAmount, ','); // get the amount (including tax)
-        getline(ss, token, ','); // skip the discount
-        getline(ss, token, ','); // skip the money tendered
-        getline(ss, token, ','); // skip the change
-        getline(ss, refundedAmount, ','); // get the refunded amount
-        getline(ss, transactionDate, ','); // get the date
+        stringstream ss(line); // used to split the line by comma
+        vector<string> cols; // to store the value of each column
+        string cell; // to temporarily hold each cell value
+        while(getline(ss, cell, ',')) {
+            cols.push_back(cell); // add each cell value to the cols vector
+        }
         
-       if(transactionDate.length() >= 8) { // this make sure that the date is valid (e.g. 10_10_25) before using substr, since it will cause an error if the length is less than 8 (out of range)
-            string transactionMonth = transactionDate.substr(0,2); // get the first two characters of the transaction date (which is the month)
-            string transactionYear = transactionDate.substr(6,2); // get the last two characters of the transaction date (which is the year)
+        // Check if the row has enough columns and a valid date
+        if(cols.size() > 10 && cols[10].length() >= 8) { // every row, get the date column
+            string transactionDate = cols[10]; // after getting the date, extract month and year
+            string transactionMonth = transactionDate.substr(0,2);
+            string transactionYear = transactionDate.substr(6,2);
             
-            if(currentMonth == transactionMonth && currentYear == transactionYear){
-                totalCashSales += stod(cashSalesAmount); // convert to double and add to total cash sales
-                totalCashSales -= stod(refundedAmount); // subtract the refunded amount from the total cash sales
-                cashTransactions++;
+            if(currentMonth == transactionMonth && currentYear == transactionYear){ // if both month and year matches current month and year, get salesAmount and refundedAmount
+                double salesAmount = 0.0;
+                double refundedAmount = 0.0;
+                salesAmount = stod(cols[5]); // Total Amount
+                refundedAmount = stod(cols[9]); // Refunded Amount
+                
+                totalCashSales += salesAmount - refundedAmount; // calculate net sales after refund
+                cashTransactions++; // we will need this to calculate the average cash sales
             }
         }
-    }
+    } // this will run until the very last row (or line) of the csv file
 
     getline(gcashFile, line); // skip the header
     while(getline(gcashFile, line)){
         if (line.empty()) continue; // Skip empty lines
-        stringstream ss(line);
-        string transactionDate, gcashSalesAmount, refundedAmount, token;
         
-        getline(ss, token, ','); // skip id
-        getline(ss, token, ','); // skip product names
-        getline(ss, token, ','); // skip product quantities
-        getline(ss, token, ','); // skip product amt (not including tax)
-        getline(ss, token, ','); // skip the tax amount
-        getline(ss, gcashSalesAmount, ','); // get the amount (including tax)
-        // the values will all be replaced, and when it comes to the index five, it will get the amount and save to the variable
-        getline(ss, token, ','); // skip the discount
-        getline(ss, token, ','); // skip the money tendered
-        getline(ss, token, ','); // skip the change
-        getline(ss, token, ','); // skip the reference id
-        getline(ss, refundedAmount, ','); // get the refunded amount
-        getline(ss, transactionDate, ','); // get the date
+        stringstream ss(line); // helps to split the line by comma
+        vector<string> cols; // to store the value of each column
+        string cell; // to temporarily hold each cell value
+        while(getline(ss, cell, ',')) {
+            cols.push_back(cell); // add each cell value to the cols vector
+        }
         
-        if(transactionDate.length() >= 8) { // this make sure that the date is valid (e.g. 10_10_25) before using substr, since it will cause an error if the length is less than 8 (out of range)
-            string transactionMonth = transactionDate.substr(0,2); // get the first two characters of the transaction date (which is the month)
-            string transactionYear = transactionDate.substr(6,2); // get the last two characters of the transaction date (which is the year)
+        // Check if the row has enough columns and a valid date
+        if(cols.size() > 11 && cols[11].length() >= 8) {// every row, get the date column
+            string transactionDate = cols[11]; // after getting the date, extract month and year
+            string transactionMonth = transactionDate.substr(0,2);
+            string transactionYear = transactionDate.substr(6,2);
             
-            if(currentMonth == transactionMonth && currentYear == transactionYear){
-                totalGcashSales += stod(gcashSalesAmount); // convert to double and add to total gcash sales
-                totalGcashSales -= stod(refundedAmount); // subtract the refunded amount from the total gcash sales
-                gcashTransactions++;
+            if(currentMonth == transactionMonth && currentYear == transactionYear){ // if both month and year matches current month and year, get salesAmount and refundedAmount
+                double salesAmount = 0.0;
+                double refundedAmount = 0.0;
+                if (!cols[5].empty()) salesAmount = stod(cols[5]); // Total Amount
+                if (!cols[10].empty()) refundedAmount = stod(cols[10]); // Refunded Amount
+                
+                totalGcashSales += salesAmount - refundedAmount; // calculate net sales after refund
+                gcashTransactions++; // we will need this to calculate the average gcash sales
             }
         }
     }
     cashFile.close();
     gcashFile.close();
 
-    double totalSales = totalCashSales + totalGcashSales;
-    double averageMonthlyCashSales = cashTransactions > 0 ? totalCashSales / cashTransactions : 0; // if cashTransaction is greater than 0, divide totalCashSales by cashTransactions, else return 0
+    double totalSales = totalCashSales + totalGcashSales; // total sales from both payment methods
+    double averageMonthlyCashSales = cashTransactions > 0 ? totalCashSales / cashTransactions : 0; // if cashTransactions is greater than 0, divide totalCashSales by cashTransactions, else return 0
     double averageMonthlyGcashSales = gcashTransactions > 0 ? totalGcashSales / gcashTransactions : 0; // if gcashTransactions is greater than 0, divide totalGcashSales by gcashTransactions, else return 0
 
+    // setprecision(2) is used to set the number of decimal places to 2, and fixed is used to ensure that the decimal places are always shown (even if they are zeros, and also avoid rounding up)
     cout << setprecision(2) << fixed;
     cout << "Sales from Cash: P" << totalCashSales << endl;
     cout << "Sales from GCash: P" << totalGcashSales << "\n\n";
@@ -530,90 +526,87 @@ void POSAdmin::getYearlySales(){
     ifstream cashFile(cashDatabase);
     ifstream gcashFile(gcashDatabase);
 
-    if(!cashFile.is_open() || !gcashFile.is_open()){ // check if both files are opened successfully
+    if(!cashFile.is_open() || !gcashFile.is_open()){ // check if one of the files cannot be opened
         cout << "Failed to open one or both transaction files.\n";
         return;
     }
 
     // get the current date
     time_t timestamp = time(NULL);
-    struct tm datetime = *localtime(&timestamp);
-    char yearChar[10];
-    strftime(yearChar, 10, "%y", &datetime);
-    string currentYear(yearChar);
+    struct tm datetime = *localtime(&timestamp); // get the value of the pointer returned by localtime
+    char yearChar[10]; // to hold the year string
+    strftime(yearChar, 10, "%y", &datetime); // get current year in yy format
+    string currentYear(yearChar); // get current year as string (for comparison purposes)
 
     string line;
     double totalCashSales = 0.0;
     double totalGcashSales = 0.0;
     int gcashTransactions = 0, cashTransactions = 0;
 
-    // Process Cash File
-    getline(cashFile, line); // skip header
+    getline(cashFile, line); // skip the header
     while(getline(cashFile, line)){
-        if (line.empty()) continue;
-        stringstream ss(line);
-        string cashSalesAmount, transactionDate, refundedAmount, token;
+        if (line.empty()) continue; // Skip empty lines
         
-        // Explicitly parse all columns for cash transactions
-        getline(ss, token, ','); // id
-        getline(ss, token, ','); // product names
-        getline(ss, token, ','); // product quantities
-        getline(ss, token, ','); // product amt
-        getline(ss, token, ','); // tax amount
-        getline(ss, cashSalesAmount, ','); // total amount
-        getline(ss, token, ','); // discount
-        getline(ss, token, ','); // money tendered
-        getline(ss, token, ','); // change
-        getline(ss, refundedAmount, ','); // refunded amount
-        getline(ss, transactionDate, ','); // date
+        stringstream ss(line); // used to split the line by comma
+        vector<string> cols; // to store the value of each column
+        string cell; // to temporarily hold each cell value
+        while(getline(ss, cell, ',')) {
+            cols.push_back(cell); // add each cell value to the cols vector
+        }
         
-        if (transactionDate.length() >= 8) { // this make sure that the date is valid (e.g. 10_10_25) before using substr, since it will cause an error if the length is less than 8 (out of range)
-            string transactionYear = transactionDate.substr(6, 2);// get the year from the date
-            if(transactionYear == currentYear){ // compare the transaction year with the current year
-                totalCashSales += stod(cashSalesAmount); // convert to double and add to total cash sales
-                totalCashSales -= stod(refundedAmount); // subtract the refunded amount from the total cash sales
-                cashTransactions++;
+        // Check if the row has enough columns and a valid date
+        if(cols.size() > 10 && cols[10].length() >= 8) { // every row, get the date column
+            string transactionDate = cols[10]; // after getting the date, extract year
+            string transactionYear = transactionDate.substr(6,2); // get the year part
+            
+            if(currentYear == transactionYear){
+                double salesAmount = 0.0;
+                double refundedAmount = 0.0;
+                salesAmount = stod(cols[5]); // Total Amount
+                refundedAmount = stod(cols[9]); // Refunded Amount
+                
+                totalCashSales += salesAmount - refundedAmount; // calculate net sales after refund
+                cashTransactions++; //we will need this to calculate the average cash sales
             }
         }
-    }
+    } // this will run until the very last row (or line) of the csv file
 
-    // Process GCash File
-    getline(gcashFile, line); // skip header
+    //gcash
+    getline(gcashFile, line); // skip the header
     while(getline(gcashFile, line)){
-        if (line.empty()) continue;
-        stringstream ss(line);
-        string gcashSalesAmount, transactionDate, refundedAmount, token;
+        if (line.empty()) continue; // Skip empty lines
         
-        // skip the first five tokens
-        getline(ss, token, ','); // skip id
-        getline(ss, token, ','); // skip product names
-        getline(ss, token, ','); // skip product quantities
-        getline(ss, token, ','); // skip product amt (not including tax)
-        getline(ss, token, ','); // skip the tax amount
-        getline(ss, gcashSalesAmount, ','); // get the amount (including tax)
-        getline(ss, token, ','); // skip the discount
-        getline(ss, token, ','); // skip the money tendered
-        getline(ss, token, ','); // skip the change
-        getline(ss, token, ','); // skip the reference id
-        getline(ss, refundedAmount, ','); // get the refunded amount
-        getline(ss, transactionDate, ','); // get the date
-
-        if (transactionDate.length() >= 8) { // this make sure that the date is valid (e.g. 10_10_25) before using substr, since it will cause an error if the length is less than 8 (out of range)
-            string transactionYear = transactionDate.substr(6, 2); // get the year from the date
-            if(transactionYear == currentYear){ // compare the transaction year with the current year
-                totalGcashSales += stod(gcashSalesAmount); // convert to double and add to total gcash sales
-                totalGcashSales -= stod(refundedAmount); // subtract the refunded amount from the total gcash sales
-                gcashTransactions++;
+        stringstream ss(line); // used to split the line by comma
+        vector<string> cols; // to store the value of each column
+        string cell; // to temporarily hold each cell value
+        while(getline(ss, cell, ',')) {
+            cols.push_back(cell); // add each cell value to the cols vector
+        }
+        
+        // Check if the row has enough columns and a valid date
+        if(cols.size() > 11 && cols[11].length() >= 8) { // every row, get the date column
+            string transactionDate = cols[11]; // after getting the date, extract year
+            string transactionYear = transactionDate.substr(6,2);
+            
+            if(currentYear == transactionYear){ // if year matches current year, get salesAmount and refundedAmount
+                double salesAmount = 0.0; 
+                double refundedAmount = 0.0;
+                salesAmount = stod(cols[5]); // Total Amount
+                refundedAmount = stod(cols[10]); // Refunded Amount
+                
+                totalGcashSales += salesAmount - refundedAmount; // calculate net sales after refund
+                gcashTransactions++; // we will need this to calculate the average gcash sales
             }
         }
-    }
+    } // this will run until the very last row (or line) of the csv file
     cashFile.close();
     gcashFile.close();
 
     double totalSales = totalCashSales + totalGcashSales;
-    double averageYearlyCashSales = cashTransactions > 0 ? totalCashSales / cashTransactions : 0; // if cashTransaction is greater than 0, divide totalCashSales by cashTransactions, else return 0
-    double averageYearlyGcashSales = gcashTransactions > 0 ? totalGcashSales / gcashTransactions : 0; // if gcashTransactions is greater than 0, divide totalGcashSales by gcashTransactions, else return 0
+    double averageYearlyCashSales = cashTransactions > 0 ? totalCashSales / cashTransactions : 0;
+    double averageYearlyGcashSales = gcashTransactions > 0 ? totalGcashSales / gcashTransactions : 0;
 
+    // setprecision(2) is used to set the number of decimal places to 2, and fixed is used to ensure that the decimal places are always shown (even if they are zeros, and also avoid rounding up)
     cout << setprecision(2) << fixed;
     cout << "Sales from Cash: P" << totalCashSales << endl;
     cout << "Sales from GCash: P" << totalGcashSales << "\n\n";
@@ -634,72 +627,79 @@ void POSAdmin::getTotalSales(){
     ifstream cashFile(cashDatabase);
     ifstream gcashFile(gcashDatabase);
 
-    if(!cashFile.is_open() || !gcashFile.is_open()){
+    if(!cashFile.is_open() || !gcashFile.is_open()){ // check if one of the files cannot be opened
         cout << "Failed to open one or both transaction files.\n";
         return;
     }
 
-    // get the current date
-    time_t timestamp = time(NULL); // set the time as null so that it will return the current timestamp
-    struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *, and we used ampersand inside the argument to get the address pointer of the timestamp variable, as it is expecting an address
-    char date[50]; // since it points to a char array
-    strftime(date, 50, "%m_%d_%y", &datetime); // format the date as mm_dd_yy. 50 means the maximum length (size) of the char array
-    string currentDate(date); // we need to convert it from char array to string for easier comparison later
-    // if you would notice, in the POSCashier, we used the same format for the date when saving transactions
-    // we do not have to do this conversion in POSCashier.cpp because we are not comparing dates there
-    // because, when we compare, we check for the address of the char array, which is not correct, so we convert it to string here
-
-    // now, read the csv files and only get the totalAmt column (column index 5)
     string line;
     double totalCashSales = 0.0;
     double totalGcashSales = 0.0;
     int gcashTransactions = 0, cashTransactions = 0;
 
+    //cash
     getline(cashFile, line); // skip the header
     while(getline(cashFile, line)){
-        stringstream ss(line);
-        string transactionDate, cashSalesAmount, token;
-        // skip the first five tokens
-        getline(ss, token, ','); // skip id
-        getline(ss, token, ','); // skip product names
-        getline(ss, token, ','); // skip product quantities
-        getline(ss, token, ','); // skip product amt (not including tax)
-        getline(ss, token, ','); // skip the tax amount
-        getline(ss, cashSalesAmount, ','); // get the amount (including tax)
-                
-        totalCashSales += stod(cashSalesAmount); // convert to integer and add to total cash sales
-        cashTransactions++;
-    }
+        if (line.empty()) continue; // Skip empty lines
+        
+        stringstream ss(line); // used to split the line by comma
+        vector<string> cols; // to store the value of each column
+        string cell; // to temporarily hold each cell value
+        while(getline(ss, cell, ',')) {
+            cols.push_back(cell); // add each cell value to the cols vector
+        }
+        
+        // Check if the row has enough columns to be valid
+        if(cols.size() > 9) { // Need at least 10 columns for sales and refund amounts
+            double salesAmount = 0.0;
+            double refundedAmount = 0.0;
+            salesAmount = stod(cols[5]); // Total Amount is at index 5
+            refundedAmount = stod(cols[9]); // Refunded Amount is at index 9
+            
+            totalCashSales += salesAmount - refundedAmount; // calculate net sales after refund
+            cashTransactions++; // we will need this to calculate the average cash sales
+        }
+    } // this will run until the very last row (or line) of the csv file
 
+    // gcash
     getline(gcashFile, line); // skip the header
     while(getline(gcashFile, line)){
-        stringstream ss(line);
-        string transactionDate, gcashSalesAmount, token;
-        // skip the first five tokens
-        getline(ss, token, ','); // skip id
-        getline(ss, token, ','); // skip product names
-        getline(ss, token, ','); // skip product quantities
-        getline(ss, token, ','); // skip product amt (not including tax)
-        getline(ss, token, ','); // skip the tax amount
-        getline(ss, gcashSalesAmount, ','); // get the amount (including tax)
-
-        totalGcashSales += stod(gcashSalesAmount); // convert to integer and add to total gcash sales
-        gcashTransactions++;
-    }
+        if (line.empty()) continue; // Skip empty lines
+        
+        stringstream ss(line); // used to split the line by comma
+        vector<string> cols; // to store the value of each column
+        string cell; // to temporarily hold each cell value
+        while(getline(ss, cell, ',')) {
+            cols.push_back(cell); // add each cell value to the cols vector
+        }
+        
+        // Check if the row has enough columns to be valid
+        if(cols.size() > 10) { // GCash has an extra refId, so we need at least 11 columns
+            double salesAmount = 0.0;
+            double refundedAmount = 0.0;
+            salesAmount = stod(cols[5]); // Total Amount is at index 5
+            refundedAmount = stod(cols[10]); // Refunded Amount is at index 10
+            
+            totalGcashSales += salesAmount - refundedAmount; // calculate net sales after refund
+            gcashTransactions++; // we will need this to calculate the average gcash sales
+        }
+    }// this will run until the very last row (or line) of the csv file
     cashFile.close();
     gcashFile.close();
 
-    int totalSales = totalCashSales + totalGcashSales;
-    double averageTotalCashSales = cashTransactions > 0 ? totalCashSales / cashTransactions : 0; // if cashTransaction is greater than 0, divide totalCashSales by cashTransactions, else return 0
+    double totalSales = totalCashSales + totalGcashSales; // total sales from both payment methods
+    double averageTotalCashSales = cashTransactions > 0 ? totalCashSales / cashTransactions : 0; // if cashTransactions is greater than 0, divide totalCashSales by cashTransactions, else return 0
     double averageTotalGcashSales = gcashTransactions > 0 ? totalGcashSales / gcashTransactions : 0; // if gcashTransactions is greater than 0, divide totalGcashSales by gcashTransactions, else return 0
 
-    cout << "Total Sales from Cash: P" << setprecision(2) << fixed << totalCashSales << endl;
-    cout << "Total Sales from GCash: P" << setprecision(2) << fixed << totalGcashSales << "\n\n";
+    // setprecision(2) is used to set the number of decimal places to 2, and fixed is used to ensure that the decimal places are always shown (even if they are zeros, and also avoid rounding up)
+    cout << setprecision(2) << fixed;
+    cout << "Total Sales from Cash: P" << totalCashSales << endl;
+    cout << "Total Sales from GCash: P" << totalGcashSales << "\n\n";
 
-    cout << "Average Sales from Cash: P" << setprecision(2) << fixed << averageTotalCashSales << endl;
-    cout << "Average Sales from GCash: P" << setprecision(2) << fixed << averageTotalCashSales << "\n\n";
+    cout << "Average Sales from Cash: P" << averageTotalCashSales << endl;
+    cout << "Average Sales from GCash: P" << averageTotalGcashSales << "\n\n";
 
-    cout << "Total Sales: P" << setprecision(2) << fixed << totalSales << endl;
+    cout << "Total Sales: P" << totalSales << endl;
     cout << "---------------------------------\n";
 }
 
@@ -1428,23 +1428,17 @@ void POSAdmin::updateDiscounts(string username) {
     Sleep(1200);
 }
 
+// ...existing code...
 void POSAdmin::processRefunds(string username){
     int transactionPaymentMethodInput, transactionID;
-    string transactionPaymentMethod, transactionDatabase, amountToRefund;
-    string productsRefunded, productQuantitiesRefunded;
+    string transactionPaymentMethod, transactionDatabase, amountToRefundForLog;
+    string productsRefundedForLog, productQuantitiesRefundedForLog;
     bool isFound = false;
 
     cout << "Which payment method was used for the transaction to refund? (1 = Cash, 2 = GCash, 0 = Cancel): ";
     cin >> transactionPaymentMethodInput;
 
-    if(transactionPaymentMethodInput == 0) return;
-    if(handleInputError()) return;
-
-    if(transactionPaymentMethodInput != 1 && transactionPaymentMethodInput != 2){
-        cout << "Invalid payment method. Please enter 1 for Cash or 2 for GCash.\n";
-        Sleep(1200);
-        return;
-    }
+    if(handleInputError() || transactionPaymentMethodInput == 0) return;
 
     if(transactionPaymentMethodInput == 1){
         transactionDatabase = "database/transactions/cash_cashierTransactions.csv";
@@ -1452,18 +1446,21 @@ void POSAdmin::processRefunds(string username){
     } else if(transactionPaymentMethodInput == 2){
         transactionDatabase = "database/transactions/gcash_cashierTransactions.csv";
         transactionPaymentMethod = "GCash";
+    } else {
+        cout << "Invalid payment method. Please enter 1 for Cash or 2 for GCash.\n";
+        Sleep(1200);
+        return;
     }
 
     cout << "Enter the transaction ID (0 = Cancel): ";
     cin >> transactionID;
 
-    if(handleInputError()) return;
-    if(transactionID == 0) return;
+    if(handleInputError() || transactionID == 0) return;
 
     string line;
     string fileContent;
-    ifstream transactionFile(transactionDatabase);
-    if(!transactionFile.is_open()){
+    ifstream transactionFile(transactionDatabase); // open the file as an ifstream since we are reading from it
+    if(!transactionFile.is_open()){ // if file cannot be opened
         cout << "Failed to open transaction file.\n";
         Sleep(1200);
         return;
@@ -1471,14 +1468,14 @@ void POSAdmin::processRefunds(string username){
 
     // 1. Handle the header correctly
     getline(transactionFile, line); 
-    fileContent += line + "\n"; 
+    fileContent += line + "\n"; // add header to fileContent
 
     // 2. Loop through the data rows
     while(getline(transactionFile, line)){
         stringstream ss(line);
         string id, productNames, productQuantities, productAmt, taxAmt, totalAmt, discount, moneyTendered, changeAmt, refundedAmt, refId, date, time, cashierName, status;
 
-        // Parse all columns from the current line
+        // Parse all columns from the current row
         getline(ss, id, ',');
         getline(ss, productNames, ',');
         getline(ss, productQuantities, ',');
@@ -1498,43 +1495,45 @@ void POSAdmin::processRefunds(string username){
         getline(ss, status);
 
         // 3. Check if this is the line to void
-        if(stoi(id) == transactionID){
-            if(status == "VOID"){
+        if(!id.empty() && stoi(id) == transactionID){
+            if(status == "Voided"){
                 cout << "Transaction ID " << transactionID << " has already been voided.\n";
                 Sleep(1200);
+                transactionFile.close();
                 return;
             } 
             isFound = true;
             status = "Voided"; // Update the status for this line
             
-            // Capture the details from THIS line for logging later
-            amountToRefund = totalAmt; 
-            productsRefunded = productNames;
-            productQuantitiesRefunded = productQuantities;
+            refundedAmt = totalAmt; // now, the refundedAmt for that specific product ID will now become what the user had to pay
 
-            // after it was found, we want to get the quantity of each product refunded and add it back to the inventory
-            // first, split the product names and quantity by |
-            vector<vector<string>> products; // 2D vector to hold product names and quantities
-            stringstream prodNamesStream(productNames);
-            stringstream prodQuantitiesStream(productQuantities);
+            // Capture the details from THIS line for logging later
+            amountToRefundForLog = totalAmt; 
+            productsRefundedForLog = productNames;
+            productQuantitiesRefundedForLog = productQuantities;
+
+            // (The inventory update logic remains the same)
+            vector<vector<string>> products;
+            stringstream prodNamesStream(productNames); // split product names by '|'
+            stringstream prodQuantitiesStream(productQuantities); // split product quantities by '|'
             string prodName, prodQuantity;
-            while(getline(prodNamesStream, prodName, '|') && getline(prodQuantitiesStream, prodQuantity, '|')){
-                products.push_back({prodName, prodQuantity}); // add product name and quantity as a pair
+            while(getline(prodNamesStream, prodName, '|') && getline(prodQuantitiesStream, prodQuantity, '|')){ // iterate for each product and quantity one by one
+                products.push_back({prodName, prodQuantity}); // if there are two products (e.g. Prod1|Prod2) and their quantities (e.g. 2|3), then products will hold {{"Prod1", "2"}, {"Prod2", "3"}} 
             }
-            // now, we have a 2D vector with product names and quantities
-            // next, we will read the products database and update the quantities
+            
             string productsFileContent;
-            ifstream productsFile("database/products.csv");
-            if(!productsFile.is_open()){
+            ifstream productsFile("database/products.csv"); // open the products database to update quantities
+            if(!productsFile.is_open()){ // if file cannot be opened
                 cout << "Failed to open products database for updating quantities.\n";
                 Sleep(1200);
                 return;
             }
+
             string productsLine;
-            // read each line from the products database
-            while(getline(productsFile, productsLine)){
-                stringstream prodSS(productsLine);
+            while(getline(productsFile, productsLine)){ // read each line from products database
+                stringstream prodSS(productsLine); // create a string stream from the line
                 string prodId, prodCategory, prodSubCategory, prodNameInDB, prodQuantityInDB, prodPrice;
+                // parse product details
                 getline(prodSS, prodId, ',');
                 getline(prodSS, prodCategory, ',');
                 getline(prodSS, prodSubCategory, ',');
@@ -1542,21 +1541,21 @@ void POSAdmin::processRefunds(string username){
                 getline(prodSS, prodQuantityInDB, ',');
                 getline(prodSS, prodPrice);
 
-                // check if this product is in the refunded products
-                for(const auto& prod : products){ // iterate through each refunded product
-                    if(prodNameInDB == prod[0]){ // if product names match
-                        int updatedQuantity = stoi(prodQuantityInDB) + stoi(prod[1]); // add the refunded quantity back to inventory
-                        prodQuantityInDB = to_string(updatedQuantity); // update the quantity in the database line
-                        break; // no need to check further
+                for(const auto& prod : products){ // for each product in the refunded transaction
+                    if(prodNameInDB == prod[0]){ // if product names match (index zero means the product name, and since it is a vector inside a vector, we can use the index 0 if there are many products)
+                        // Update the quantity in the database
+                        int updatedQuantity = stoi(prodQuantityInDB) + stoi(prod[1]); // get the quantity from the db and the quantity bought
+                        prodQuantityInDB = to_string(updatedQuantity); // convert it into string
+                        break;
                     }
                 }
-                // rebuild the product line and add to productsFileContent
+                // Rebuild the product line
                 productsFileContent += prodId + "," + prodCategory + "," + prodSubCategory + "," + prodNameInDB + "," + prodQuantityInDB + "," + prodPrice + "\n";
             }
             productsFile.close();
 
-            ofstream productsFileOut("database/products.csv"); // open the products database for writing (no need for error, since if the code above cannot write, it would have exited already)
-            productsFileOut << productsFileContent; // write updated product quantities back to the products database
+            ofstream productsFileOut("database/products.csv");
+            productsFileOut << productsFileContent;
             productsFileOut.close();
         }
 
@@ -1565,7 +1564,7 @@ void POSAdmin::processRefunds(string username){
         if(transactionPaymentMethod == "GCash"){
             fileContent += refId + ",";
         }
-        fileContent += amountToRefund + "," + date + "," + time + "," + cashierName + "," + status + "\n";
+        fileContent += refundedAmt + "," + date + "," + time + "," + cashierName + "," + status + "\n";
     }
     transactionFile.close();
 
@@ -1580,72 +1579,160 @@ void POSAdmin::processRefunds(string username){
     transactionFileOut << fileContent;
     transactionFileOut.close();
 
-    cout << "Transaction ID " << transactionID << " has been successfully voided. Amount to refund: P" << amountToRefund << "\n\n";
+    cout << "Transaction ID " << transactionID << " has been successfully voided. Amount to refund: P" << amountToRefundForLog << "\n\n";
 
-    // 6. Save the log with the captured details
-    saveRefundLogs(transactionID, productsRefunded, stoi(productQuantitiesRefunded), stod(amountToRefund), transactionPaymentMethod, username);
+    // 6. FIX: Correctly calculate total quantity for logging to prevent crash
+    int totalQuantitiesForLog = 0;
+    stringstream logQuants(productQuantitiesRefundedForLog);
+    string logQuant;
+    while(getline(logQuants, logQuant, '|')){
+        if(!logQuant.empty()) totalQuantitiesForLog += stoi(logQuant);
+    }
+
+    saveRefundLogs(transactionID, productsRefundedForLog, totalQuantitiesForLog, stod(amountToRefundForLog), transactionPaymentMethod, username);
     system("pause");
     return;
 }
 
 // DELETE
 void POSAdmin::deleteInformation(string type, string filename, string username){    
-    string deleteProductInput;
-
-    cout << "Enter the entry name you want to delete (0 = Cancel): ";
-    cin >> deleteProductInput;
-
-    if(regex_search(deleteProductInput, disallowed)){ // validate the input for any invalid characters that may interfere with the program's structure
-        cout << "Entry name cannot contain spaces or commas, or any other special character besides: _ @ # &\n";
+    string database;
+    if(type == "products"){
+        database = "database/products.csv";
+    } else if(type == "accounts"){
+        database = "database/userAccounts.csv";
+    } else {
+        cout << "Invalid type for deletion.\n";
         Sleep(1200);
         return;
     }
 
-    if (deleteProductInput == "0") return;
+    // Open the file as ifstream, so that we can read it
+    ifstream file(database);
 
-    ifstream input_file(filename); // open the file as an ifstream since we are reading from it
-    if (!input_file.is_open()) {
+    // check if file exists
+    if (!file.is_open()) {
         cout << "Failed to open file\n";
+        return;
+    }
+
+    // Read all rows first
+    vector<vector<string>> rows; // 2D vector to hold rows and columns
+    string line;
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string cell;
+        vector<string> row; // this will hold a single row, example output of this is {"ADD", "Product1", "12_31_23", "10:00:00_AM", "AdminUser"} 
+        while (getline(ss, cell, ',')) { // split by comma
+            row.push_back(cell); // add each cell to the row
+        }
+        rows.push_back(row); // add the row to the list of rows
+    }
+    file.close(); // close the file
+
+    // stop if the rows are empty
+    if (rows.empty()){
+        cout << "No records found in the database.\n";
         Sleep(1200);
         return;
     }
 
-    vector<string> rows;
-    string line;
-    bool found = false;
+    // Find max width of each column
+    size_t cols = 0;
+    for (auto &r : rows) cols = max(cols, r.size()); // get the maximum number in each of the vector rows, so that the other parts will not overlap
+    vector<size_t> widths(cols, 0); // using the max column size from the variable cols, use it to initialize widths with 0
+    // if there are 6 columns in the csv, then cols = 6 and it will initialize widths to {0, 0, 0, 0, 0, 0}
 
-    // Read each line and filter out the one with the username
-    while (getline(input_file, line)) {
-        stringstream ss(line);
-        string token;
-        getline(ss, token, ',');     // read id (not used)
-        getline(ss, token, ',');     // read the second entry
-        if(token != deleteProductInput){
-            rows.push_back(line); // keep the line if it doesn't match
-        } else {
-            found = true;
+    // after we get the maximum number, we will update the widths vector
+    // this will make sure that each value will not overlap with each other
+
+    for (auto &r : rows) { // for each row
+        for (size_t c = 0; c < r.size(); ++c) // for each column in the row
+            widths[c] = max(widths[c], r[c].size()); // update max width according to the for loop that determines the maximum number of columns
+            // then, it would look like this: {2, 15, 12, 8, 5} for example (it iterates to get the maximum length of each column)
+            // there is no curly braces here because it is a single controlled statement
+
+            // it does this for each value in the widths vector
+    }
+
+    // Add a little padding for readability
+    for (auto &w : widths) w += 2;
+
+    // Print
+    for (auto &r : rows) {
+        for (size_t c = 0; c < r.size(); ++c) {  // for each column in the row
+            cout << left << setw(static_cast<int>(widths[c])) << r[c]; // print with padding || static cast is used to convert size_t to int SAFELY
+            // additionally, static_cast is used to avoid warnings related to signed/unsigned comparison
         }
-        // at this point, the vector rows now holds the value except the line that matches the query
-    }
-    input_file.close();
-
-    if (!found) {
-        cout << "Query not found";
-    }
-    // Write back filtered rows
-    ofstream output_file(filename, ios::trunc); // open in truncate mode
-    // it avoids the line that has the query, and it rewrites the csv without it
-    for (const auto& row : rows) { // write each remaining row
-        output_file << row << "\n"; // now, write the contents of the variable rows back to the file
-    } 
-    output_file.close();
-
-    if(type == "accounts"){ // save to the account logs
-        saveLogs("accounts", "DELETE", deleteProductInput, username, "Account_Deleted");
-    } else if(type == "products"){ // save to the product logs
-        saveLogs("products", "DELETE", deleteProductInput, username, "Product_Deleted");
+        cout << '\n';
     }
 
-    cout << "Successfully deleted " << deleteProductInput << endl;    
+    string productName;
+    int selectedId;
+    cout << "\nEnter the product ID you want to delete (0 = Cancel): ";
+    cin >> selectedId;
+
+    if(handleInputError()) return; // handle invalid inputs
+    if(selectedId == 0) return;
+
+    string idToDelete;
+    bool isFound = false;
+    for(int count = 1; count < rows.size(); ++count){
+        if(rows[count].size() > 0 && stoi(rows[count][0]) == selectedId){ // check if the first column (ID) matches the selectedId
+            isFound = true;
+            idToDelete = rows[count][0]; // get the line to delete
+            if(type == "products"){
+                productName = rows[count][3]; // get the product name for logging
+            }
+            break;
+        }
+    }
+
+    if (!isFound) {
+        cout << "ID " << selectedId << " not found in the database.\n";
+        Sleep(1200);
+        return;
+    }
+
+    // Confirm deletion
+    int deleteConfirmation;
+    cout << "Are you sure you want to delete the entry with ID " << selectedId << "? (1 = Yes, 0 = No): ";
+    cin >> deleteConfirmation;
+    if(handleInputError()) return; // handle invalid inputs
+    if(deleteConfirmation == 0){
+        cout << "Deletion cancelled.\n";
+        Sleep(1200);
+        return;
+    }
+
+    // Rebuild file content without the deleted line
+    string fileContent;
+
+    // read the file and skip the product id to delete
+    for (const auto& row : rows) {
+        // Check if the current row's ID matches the one to delete
+        if (row.empty() || row[0] == idToDelete) {
+            continue; // Skip this row (either empty or the one to be deleted)
+        }
+
+        // Rebuild the line from the row's cells
+        for (int count = 0; count < row.size(); ++count) {
+            fileContent += row[count]; // get the value for each cell. output of this would be {123, "Tops", "Shirts", "Blue_Shirt", "50", "299"}. each value will be added one by one, with comma (except for the last one)
+            if (count < row.size() - 1) {
+                fileContent += ","; // Add a comma between cells
+            }
+        }
+        fileContent += "\n"; // Add a newline at the end of the row
+    }
+
+    file.close();
+
+    // Write back to the file
+    ofstream fileOut(database);
+    fileOut << fileContent;
+    fileOut.close();
+
+    cout << "Successfully deleted entry with ID " << selectedId << " from the database.\n";
+    saveLogs(type, "DELETE", productName + "_ID_" + to_string(selectedId), username, "Deleted_Entry");
     Sleep(1200);
 }
