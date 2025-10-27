@@ -117,3 +117,6 @@ UPDATE,Graphic_Tee_Quantity_to_1,10_27_25,11:10:08_AM,cashier,Purchased_Quantity
 UPDATE,Graphic_Tee_Quantity_to_1,10_27_25,11:14:18_AM,cashier,Purchased_Quantity_Deducted
 UPDATE,Graphic_Tee_Quantity_to_1,10_27_25,11:14:18_AM,cashier,Purchased_Quantity_Deducted
 UPDATE,Vintage_Print_Tee_Quantity_to_1,10_27_25,11:14:18_AM,cashier,Purchased_Quantity_Deducted
+ADD,Striped_Polo,10_27_25,01:44:53_PM,admin,New_Product_Added
+UPDATE,Graphic_Tee_Quantity_to_1,10_27_25,01:58:40_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Plain_Oversized_Tee_Quantity_to_1,10_27_25,01:58:40_PM,cashier,Purchased_Quantity_Deducted

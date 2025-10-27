@@ -1039,6 +1039,34 @@ void POSAdmin::readAccounts(string userDatabase, string operatorUsername){
     }
 };
 
+int POSAdmin::getProductPriceByName(string productsDatabase, string productName){
+    ifstream file(productsDatabase);
+    if (!file.is_open()) {
+        cout << "Failed to open file\n";
+        return 0;
+    }
+    string line;
+    getline(file, line); // skip header
+    while(getline(file, line)){
+        stringstream ss(line);
+        string id, category, subCategory, name, quantity, price;
+        
+        getline(ss, id, ',');
+        getline(ss, category, ',');
+        getline(ss, subCategory, ',');
+        getline(ss, name, ',');
+        getline(ss, quantity, ',');
+        getline(ss, price, ',');
+
+        if(name == productName){
+            file.close();
+            return stoi(price);
+        }
+    }
+    file.close();
+    return 0;
+}
+
 void POSAdmin::readReceipts(string database, int receiptIdChoiceInput, string paymentMethod){
     ifstream file(database);
     if (!file.is_open()) {
@@ -1080,8 +1108,21 @@ void POSAdmin::readReceipts(string database, int receiptIdChoiceInput, string pa
             cout << left << setw(35) << "Product Name" << setw(10) << "Qty" << "Price" << endl;
             cout << "--------------------------------------------------" << endl;
 
-            cout << left << setw(35) << productNames << setw(10) << productQuantities << "P" << productAmt << endl; // product names already formatted with new lines and spacing
+            // split the product names and quantities by '|', so that we can print them line by line// split the product names and quantities by '|', so that we can print them line by lin
 
+            // stringstream helps us to treat a string like a stream, so that we can use getline to split it by a delimiter. stream refers to a sequence of data elements that are made available over time. In this case, we are treating the string as a stream of characters that we can read from. (in short, it helps us read the string easily)
+            stringstream productNamesStream(productNames);
+            stringstream productQuantitiesStream(productQuantities);
+            string singleProductName, singleProductQuantity;
+
+            while(getline(productNamesStream, singleProductName, '|') && getline(productQuantitiesStream, singleProductQuantity, '|')){ // iterate for each product and quantity one by one
+                cout << left << setw(35) << singleProductName << setw(10) << singleProductQuantity; // print the product name and quantity (because we assigned the getline to store the quantity and product name to singleProductName and singleProductQuantity)
+                // to find the exact amount for each product, we need to create a function that will look for the name, get its price, and multiply it by the quantity
+                double productPrice = getProductPriceByName("database/products.csv", singleProductName);
+                double totalPrice = productPrice * stoi(singleProductQuantity);
+                cout << "P" << fixed << setprecision(2) << totalPrice / 1.12 << "\n"; // print the total price for that product
+            }
+            // this will run until there are no more products or quantities to read (no more pipe character '|')
 
             cout << "\nMoney tendered: " << "P" << moneyTendered << "\n";
             cout << "Discounts: " << "P" << discount << "\n";
@@ -1108,7 +1149,6 @@ void POSAdmin::readReceipts(string database, int receiptIdChoiceInput, string pa
     }
 
     file.close();
-    system("pause");
 }
 
 // UPDATE

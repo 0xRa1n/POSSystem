@@ -375,7 +375,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     for(const auto& item : cart){ // for each item in the cart
         cout << left << setw(35) << item[0]  // print with left alignment and width of 35. item[0] is the product name
                 << setw(10) << item[2] // print with width of 10. item[2] is the quantity
-                << "P" << fixed << setprecision(2) << stod(item[3]) << endl; // item[3] is the price, we need to convert it to decimal so that it can get and show two decimal places. if it werent converted, it would show as an integer and will show many zeros
+                << "P" << fixed << setprecision(2) << stod(item[3]) / 1.12 << endl; // item[3] is the price, we need to convert it to decimal so that it can get and show two decimal places. if it werent converted, it would show as an integer and will show many zeros
     }
     cout << "\n\n";
 
@@ -684,7 +684,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     for(const auto& item : cart){ // for each item in the cart. auto means that the compiler will automatically detect the type of the variable
         cout << left << setw(35) << item[0] // print with left alignment and width of 35. item[0] is the product name
                 << setw(10) << item[2]  // print with width of 10. item[2] is the quantity
-                << "P" << fixed << setprecision(2) << stod(item[3]) << endl; // item[3] is the price, we need to convert it to decimal so that it can get and show two decimal places. if it werent converted, it would show as an integer and will show many zeros
+                << "P" << fixed << setprecision(2) << stod(item[3]) / 1.12 << endl; // item[3] is the price, we need to convert it to decimal so that it can get and show two decimal places. if it werent converted, it would show as an integer and will show many zeros
     }
     cout << "\n\n";
 

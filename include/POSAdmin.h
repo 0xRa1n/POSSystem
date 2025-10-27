@@ -20,6 +20,7 @@ public:
     void readProductsByCategory(string productsDatabase, string category, string username);
     void readAccounts(string usersDatabase, string username); // read and display all user accounts from the database
     void readReceipts(string database, int receiptIdChoiceInput, string paymentMethod); // read and display all receipts based on payment method (Cash or GCash)
+    int getProductPriceByName(string productsDatabase, string productName); // get the price of a product by its name
 
     // UPDATE
     void updateProduct(string filename, string query, string valueToUpdate, string type, string username); // used to update product's name, price, quantity, category, or sub-category
