@@ -24,6 +24,7 @@ public:
     void readBackupTransactions(string database); // read and display the backup transaction from a power outage or system crash
     void readProductsByCategory(string productsDatabase, string category, string username);
     void readAccounts(string usersDatabase, string username); // read and display all user accounts from the database
+    void readReceipts(); // read and display all receipts based on payment method (Cash or GCash)
 
     // UPDATE
     void updateProduct(string filename, string query, string valueToUpdate, string type, string username); // used to update product's name, price, quantity, category, or sub-category

@@ -8,7 +8,7 @@ public:
     // we declare all member functions of POSCashier here (the ones that will be defined in POSCashier.cpp)
 
     // CREATE
-    void saveTransaction(string productNames, string productQuantities, double initialAmount, double totalAmount, double change, string cashierName, string paymentMethod, int referenceID = 0); // used to log transactions on the transactions folder
+    void saveTransaction(string productNames, string productQuantities, double initialAmount, double totalAmount, double discount, double moneyTendered, double change, string cashierName, string paymentMethod, int referenceID); // used to log transactions on the transactions folder
     bool processTransaction(string username); // used to verify the transaction, and afterwards, use the function saveTransaction to log the transaction
     void saveAbandonedCarts(string productNames, string productQuantities);
 

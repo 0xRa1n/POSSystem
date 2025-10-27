@@ -625,7 +625,7 @@ void POSAdmin::getDailySales(){
     getline(cashFile, line); // skip the header
     while(getline(cashFile, line)){
         stringstream ss(line);
-        string transactionDate, cashSalesAmount, token;
+        string transactionDate, cashSalesAmount, refundedAmount, token;
         // skip the first five tokens
         getline(ss, token, ','); // skip id
         getline(ss, token, ','); // skip product names
@@ -633,11 +633,15 @@ void POSAdmin::getDailySales(){
         getline(ss, token, ','); // skip product amt (not including tax)
         getline(ss, token, ','); // skip the tax amount
         getline(ss, cashSalesAmount, ','); // get the amount (including tax)
+        getline(ss, token, ','); // skip the discount
+        getline(ss, token, ','); // skip the money tendered
         getline(ss, token, ','); // skip the change
+        getline(ss, refundedAmount, ','); // get the refunded amount
         getline(ss, transactionDate, ','); // get the date
         
         if(transactionDate == currentDate){ // compare the transaction date with the current date
             totalCashSales += stod(cashSalesAmount); // convert to integer and add to total cash sales
+            totalCashSales -= stod(refundedAmount); // subtract the refunded amount from the total cash sales
             cashTransactions++;
         }
     }
@@ -645,7 +649,7 @@ void POSAdmin::getDailySales(){
     getline(gcashFile, line); // skip the header
     while(getline(gcashFile, line)){
         stringstream ss(line);
-        string transactionDate, gcashSalesAmount, token;
+        string transactionDate, gcashSalesAmount, refundedAmount, token;
         // skip the first five tokens
         getline(ss, token, ','); // skip id
         getline(ss, token, ','); // skip product names
@@ -654,12 +658,16 @@ void POSAdmin::getDailySales(){
         getline(ss, token, ','); // skip the tax amount
         getline(ss, gcashSalesAmount, ','); // get the amount (including tax)
         // the values will all be replaced, and when it comes to the index five, it will get the amount and save to the variable
+        getline(ss, token, ','); // skip the discount
+        getline(ss, token, ','); // skip the money tendered
         getline(ss, token, ','); // skip the change
-        getline(ss, token, ','); // skip the refId
+        getline(ss, token, ','); // skip the reference id
+        getline(ss, refundedAmount, ','); // get the refunded amount
         getline(ss, transactionDate, ','); // get the date
 
         if(transactionDate == currentDate){ // compare the transaction date with the current date
             totalGcashSales += stod(gcashSalesAmount); // convert to integer and add to total gcash sales
+            totalGcashSales -= stod(refundedAmount); // subtract the refunded amount from the total gcash sales
             gcashTransactions++;
         }
     }
@@ -713,17 +721,19 @@ void POSAdmin::getMonthlySales(){
     while(getline(cashFile, line)){
         if (line.empty()) continue; // Skip empty lines
         stringstream ss(line);
-        string transactionDate, cashSalesAmount, token;
+        string transactionDate, cashSalesAmount, refundedAmount, token;
         
-        // Correctly parse all columns for cash transactions
+        // skip the first five tokens
         getline(ss, token, ','); // skip id
         getline(ss, token, ','); // skip product names
         getline(ss, token, ','); // skip product quantities
         getline(ss, token, ','); // skip product amt (not including tax)
         getline(ss, token, ','); // skip the tax amount
         getline(ss, cashSalesAmount, ','); // get the amount (including tax)
+        getline(ss, token, ','); // skip the discount
+        getline(ss, token, ','); // skip the money tendered
         getline(ss, token, ','); // skip the change
-        getline(ss, token, ','); // skip the refunded amount
+        getline(ss, refundedAmount, ','); // get the refunded amount
         getline(ss, transactionDate, ','); // get the date
         
        if(transactionDate.length() >= 8) { // this make sure that the date is valid (e.g. 10_10_25) before using substr, since it will cause an error if the length is less than 8 (out of range)
@@ -732,6 +742,7 @@ void POSAdmin::getMonthlySales(){
             
             if(currentMonth == transactionMonth && currentYear == transactionYear){
                 totalCashSales += stod(cashSalesAmount); // convert to double and add to total cash sales
+                totalCashSales -= stod(refundedAmount); // subtract the refunded amount from the total cash sales
                 cashTransactions++;
             }
         }
@@ -741,26 +752,29 @@ void POSAdmin::getMonthlySales(){
     while(getline(gcashFile, line)){
         if (line.empty()) continue; // Skip empty lines
         stringstream ss(line);
-        string transactionDate, gcashSalesAmount, token;
+        string transactionDate, gcashSalesAmount, refundedAmount, token;
         
-        // Correctly parse all columns for gcash transactions
         getline(ss, token, ','); // skip id
         getline(ss, token, ','); // skip product names
         getline(ss, token, ','); // skip product quantities
         getline(ss, token, ','); // skip product amt (not including tax)
         getline(ss, token, ','); // skip the tax amount
         getline(ss, gcashSalesAmount, ','); // get the amount (including tax)
+        // the values will all be replaced, and when it comes to the index five, it will get the amount and save to the variable
+        getline(ss, token, ','); // skip the discount
+        getline(ss, token, ','); // skip the money tendered
         getline(ss, token, ','); // skip the change
-        getline(ss, token, ','); // skip the refId
-        getline(ss, token, ','); // skip the refunded amount
+        getline(ss, token, ','); // skip the reference id
+        getline(ss, refundedAmount, ','); // get the refunded amount
         getline(ss, transactionDate, ','); // get the date
-
+        
         if(transactionDate.length() >= 8) { // this make sure that the date is valid (e.g. 10_10_25) before using substr, since it will cause an error if the length is less than 8 (out of range)
             string transactionMonth = transactionDate.substr(0,2); // get the first two characters of the transaction date (which is the month)
             string transactionYear = transactionDate.substr(6,2); // get the last two characters of the transaction date (which is the year)
             
             if(currentMonth == transactionMonth && currentYear == transactionYear){
                 totalGcashSales += stod(gcashSalesAmount); // convert to double and add to total gcash sales
+                totalGcashSales -= stod(refundedAmount); // subtract the refunded amount from the total gcash sales
                 gcashTransactions++;
             }
         }
@@ -814,7 +828,7 @@ void POSAdmin::getYearlySales(){
     while(getline(cashFile, line)){
         if (line.empty()) continue;
         stringstream ss(line);
-        string salesAmount, transactionDate, token;
+        string cashSalesAmount, transactionDate, refundedAmount, token;
         
         // Explicitly parse all columns for cash transactions
         getline(ss, token, ','); // id
@@ -822,15 +836,18 @@ void POSAdmin::getYearlySales(){
         getline(ss, token, ','); // product quantities
         getline(ss, token, ','); // product amt
         getline(ss, token, ','); // tax amount
-        getline(ss, salesAmount, ','); // total amount
+        getline(ss, cashSalesAmount, ','); // total amount
+        getline(ss, token, ','); // discount
+        getline(ss, token, ','); // money tendered
         getline(ss, token, ','); // change
-        getline(ss, token, ','); // refunded amount
+        getline(ss, refundedAmount, ','); // refunded amount
         getline(ss, transactionDate, ','); // date
         
         if (transactionDate.length() >= 8) { // this make sure that the date is valid (e.g. 10_10_25) before using substr, since it will cause an error if the length is less than 8 (out of range)
             string transactionYear = transactionDate.substr(6, 2);// get the year from the date
             if(transactionYear == currentYear){ // compare the transaction year with the current year
-                totalCashSales += stod(salesAmount); // convert to double and add to total cash sales
+                totalCashSales += stod(cashSalesAmount); // convert to double and add to total cash sales
+                totalCashSales -= stod(refundedAmount); // subtract the refunded amount from the total cash sales
                 cashTransactions++;
             }
         }
@@ -841,24 +858,27 @@ void POSAdmin::getYearlySales(){
     while(getline(gcashFile, line)){
         if (line.empty()) continue;
         stringstream ss(line);
-        string salesAmount, transactionDate, token;
+        string gcashSalesAmount, transactionDate, refundedAmount, token;
         
-        // Explicitly parse all columns for gcash transactions, including refId
-        getline(ss, token, ','); // id
-        getline(ss, token, ','); // product names
-        getline(ss, token, ','); // product quantities
-        getline(ss, token, ','); // product amt
-        getline(ss, token, ','); // tax amount
-        getline(ss, salesAmount, ','); // total amount
-        getline(ss, token, ','); // change
-        getline(ss, token, ','); // refId
-        getline(ss, token, ','); // refunded amount
-        getline(ss, transactionDate, ','); // date
+        // skip the first five tokens
+        getline(ss, token, ','); // skip id
+        getline(ss, token, ','); // skip product names
+        getline(ss, token, ','); // skip product quantities
+        getline(ss, token, ','); // skip product amt (not including tax)
+        getline(ss, token, ','); // skip the tax amount
+        getline(ss, gcashSalesAmount, ','); // get the amount (including tax)
+        getline(ss, token, ','); // skip the discount
+        getline(ss, token, ','); // skip the money tendered
+        getline(ss, token, ','); // skip the change
+        getline(ss, token, ','); // skip the reference id
+        getline(ss, refundedAmount, ','); // get the refunded amount
+        getline(ss, transactionDate, ','); // get the date
 
         if (transactionDate.length() >= 8) { // this make sure that the date is valid (e.g. 10_10_25) before using substr, since it will cause an error if the length is less than 8 (out of range)
             string transactionYear = transactionDate.substr(6, 2); // get the year from the date
             if(transactionYear == currentYear){ // compare the transaction year with the current year
-                totalGcashSales += stod(salesAmount); // convert to double and add to total gcash sales
+                totalGcashSales += stod(gcashSalesAmount); // convert to double and add to total gcash sales
+                totalGcashSales -= stod(refundedAmount); // subtract the refunded amount from the total gcash sales
                 gcashTransactions++;
             }
         }
@@ -1059,7 +1079,7 @@ void POSAdmin::readProductsByCategory(string productsDatabase, string category, 
             // row will look like this: {"ID", "ProductName", "SubCategory", "Quantity", "Price"
         }
         // Only add if ProductSubCategory is the desired sub-category (subCategory)
-        if (row.size() > 2 && row[2] == category) { // if row size is greater than 2 to avoid out of range error and if the sub-category matches the desired sub-category
+        if (row.size() > 1 && row[1] == category) { // if row size is greater than 1 to avoid out of range error and if the category matches the desired category
             categoryRows.push_back(row); // add the row to the categoryRows
             // subCategoryRows will look like this: {{"ID", "ProductName", "SubCategory", "Quantity", "Price"}, {"1", "Product1", "T-Shirts", "10", "100"}, ...
             // the contents of the variable row will only be added if the sub-category matches
@@ -1069,7 +1089,7 @@ void POSAdmin::readProductsByCategory(string productsDatabase, string category, 
     file.close();
 
     if (categoryRows.empty()) {
-        cout << "No products available in this sub-category.\n";
+        cout << "No products available in this category.\n";
         Sleep(1200);
         return;
     }
@@ -1145,7 +1165,7 @@ void POSAdmin::readProductsByCategory(string productsDatabase, string category, 
         case 1: {
             string newProductCategory; // for storing the new category
             int categoryOption; // for storing the input
-            cout << "1. Tops\n2. Bottoms\n3. Outerwear\n4. Accessories\nEnter the new category: ";
+            cout << "1. Tops\n2. Bottoms\n3. Accessories\nEnter the new category: ";
             cin >> categoryOption;
 
             if(handleInputError()) return; // handle invalid inputs
@@ -1371,6 +1391,100 @@ void POSAdmin::readAccounts(string userDatabase, string username){
     }
 };
 
+void POSAdmin::readReceipts(){
+    string database, paymentMethod;
+    int receiptsChoiceInput, receiptIdChoiceInput;
+
+    cout << "1. Cash Receipts\n2. GCash Receipts\n3. Go back\nEnter your choice: ";
+    cin >> receiptsChoiceInput;
+    if(handleInputError()) return; // handle invalid inputs 
+    if(receiptsChoiceInput == 3) return;
+
+    switch(receiptsChoiceInput){
+        case 1: database = "database/transactions/cash_cashierTransactions.csv"; paymentMethod = "cash";
+            break;
+        case 2: database = "database/transactions/gcash_cashierTransactions.csv"; paymentMethod = "gcash";
+            break;
+        default:
+            cout << "Invalid choice.\n";
+            Sleep(1200);
+            return;
+    }
+
+    cout << "Enter Receipt ID to view (0 = Cancel): ";
+    cin >> receiptIdChoiceInput;
+    if(handleInputError()) return; // handle invalid inputs
+    if(receiptIdChoiceInput == 0) return;
+
+    ifstream file(database);
+    if (!file.is_open()) {
+        cout << "Failed to open file\n";
+        return;
+    }
+    string line;
+    bool isFound = false;
+    getline(file, line); // skip header
+    while(getline(file, line)){
+        stringstream ss(line);
+        string id, productNames, productQuantities, productAmt, taxAmt, totalAmt, discount, moneyTendered, changeAmt, refId, refundedAmt, date, time;
+        getline(ss, id, ',');
+        getline(ss, productNames, ',');
+        getline(ss, productQuantities, ',');
+        getline(ss, productAmt, ',');
+        getline(ss, taxAmt, ',');
+        getline(ss, totalAmt, ',');
+        getline(ss, discount, ',');
+        getline(ss, moneyTendered, ',');
+        getline(ss, changeAmt, ',');
+        if(paymentMethod == "gcash"){
+            getline(ss, refId, ','); // only for gcash transactions
+        }
+        getline(ss, refundedAmt, ',');
+        getline(ss, date, ',');
+        getline(ss, time, ',');
+
+        if(stoi(id) == receiptIdChoiceInput){
+            isFound = true;
+            system("cls");
+            showHeader("P.O.S");
+
+            cout << "Threads and Charms\n";
+            cout << "Transaction Date: " << date << " " << time << "\n";
+            cout << "Transaction #: " << id << "\n\n";
+
+            cout << left << setw(35) << "Product Name" << setw(10) << "Qty" << "Price" << endl;
+            cout << "--------------------------------------------------" << endl;
+
+            cout << left << setw(35) << productNames << setw(10) << productQuantities << "P" << productAmt << endl; // product names already formatted with new lines and spacing
+
+
+            cout << "\nMoney tendered: " << "P" << moneyTendered << "\n";
+            cout << "Discounts: " << "P" << discount << "\n";
+            cout << "Total before VAT: " << "P" << fixed << setprecision(2) << (stod(totalAmt) - stod(taxAmt)) << "\n"; // total before VAT is totalAmt - taxAmt
+            cout << "VAT (12%): " << "P" << taxAmt << "\n";
+            cout << "Amount Due: " << "P" << totalAmt << "\n";
+            cout << "Change: " << "P" << changeAmt << "\n";
+
+            if(paymentMethod == "gcash"){
+                cout << "Reference ID: " << refId << "\n";
+                cout << "Payment Method: GCash\n";
+            } else {
+                cout << "Payment Method: Cash\n";
+            }
+
+            cout << "Refunded Amount: " << "P" << refundedAmt << "\n\n";
+            break;
+        }
+    }
+
+    if(!isFound){
+        cout << "Receipt with ID " << receiptIdChoiceInput << " not found.\n";
+    }
+
+    file.close();
+    system("pause");
+}
+
 // UPDATE
 void POSAdmin::updateProduct(string filename, string query, string valueToUpdate, string type, string username){
     string reason;
@@ -1442,7 +1556,7 @@ void POSAdmin::updateProduct(string filename, string query, string valueToUpdate
 
         // if-elseif has been used since switch case does not support strings in C++
         // modify the entry if it matches the query
-        if (indexTwo == query) { // This will check each line if the product name matches the query (note that indexTwo holds the product name, and the variable query holds the product name to search for)
+        if (indexFour == query) { // This will check each line if the product name matches the query (note that indexTwo holds the product name, and the variable query holds the product name to search for)
             if(type == "productName"){
                 indexFour = valueToUpdate; // update product name
             } else if(type == "productQuantity"){
@@ -1652,27 +1766,29 @@ void POSAdmin::updateDiscounts(string username) {
 }
 
 void POSAdmin::processRefunds(string username){
-    int transactionID;
+    int transactionPaymentMethodInput, transactionID;
     string transactionPaymentMethod, transactionDatabase, amountToRefund;
     string productsRefunded, productQuantitiesRefunded;
     bool isFound = false;
 
-    cout << "Which payment method was used for the transaction to refund? (Cash/GCash, 0 = Cancel): ";
-    // Use cin >> ws to handle whitespace and avoid needing cin.ignore() here
-    cin >> ws; 
-    getline(cin, transactionPaymentMethod);
+    cout << "Which payment method was used for the transaction to refund? (1 = Cash, 2 = GCash, 0 = Cancel): ";
+    cin >> transactionPaymentMethodInput;
 
-    if(transactionPaymentMethod == "0") return;
-    if(transactionPaymentMethod != "Cash" && transactionPaymentMethod != "GCash"){
-        cout << "Invalid payment method. Please enter Cash or GCash.\n";
+    if(transactionPaymentMethodInput == 0) return;
+    if(handleInputError()) return;
+
+    if(transactionPaymentMethodInput != 1 && transactionPaymentMethodInput != 2){
+        cout << "Invalid payment method. Please enter 1 for Cash or 2 for GCash.\n";
         Sleep(1200);
         return;
     }
-    
-    if(transactionPaymentMethod == "Cash"){
+
+    if(transactionPaymentMethodInput == 1){
         transactionDatabase = "database/transactions/cash_cashierTransactions.csv";
-    } else if(transactionPaymentMethod == "GCash"){
+        transactionPaymentMethod = "Cash";
+    } else if(transactionPaymentMethodInput == 2){
         transactionDatabase = "database/transactions/gcash_cashierTransactions.csv";
+        transactionPaymentMethod = "GCash";
     }
 
     cout << "Enter the transaction ID (0 = Cancel): ";
@@ -1690,8 +1806,6 @@ void POSAdmin::processRefunds(string username){
         return;
     }
 
-    // --- FIX: Use a single, correct loop ---
-
     // 1. Handle the header correctly
     getline(transactionFile, line); 
     fileContent += line + "\n"; 
@@ -1699,7 +1813,7 @@ void POSAdmin::processRefunds(string username){
     // 2. Loop through the data rows
     while(getline(transactionFile, line)){
         stringstream ss(line);
-        string id, productNames, productQuantities, productAmt, taxAmt, totalAmt, changeAmt, refundedAmt, refId, date, time, cashierName, status;
+        string id, productNames, productQuantities, productAmt, taxAmt, totalAmt, discount, moneyTendered, changeAmt, refundedAmt, refId, date, time, cashierName, status;
 
         // Parse all columns from the current line
         getline(ss, id, ',');
@@ -1708,14 +1822,16 @@ void POSAdmin::processRefunds(string username){
         getline(ss, productAmt, ',');
         getline(ss, taxAmt, ',');
         getline(ss, totalAmt, ',');
+        getline(ss, discount, ',');
+        getline(ss, moneyTendered, ',');
         getline(ss, changeAmt, ',');
         if(transactionPaymentMethod == "GCash"){
             getline(ss, refId, ',');
         }
         getline(ss, refundedAmt, ',');
         getline(ss, date, ',');
-        getline(ss, cashierName, ',');
         getline(ss, time, ',');
+        getline(ss, cashierName, ',');
         getline(ss, status);
 
         // 3. Check if this is the line to void
@@ -1732,10 +1848,57 @@ void POSAdmin::processRefunds(string username){
             amountToRefund = totalAmt; 
             productsRefunded = productNames;
             productQuantitiesRefunded = productQuantities;
+
+            // after it was found, we want to get the quantity of each product refunded and add it back to the inventory
+            // first, split the product names and quantity by |
+            vector<vector<string>> products; // 2D vector to hold product names and quantities
+            stringstream prodNamesStream(productNames);
+            stringstream prodQuantitiesStream(productQuantities);
+            string prodName, prodQuantity;
+            while(getline(prodNamesStream, prodName, '|') && getline(prodQuantitiesStream, prodQuantity, '|')){
+                products.push_back({prodName, prodQuantity}); // add product name and quantity as a pair
+            }
+            // now, we have a 2D vector with product names and quantities
+            // next, we will read the products database and update the quantities
+            string productsFileContent;
+            ifstream productsFile("database/products.csv");
+            if(!productsFile.is_open()){
+                cout << "Failed to open products database for updating quantities.\n";
+                Sleep(1200);
+                return;
+            }
+            string productsLine;
+            // read each line from the products database
+            while(getline(productsFile, productsLine)){
+                stringstream prodSS(productsLine);
+                string prodId, prodCategory, prodSubCategory, prodNameInDB, prodQuantityInDB, prodPrice;
+                getline(prodSS, prodId, ',');
+                getline(prodSS, prodCategory, ',');
+                getline(prodSS, prodSubCategory, ',');
+                getline(prodSS, prodNameInDB, ',');
+                getline(prodSS, prodQuantityInDB, ',');
+                getline(prodSS, prodPrice);
+
+                // check if this product is in the refunded products
+                for(const auto& prod : products){ // iterate through each refunded product
+                    if(prodNameInDB == prod[0]){ // if product names match
+                        int updatedQuantity = stoi(prodQuantityInDB) + stoi(prod[1]); // add the refunded quantity back to inventory
+                        prodQuantityInDB = to_string(updatedQuantity); // update the quantity in the database line
+                        break; // no need to check further
+                    }
+                }
+                // rebuild the product line and add to productsFileContent
+                productsFileContent += prodId + "," + prodCategory + "," + prodSubCategory + "," + prodNameInDB + "," + prodQuantityInDB + "," + prodPrice + "\n";
+            }
+            productsFile.close();
+
+            ofstream productsFileOut("database/products.csv"); // open the products database for writing (no need for error, since if the code above cannot write, it would have exited already)
+            productsFileOut << productsFileContent; // write updated product quantities back to the products database
+            productsFileOut.close();
         }
 
         // 4. Rebuild the line (either original or modified) and add to fileContent
-        fileContent += id + "," + productNames + "," + productQuantities + "," + productAmt + "," + taxAmt + "," + totalAmt + "," + changeAmt + ",";
+        fileContent += id + "," + productNames + "," + productQuantities + "," + productAmt + "," + taxAmt + "," + totalAmt + "," + discount + "," + moneyTendered + "," + changeAmt + ",";
         if(transactionPaymentMethod == "GCash"){
             fileContent += refId + ",";
         }

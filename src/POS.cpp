@@ -14,8 +14,8 @@ using namespace std;
 // enum class acts similarly to class. They can only be accessed through the scope resolution operator (::)
 // e.g., AdminState::MainMenu
 // so that there will be no conflict if there are other enums with the same names in other parts of the program
-enum class AdminState { MainMenu, Inventory, Add, View, ViewLogs, Update, UpdateProduct, UpdateAccount, Delete, DeleteProduct, DeleteAccount, Monitoring, Exit };
-enum class ManagerState { MainMenu, Inventory, View, ViewLogs, Update, UpdateProduct, Monitoring, Exit };
+enum class AdminState { MainMenu, Inventory, Add, View, ViewReceipts, ViewCashReceipts, ViewGCashReceipts, ViewLogs, Update, UpdateProduct, UpdateAccount, Delete, DeleteProduct, DeleteAccount, Monitoring, Exit };
+enum class ManagerState { MainMenu, Inventory, AddProduct, View, ViewReceipts, ViewCashReceipts, ViewGCashReceipts, ViewLogs, UpdateProduct, DeleteProduct, Monitoring, Exit };
 enum class CashierState { MainMenu, Tops, Bottoms, Accessories, ViewCart, Exit };
 
 // switch accepts numbers such as int, short, long, char, and enum types
@@ -67,8 +67,8 @@ void PointOfSale::adminMenu(string username) {
     const string productsDatabase = "database/products.csv";
     const string usersDatabase = "database/userAccounts.csv";
 
-    AdminState currentState = AdminState::MainMenu; // this is the current state (meaning that this can change where the user want to select) || we tell the compiler that the currentState is MainMenu that is inside of the enum class AdminState
-    AdminState previousState = AdminState::MainMenu; // this will store the previous menu that the user was in (for going back) || we tell the compiler that the currentState is MainMenu that is inside of the enum class AdminState
+    AdminState currentState = AdminState::MainMenu; // this is the current state (meaning that this can change where the user want to select) || we tell the compiler that the currentState is MainMenu that is inside of the enum class AdminState. (behind the scenes, this is treated as 1)
+    AdminState previousState = AdminState::MainMenu; // this will store the previous menu that the user was in (for going back) || we tell the compiler that the currentState is MainMenu that is inside of the enum class AdminState. (behind the scenes, this is treated as 1)
 
     while (currentState != AdminState::Exit) { // this checks if the currentState is not Exit, if it is Exit, the loop will end
         // if the currentState is not AdminState::Exit, continue the loop
@@ -78,14 +78,11 @@ void PointOfSale::adminMenu(string username) {
                 string menu[] = {"Inventory", "Monitoring", "Logout"};
                 int selection = showMenu("P.O.S. (Admin)", menu);
                 switch (selection) {
-                    case 1: 
-                        currentState = AdminState::Inventory; // change the currentState to Inventory
+                    case 1: currentState = AdminState::Inventory; // change the currentState to Inventory
                         break;
-                    case 2: 
-                        currentState = AdminState::Monitoring; // change the currentState to Monitoring
+                    case 2: currentState = AdminState::Monitoring; // change the currentState to Monitoring
                         break;
-                    case 3: 
-                        currentState = AdminState::Exit; // change the currentState to Exit to logout
+                    case 3:  currentState = AdminState::Exit; // change the currentState to Exit to logout
                         break;
                     default: 
                         cout << "Invalid selection.\n"; 
@@ -95,7 +92,7 @@ void PointOfSale::adminMenu(string username) {
                 break; // after the user had selected, it will break this case
             }
             case AdminState::Inventory: { // after the previous case had been broken, it will go here if the user selected Inventory (if the user exits the first case, it will only end that case and the loop will continue to the next where it will check the currentState again)
-                string menu[] = {"Add Product or Account", "View", "Update Product or Account", "Delete Product or Account", "Go back"};
+                string menu[] = {"Add Product or Account", "View", "Update Product or Account", "Delete Product or Account", "Process Refunds", "Go back"};
                 int selection = showMenu("Admin Inventory", menu);
                 previousState = AdminState::MainMenu; // we indicate that the previous state is MainMenu for going back, and if this case breaks, the loop will rerun and go to the AdminState::MainMenu case
 
@@ -108,7 +105,9 @@ void PointOfSale::adminMenu(string username) {
                         break;
                     case 4: currentState = AdminState::Delete; // below this case, there will be a case named AdminState::Delete. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the AdminState::Delete case to execute
                         break;
-                    case 5: currentState = previousState;  // go back to the previous state (which is MainMenu). Then, break this case. It will find for the case named AdminState::MainMenu to execute
+                    case 5: showHeader("Process refunds"); admin.processRefunds(username); 
+                        break; // call the processRefunds function from POSAdmin class
+                    case 6: currentState = previousState;  // go back to the previous state (which is MainMenu). Then, break this case. It will find for the case named AdminState::MainMenu to execute
                         break;
                     default: // for invalid input
                         cout << "Invalid selection.\n"; 
@@ -137,7 +136,7 @@ void PointOfSale::adminMenu(string username) {
                 break;
             }
             case AdminState::View: {
-                string menu[] = {"View all accounts", "View all logs", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "Refund logs", "Go back"};
+                string menu[] = {"View all accounts", "View all logs", "View Receipts", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "Refund logs", "Go back"};
                 int selection = showMenu("View", menu);
                 previousState = AdminState::Inventory; // set previous state to Inventory for going back
 
@@ -147,16 +146,17 @@ void PointOfSale::adminMenu(string username) {
                         break;
                     case 2: currentState = AdminState::ViewLogs; // below this case, there will be a case named AdminState::ViewLogs. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the AdminState::ViewLogs case to execute
                         break;
-                    case 3: showHeader("Backup transaction data (Cash)"); admin.readBackupTransactions("database/transactions/cash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
+                    case 3: showHeader("View Receipts"); admin.readReceipts(); break;
+                    case 4: showHeader("Backup transaction data (Cash)"); admin.readBackupTransactions("database/transactions/cash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
                         system("pause"); 
                         break;
-                    case 4: showHeader("Backup transaction data (GCash)"); admin.readBackupTransactions("database/transactions/gcash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
+                    case 5: showHeader("Backup transaction data (GCash)"); admin.readBackupTransactions("database/transactions/gcash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
                         system("pause"); 
                         break;
-                    case 5: showHeader("View refund logs"); admin.readRefundLogs(); // call the readRefundLogs function from POSAdmin class
+                    case 6: showHeader("View refund logs"); admin.readRefundLogs(); // call the readRefundLogs function from POSAdmin class
                         system("pause"); 
                         break;
-                    case 6: currentState = previousState;  // go back to the previous state (which is Inventory). Then, break this case. It will find for the case named AdminState::Inventory to execute
+                    case 7: currentState = previousState;  // go back to the previous state (which is Inventory). Then, break this case. It will find for the case named AdminState::Inventory to execute
                         break;
                     default: // for invalid input
                         cout << "Invalid selection.\n"; 
@@ -304,78 +304,85 @@ void PointOfSale::managerMenu(string username) {
     const string productsDatabase = "database/products.csv";
     const string usersDatabase = "database/userAccounts.csv";
 
-    ManagerState currentState = ManagerState::MainMenu; // this is the current state (meaning that this can change where the user want to select)
-    ManagerState previousState = ManagerState::MainMenu; // this will store the previous menu that the user was in (for going back)
+    ManagerState currentState = ManagerState::MainMenu; // this is the current state (meaning that this can change where the user want to select) || we tell the compiler that the currentState is MainMenu that is inside of the enum class AdminState. (behind the scenes, this is treated as 1)
+    ManagerState previousState = ManagerState::MainMenu; // this will store the previous menu that the user was in (for going back) || we tell the compiler that the currentState is MainMenu that is inside of the enum class AdminState. (behind the scenes, this is treated as 1)
 
-    while (currentState != ManagerState::Exit) {
+    while (currentState != ManagerState::Exit) { // this checks if the currentState is not Exit, if it is Exit, the loop will end
+        // if the currentState is not AdminState::Exit, continue the loop
         system("cls");
         switch (currentState) {
-            case ManagerState::MainMenu: {
+            case ManagerState::MainMenu: { // this will be the main menu for the admin
                 string menu[] = {"Inventory", "Monitoring", "Logout"};
-                int selection = showMenu("P.O.S. (Manager)", menu);
-
+                int selection = showMenu("P.O.S. (Admin)", menu);
                 switch (selection) {
-                    case 1: currentState = ManagerState::Inventory; // below this case, there will be a case named ManagerState::Inventory. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::Inventory case to execute
+                    case 1: currentState = ManagerState::Inventory; // change the currentState to Inventory
                         break;
-                    case 2: currentState = ManagerState::Monitoring; // below this case, there will be a case named ManagerState::Monitoring. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::Monitoring case to execute
+                    case 2: currentState = ManagerState::Monitoring; // change the currentState to Monitoring
                         break;
-                    case 3: currentState = ManagerState::Exit; // change the currentState to Exit to logout
+                    case 3:  currentState = ManagerState::Exit; // change the currentState to Exit to logout
                         break;
                     default: 
                         cout << "Invalid selection.\n"; 
                         Sleep(1200); 
                         break;
-                }
-                break;
+                } 
+                break; // after the user had selected, it will break this case
             }
-            case ManagerState::Inventory: { // case for manager Inventory
-                string menu[] = {"Add products", "View...", "Update...", "Delete a product", "Go back"};
+            case ManagerState::Inventory: { // after the previous case had been broken, it will go here if the user selected Inventory (if the user exits the first case, it will only end that case and the loop will continue to the next where it will check the currentState again)
+                string menu[] = {"Add Product", "View", "Update Product", "Delete Product", "Process Refunds", "Go back"};
                 int selection = showMenu("Manager Inventory", menu);
-                previousState = ManagerState::MainMenu;
+                previousState = ManagerState::MainMenu; // we indicate that the previous state is MainMenu for going back, and if this case breaks, the loop will rerun and go to the ManagerState::MainMenu case
 
                 switch (selection) {
-                    case 1: showHeader("Add a product"); admin.addProduct(productsDatabase, username); // call the addProduct function from POSAdmin class
+                    case 1: currentState = ManagerState::AddProduct; // call the addProduct function from POSAdmin class
                         break;
                     case 2: currentState = ManagerState::View; // below this case, there will be a case named ManagerState::View. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::View case to execute
                         break;
-                    case 3: currentState = ManagerState::Update; // below this case, there will be a case named ManagerState::Update. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::Update case to execute
+                    case 3: currentState = ManagerState::UpdateProduct; // below this case, there will be a case named ManagerState::Update. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::UpdateProduct case to execute
                         break;
-                    case 4: showHeader("Delete product"); admin.deleteInformation("products", productsDatabase, username); // call the deleteInformation function from POSAdmin class
+                    case 4: currentState = ManagerState::DeleteProduct; // below this case, there will be a case named ManagerState::Delete. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::Delete case to execute
                         break;
-                    case 5: currentState = previousState; // go back to the previous state (which is MainMenu). Then, break this case. It will find for the case named ManagerState::MainMenu to execute
+                    case 5:
+                        showHeader("Process refunds"); admin.processRefunds(username); 
+                        break; // call the processRefunds function from POSAdmin class
+                    case 6: currentState = previousState;  // go back to the previous state (which is MainMenu). Then, break this case. It will find for the case named ManagerState::MainMenu to execute
                         break;
-                    default: 
+                    default: // for invalid input
                         cout << "Invalid selection.\n"; 
                         Sleep(1200); 
                         break;
                 }
                 break;
             }
+            case ManagerState::AddProduct: { // Add Product or Account
+                showHeader("Add product"); admin.addProduct(productsDatabase, username); // call the addProduct function from POSAdmin class
+                currentState = previousState;  // this will use the value from this code enum class
+                break;
+            }
             case ManagerState::View: {
-                string menu[] = {"View all products", "View all accounts", "View all logs", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "Refund logs", "Go back"};
+                string menu[] = {"View all accounts", "View all logs", "View Receipts", "Backup transaction data (Cash)", "Backup transaction data (GCash)", "Refund logs", "Go back"};
                 int selection = showMenu("View", menu);
                 previousState = ManagerState::Inventory; // set previous state to Inventory for going back
 
                 switch (selection) {
-                    case 1: showHeader("View all products"); admin.readProducts(productsDatabase); // call the readProducts function from POSAdmin class
+                    case 1: showHeader("View all accounts"); admin.getAllAccounts(usersDatabase); // call the getAllAccounts function from POSAdmin class 
                         system("pause"); 
                         break;
-                    case 2: showHeader("View all accounts"); admin.getAllAccounts(usersDatabase); // call the getAllAccounts function from POSAdmin class
-                        system("pause"); 
+                    case 2: currentState = ManagerState::ViewLogs; // below this case, there will be a case named ManagerState::ViewLogs. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::ViewLogs case to execute
                         break;
-                    case 3: currentState = ManagerState::ViewLogs; // below this case, there will be a case named ManagerState::ViewLogs. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::ViewLogs case to execute
-                        break;
+                    case 3: showHeader("View Receipts"); admin.readReceipts(); break;
                     case 4: showHeader("Backup transaction data (Cash)"); admin.readBackupTransactions("database/transactions/cash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
-                        system("pause");
+                        system("pause"); 
                         break;
                     case 5: showHeader("Backup transaction data (GCash)"); admin.readBackupTransactions("database/transactions/gcash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
-                        system("pause");
+                        system("pause"); 
                         break;
                     case 6: showHeader("View refund logs"); admin.readRefundLogs(); // call the readRefundLogs function from POSAdmin class
-                        system("pause");
+                        system("pause"); 
                         break;
-                    case 7: currentState = previousState; break;
-                    default: 
+                    case 7: currentState = previousState;  // go back to the previous state (which is Inventory). Then, break this case. It will find for the case named AdminState::Inventory to execute
+                        break;
+                    default: // for invalid input
                         cout << "Invalid selection.\n"; 
                         Sleep(1200); 
                         break;
@@ -396,26 +403,7 @@ void PointOfSale::managerMenu(string username) {
                         break;
                     case 4: showHeader("Cashier transactions (GCash)"); admin.getAllLogs("cashier_gcash"); // call the getAllLogs function from POSAdmin class
                         break;
-                    case 5: currentState = previousState; // go back to the previous state (which is View). Then, break this case. It will find for the case named ManagerState::View to execute
-                        break;
-                    default: // for invalid input
-                        cout << "Invalid selection.\n"; 
-                        Sleep(1200); 
-                        break;
-                }
-                break;
-            }
-            case ManagerState::Update: {
-                string menu[] = {"Product", "Process Refunds", "Go back"};
-                int selection = showMenu("Update", menu);
-                previousState = ManagerState::Inventory;
-
-                switch(selection) {
-                    case 1: currentState = ManagerState::UpdateProduct; // below this case, there will be a case named ManagerState::UpdateProduct. If this was selected, it will break this case. Then, the loop will rerun this whole switch and find the ManagerState::UpdateProduct case to execute
-                        break;
-                    case 2: showHeader("Process refunds"); admin.processRefunds(username); // call the processRefunds function from POSAdmin class
-                        break;
-                    case 3: currentState = previousState; // go back to the previous state (which is Inventory). Then, break this case. It will find for the case named ManagerState::Inventory to execute
+                    case 5: currentState = previousState;  // go back to the previous state (which is View). Then, break this case. It will find for the case named AdminState::View to execute
                         break;
                     default: // for invalid input
                         cout << "Invalid selection.\n"; 
@@ -449,7 +437,8 @@ void PointOfSale::managerMenu(string username) {
                         admin.readProductsByCategory(productsDatabase, "Accessories", username);
                         system("pause");
                         break;
-                    case 4: currentState = previousState;  // go back to the previous state (which is Inventory). Then, break this case. It will find for the case named AdminState::Inventory to execute
+                    case 4:
+                        currentState = previousState;  // go back to the previous state (which is Inventory). Then, break this case. It will find for the case named AdminState::Inventory to execute
                         break;
                     default:
                         cout << "Invalid selection.\n";
@@ -458,12 +447,18 @@ void PointOfSale::managerMenu(string username) {
                 }
                 break;
             }
-            case ManagerState::Monitoring: {
+            case ManagerState::DeleteProduct: {
+                showHeader("Delete product"); admin.deleteInformation("products", productsDatabase, username); // call the deleteInformation function from POSAdmin class
+                currentState = previousState;  // this will use the value from this code enum class
+                break;
+            }
+            case ManagerState::Monitoring: { // case for monitoring sales and products
                 string menu[] = {"View all products", "View sales", "Go back"};
                 int selection = showMenu("Monitoring", menu);
                 previousState = ManagerState::MainMenu;
-                 switch(selection){
-                    case 1: showHeader("View all products"); admin.readProducts(productsDatabase); // call the readProducts function from POSAdmin class
+
+                switch(selection){
+                    case 1: showHeader("View all products"); admin.readProducts(productsDatabase);  // call the readProducts function from POSAdmin class
                         system("pause"); 
                         break;
                     case 2: // view sales
@@ -474,11 +469,10 @@ void PointOfSale::managerMenu(string username) {
                         cout << "\nOverall Sales:\n"; admin.getTotalSales();
                         cout << "\n"; system("pause");
                         break;
-                    case 3: 
-                        currentState = previousState; // go back to the previous state (which is MainMenu). Then, break this case. It will find for the case named ManagerState::MainMenu to execute
+                    case 3: currentState = previousState; // go back to the previous state (which is MainMenu). Then, break this case. It will find for the case named AdminState::MainMenu to execute
                         break;
-                    default: // for invalid input
-                        cout << "Invalid option\n";
+                    default: 
+                        cout << "Invalid option\n"; // for invalid input
                         Sleep(1200); 
                         break;
                 }

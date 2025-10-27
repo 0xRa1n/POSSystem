@@ -128,13 +128,15 @@ bool POSCashier::viewCart(string username){ // view cart is also bool since if t
     return false; // just to satisfy the compiler, this line will never be reached
 }
 
-void POSCashier::saveTransaction(string productNames, string productQuantities, double initialAmount, double totalAmount, double change, string cashierName, string paymentMethod, int referenceID){
+void POSCashier::saveTransaction(string productNames, string productQuantities, double initialAmount, double totalAmount, double discount, double moneyTendered, double change, string cashierName, string paymentMethod, int referenceID = 0){
     string database;
+    const string customersDatabase = "database/customers/customers_logs.csv";
     if(paymentMethod == "GCash"){
         database = "database/transactions/gcash_cashierTransactions.csv";
     } else if(paymentMethod == "Cash"){
         database = "database/transactions/cash_cashierTransactions.csv";
     }
+    // we cannot use const here because we are assigning a value to the variable database
     // get the current date and time
     time_t timestamp = time(NULL); // get current time, NULL since we are not interested to set a custom timestamp
     struct tm datetime = *localtime(&timestamp); // pointer localtime returns a pointer to struct tm, so we dereference it using *
@@ -163,8 +165,8 @@ void POSCashier::saveTransaction(string productNames, string productQuantities, 
 
     // &datetime == pointer to struct tm
 
-    // generate an id based on the previous id 
-    int newId = getLastId(database) + 1;
+    // get the last id based on the customers database
+    int newId = getLastId(customersDatabase);
 
     // open the transactions.csv file in append mode
     ofstream fout(database, ios::app); // fout is an instance of ofstream, used to write to files
@@ -182,6 +184,8 @@ void POSCashier::saveTransaction(string productNames, string productQuantities, 
                 << setprecision(2) << fixed << initialAmount << ","
                 << setprecision(2) << fixed << initialAmount * 0.12 << ","
                 << setprecision(2) << fixed << totalAmount << ","
+                << setprecision(2) << fixed << discount << ","
+                << setprecision(2) << fixed << moneyTendered << ","
                 << setprecision(2) << fixed << change << ","
                 << 0.00 << ","
                 << date << ","
@@ -197,6 +201,8 @@ void POSCashier::saveTransaction(string productNames, string productQuantities, 
                 << setprecision(2) << fixed << initialAmount << ","
                 << setprecision(2) << fixed << initialAmount * 0.12 << ","
                 << setprecision(2) << fixed << totalAmount << ","
+                << setprecision(2) << fixed << discount << ","
+                << setprecision(2) << fixed << moneyTendered << ","
                 << setprecision(2) << fixed << change << ","
                 << referenceID << ","
                 << 0.00 << ","
@@ -522,7 +528,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                         }
                         
                         // save the transaction to the main database
-                        saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, change, username, "Cash");
+                        saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, discountAmount, stod(cashUserInput), change, username, "Cash", 0); // save the transaction to the database, specifically at the cash_cashierTransactions.csv
 
                         // remove the backup file after saving the transaction to the main database
                         remove("database/transactions/cash_backup.csv");
@@ -618,7 +624,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                     remove("database/transactions/gcash_backup.csv");
                     
                     // save the transaction to the main database
-                    saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, change, username, "GCash", referenceID); // save the transaction to the database, specifically at the gcash_cashierTransactions.csv
+                    saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, discountAmount, stod(gcashUserInput), change, username, "GCash", referenceID); // save the transaction to the database, specifically at the gcash_cashierTransactions.csv
                     break;
                 }
                 default:

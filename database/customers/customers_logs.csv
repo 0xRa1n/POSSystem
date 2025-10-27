@@ -22,3 +22,13 @@ CustomerID,ProductNames,ProductQuantities,Date,Time1,Graphic_Tee,1,10_26_25,04:2
 21,Graphic_Tee,1,10_27_25,01:29:15_AM
 22,Graphic_Tee,1,10_27_25,01:31:34_AM
 23,Graphic_Tee,1,10_27_25,01:34:44_AM
+24,Graphic_Tee,2,10_27_25,09:12:44_AM
+25,Graphic_Tee,3,10_27_25,09:17:43_AM
+26,Plain_Oversized_Tee,1,10_27_25,09:18:24_AM
+27,Plain_Oversized_Tee|Plain_Oversized_Tee,1|1,10_27_25,09:18:36_AM
+28,Graphic_Tee|Plain_Oversized_Tee,1|1,10_27_25,09:18:58_AM
+29,Vintage_Print_Tee,2,10_27_25,09:46:23_AM
+30,Vintage_Print_Tee,1,10_27_25,10:00:52_AM
+31,Graphic_Tee|Plain_Oversized_Tee,1|1,10_27_25,10:57:03_AM
+32,Graphic_Tee,1,10_27_25,11:10:06_AM
+33,Vintage_Print_Tee|Graphic_Tee|Graphic_Tee,1|1|1,10_27_25,11:14:15_AM

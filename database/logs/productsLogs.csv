@@ -104,3 +104,16 @@ ADD,Graphic_Tee,10_27_25,01:00:25_AM,admin,New_Product_Added
 UPDATE,Graphic_Tee_Quantity_to_1,10_27_25,01:34:46_AM,cashier,Purchased_Quantity_Deducted
 ADD,Plain_Oversized_Tee,10_27_25,01:40:40_AM,admin,New_Product_Added
 ADD,Vintage_Print_Tee,10_27_25,01:43:11_AM,admin,New_Product_Added
+UPDATE,Graphic_Tee_Quantity_to_10,10_27_25,09:12:14_AM,admin,Insuf
+UPDATE,Graphic_Tee_Quantity_to_2,10_27_25,09:12:47_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Plain_Oversized_Tee_Quantity_to_1,10_27_25,09:18:39_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Plain_Oversized_Tee_Quantity_to_1,10_27_25,09:18:39_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_1,10_27_25,09:19:02_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Plain_Oversized_Tee_Quantity_to_1,10_27_25,09:19:02_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Vintage_Print_Tee_Quantity_to_2,10_27_25,09:46:26_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_1,10_27_25,10:57:05_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Plain_Oversized_Tee_Quantity_to_1,10_27_25,10:57:05_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_1,10_27_25,11:10:08_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_1,10_27_25,11:14:18_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_1,10_27_25,11:14:18_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Vintage_Print_Tee_Quantity_to_1,10_27_25,11:14:18_AM,cashier,Purchased_Quantity_Deducted

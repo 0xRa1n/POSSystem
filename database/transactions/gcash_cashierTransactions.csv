@@ -1,5 +1,1 @@
-TransNum,ProdNames,ProdQtys,Amt,Tax,TotalAmt,Change,RefID,AmtRefundedDate,Time,CashierName,Status
-1,Graphic_Tee,1,66.96,8.04,75.00,0.00,5234234,0.00,10_27_25,01:15:26_AM,cashier,Completed
-2,Graphic_Tee,1,66.96,8.04,75.00,0.00,2435435,0.00,10_27_25,01:18:07_AM,cashier,Completed
-3,Graphic_Tee,1,66.96,8.04,75.00,0.00,342342,0.00,10_27_25,01:23:31_AM,cashier,Completed
-4,Graphic_Tee,1,66.96,8.04,75.00,0.00,2342342,0.00,10_27_25,01:26:37_AM,cashier,Completed
+TransNum,ProdNames,ProdQtys,Amt,Tax,TotalAmt,Disc,MnyTndrd,Change,RefID,AmtRefundedDate,Date,Time,CashierName,Status
