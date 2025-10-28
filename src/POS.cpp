@@ -290,9 +290,9 @@ void PointOfSale::adminMenu(string username) {
                 previousState = AdminState::Inventory; // set previous state to Inventory for going back
 
                 switch (selection) {
-                    case 1: showHeader("Delete product"); admin.deleteInformation("products", productsDatabase, username); // call the deleteInformation function from POSAdmin class
+                    case 1: showHeader("Delete product"); admin.deleteInformation("products", username); // call the deleteInformation function from POSAdmin class
                         break;
-                    case 2: showHeader("Delete account"); admin.deleteInformation("accounts", usersDatabase, username); // call the deleteInformation function from POSAdmin class
+                    case 2: showHeader("Delete account"); admin.deleteInformation("accounts", username); // call the deleteInformation function from POSAdmin class
                         break;
                     case 3: currentState = previousState;  // go back to the previous state (which is Inventory). Then, break this case. It will find for the case named AdminState::Inventory to execute
                         break;
@@ -510,7 +510,7 @@ void PointOfSale::managerMenu(string username) {
                 break;
             }
             case ManagerState::DeleteProduct: {
-                showHeader("Delete product"); admin.deleteInformation("products", productsDatabase, username); // call the deleteInformation function from POSAdmin class
+                showHeader("Delete product"); admin.deleteInformation("products", username); // call the deleteInformation function from POSAdmin class
                 currentState = previousState;  // this will use the value from this code enum class
                 break;
             }

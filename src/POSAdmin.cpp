@@ -557,7 +557,7 @@ void POSAdmin::getYearlySales(){
         }
         
         // Check if the row has enough columns and a valid date
-        if(cols.size() > 10 && cols[10].length() >= 8) { // every row, get the date column
+        if(cols.size() > 10 && cols[10].length() >= 8) { // every row, get the date column (first it will check if the column is greater than 10 to avoid out of range error, then it will check if the date length is at least 8 to avoid invalid date format)
             string transactionDate = cols[10]; // after getting the date, extract year
             string transactionYear = transactionDate.substr(6,2); // get the year part
             
@@ -586,11 +586,11 @@ void POSAdmin::getYearlySales(){
         }
         
         // Check if the row has enough columns and a valid date
-        if(cols.size() > 11 && cols[11].length() >= 8) { // every row, get the date column
+        if(cols.size() > 11 && cols[11].length() >= 8) { // every row, get the date column (first it will check if the column is greater than 11 to avoid out of range error, then it will check if the date length is at least 8 to avoid invalid date format)
             string transactionDate = cols[11]; // after getting the date, extract year
             string transactionYear = transactionDate.substr(6,2);
             
-            if(currentYear == transactionYear){ // if year matches current year, get salesAmount and refundedAmount
+            if(currentYear == transactionYear){ // if year matches current year, get salesAmount and refundedAmount 
                 double salesAmount = 0.0; 
                 double refundedAmount = 0.0;
                 salesAmount = stod(cols[5]); // Total Amount
@@ -605,8 +605,8 @@ void POSAdmin::getYearlySales(){
     gcashFile.close();
 
     double totalSales = totalCashSales + totalGcashSales;
-    double averageYearlyCashSales = cashTransactions > 0 ? totalCashSales / cashTransactions : 0;
-    double averageYearlyGcashSales = gcashTransactions > 0 ? totalGcashSales / gcashTransactions : 0;
+    double averageYearlyCashSales = cashTransactions > 0 ? totalCashSales / cashTransactions : 0; // if cashTransactions is greater than 0, divide totalCashSales by cashTransactions, else return 0
+    double averageYearlyGcashSales = gcashTransactions > 0 ? totalGcashSales / gcashTransactions : 0; // if gcashTransactions is greater than 0, divide totalGcashSales by gcashTransactions, else return 0
 
     // setprecision(2) is used to set the number of decimal places to 2, and fixed is used to ensure that the decimal places are always shown (even if they are zeros, and also avoid rounding up)
     cout << setprecision(2) << fixed;
@@ -652,7 +652,7 @@ void POSAdmin::getTotalSales(){
         }
         
         // Check if the row has enough columns to be valid
-        if(cols.size() > 9) { // Need at least 10 columns for sales and refund amounts
+        if(cols.size() > 9) { // Need at least 10 columns for sales and refund amounts (to make sure that we have sales and refund amounts)
             double salesAmount = 0.0;
             double refundedAmount = 0.0;
             salesAmount = stod(cols[5]); // Total Amount is at index 5
@@ -676,7 +676,7 @@ void POSAdmin::getTotalSales(){
         }
         
         // Check if the row has enough columns to be valid
-        if(cols.size() > 10) { // GCash has an extra refId, so we need at least 11 columns
+        if(cols.size() > 10) { // GCash has an extra refId, so we need at least 11 columns (to make sure that we have sales and refund amounts)
             double salesAmount = 0.0;
             double refundedAmount = 0.0;
             salesAmount = stod(cols[5]); // Total Amount is at index 5
@@ -1441,14 +1441,13 @@ void POSAdmin::processRefunds(string username){
     cin >> transactionPaymentMethodInput;
 
     if(handleInputError() || transactionPaymentMethodInput == 0) return;
-
-    if(transactionPaymentMethodInput == 1){
+    if(transactionPaymentMethodInput == 1){ // if the payment method is cash
         transactionDatabase = "database/transactions/cash_cashierTransactions.csv";
         transactionPaymentMethod = "Cash";
-    } else if(transactionPaymentMethodInput == 2){
+    } else if(transactionPaymentMethodInput == 2){ // if the payment method is gcash
         transactionDatabase = "database/transactions/gcash_cashierTransactions.csv";
         transactionPaymentMethod = "GCash";
-    } else {
+    } else { // invalid input
         cout << "Invalid payment method. Please enter 1 for Cash or 2 for GCash.\n";
         Sleep(1200);
         return;
@@ -1468,9 +1467,8 @@ void POSAdmin::processRefunds(string username){
         return;
     }
 
-    // 1. Handle the header correctly
     getline(transactionFile, line); 
-    fileContent += line + "\n"; // add header to fileContent
+    fileContent += line + "\n"; // add header to fileContent (without this, header will dissapear when we write back to the file)
 
     // 2. Loop through the data rows
     while(getline(transactionFile, line)){
@@ -1556,21 +1554,21 @@ void POSAdmin::processRefunds(string username){
             }
             productsFile.close();
 
-            ofstream productsFileOut("database/products.csv");
-            productsFileOut << productsFileContent;
-            productsFileOut.close();
+            ofstream productsFileOut("database/products.csv"); // open the products database for writing (no need for checking if it is open, since we already did that above)
+            productsFileOut << productsFileContent; // write the updated content back to the products database
+            productsFileOut.close(); // close the products file
         }
 
         // 4. Rebuild the line (either original or modified) and add to fileContent
         fileContent += id + "," + productNames + "," + productQuantities + "," + productAmt + "," + taxAmt + "," + totalAmt + "," + discount + "," + moneyTendered + "," + changeAmt + ",";
         if(transactionPaymentMethod == "GCash"){
-            fileContent += refId + ",";
+            fileContent += refId + ","; // add the refId that we got earlier for gcash transactions
         }
         fileContent += refundedAmt + "," + date + "," + time + "," + cashierName + "," + status + "\n";
     }
-    transactionFile.close();
+    transactionFile.close(); // close the transaction file
 
-    if(!isFound){
+    if(!isFound){ // if the transaction ID was not found
         cout << "Transaction ID " << transactionID << " not found in the " << transactionPaymentMethod << " transactions.\n";
         Sleep(1200);
         return;
@@ -1597,7 +1595,7 @@ void POSAdmin::processRefunds(string username){
 }
 
 // DELETE
-void POSAdmin::deleteInformation(string type, string filename, string username){    
+void POSAdmin::deleteInformation(string type, string username){    
     string database;
     if(type == "products"){
         database = "database/products.csv";
@@ -1669,7 +1667,7 @@ void POSAdmin::deleteInformation(string type, string filename, string username){
         cout << '\n';
     }
 
-    string productName;
+    string entryName;
     int selectedId;
     cout << "\nEnter the product ID you want to delete (0 = Cancel): ";
     cin >> selectedId;
@@ -1684,7 +1682,9 @@ void POSAdmin::deleteInformation(string type, string filename, string username){
             isFound = true;
             idToDelete = rows[count][0]; // get the line to delete
             if(type == "products"){
-                productName = rows[count][3]; // get the product name for logging
+                entryName = rows[count][3]; // get the product name for logging
+            } else {
+                entryName = rows[count][1]; // get the account username for logging
             }
             break;
         }
@@ -1735,6 +1735,6 @@ void POSAdmin::deleteInformation(string type, string filename, string username){
     fileOut.close();
 
     cout << "Successfully deleted entry with ID " << selectedId << " from the database.\n";
-    saveLogs(type, "DELETE", productName + "_ID_" + to_string(selectedId), username, "Deleted_Entry");
+    saveLogs(type, "DELETE", entryName + "_ID_" + to_string(selectedId), username, "Deleted_Entry");
     Sleep(1200);
 }

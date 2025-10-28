@@ -29,5 +29,5 @@ public:
     void processRefunds(string username); // used to process refunds for a transaction
 
     // DELETE
-    void deleteInformation(string type, string filename, string username); // used to delete products or accounts from the database
+    void deleteInformation(string type, string username); // used to delete products or accounts from the database
 }; // semicolon to indicate the end of class declaration

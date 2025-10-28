@@ -12,3 +12,8 @@ DELETE,RRR,10_27_25,03:15:19_PM,admin,Account_Deleted
 ADD,GUT,10_27_25,03:17:33_PM,admin,New_User_Added
 DELETE,GUT,10_27_25,03:17:40_PM,admin,Account_Deleted
 DELETE,_ID_4,10_27_25,05:40:15_PM,admin,Deleted_Entry
+ADD,rrr,10_28_25,01:07:22_PM,admin,New_User_Added
+DELETE,_ID_4,10_28_25,01:07:33_PM,admin,Deleted_Entry
+ADD,rrr,10_28_25,01:08:40_PM,admin,New_User_Added
+DELETE,_ID_4,10_28_25,01:08:47_PM,admin,Deleted_Entry
+DELETE,rrr_ID_4,10_28_25,01:18:36_PM,admin,Deleted_Entry
