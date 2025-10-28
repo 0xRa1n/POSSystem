@@ -129,7 +129,7 @@ bool POSCashier::viewCart(string username){ // view cart is also bool since if t
     return false; // just to satisfy the compiler, this line will never be reached
 }
 
-void POSCashier::saveTransaction(string productNames, string productQuantities, double initialAmount, double totalAmount, double discount, double moneyTendered, double change, string cashierName, string paymentMethod, int referenceID = 0){
+void POSCashier::saveTransaction(string productNames, string productQuantities, double initialAmount, double totalAmount, double discount, double moneyTendered, double change, string cashierName, string paymentMethod, long long referenceID = 0){
     string database;
     const string customersDatabase = "database/customers/customers_logs.csv";
     if(paymentMethod == "GCash"){
@@ -399,7 +399,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     string paymentMethod;
     switch(confirmation){
         case 1: { // proceed to payment
-            int referenceID;
+            long long referenceID;
             stringstream namesStream, quantitiesStream; // stringstream is used here to concatenate the product names and quantities easily
             // while it is possible to use regular string concatenation, using stringstream is more efficient and cleaner for this purpose
             // the difference between using a stringstream and regular string is the for stringstream, we can easily append strings using the << operator, and we can also easily convert the stream to a string using the str() method
@@ -567,6 +567,11 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                     cout << "Enter the reference id: ";
                     cin >> referenceID;
                     if(handleInputError()) return false; // handle invalid inputs
+                    if(referenceID <= 0 || to_string(referenceID).length() < 12 || to_string(referenceID).length() > 13){ // reference id must be positive and at least 12 digits, since length requires it to  be a string, we convert it to string using to_string()
+                        cout << "Invalid reference id. Please enter a valid reference id.\n";
+                        Sleep(1200);
+                        return false;
+                    }
 
                     // power outtage might happen here after the user had paid, so we need to have a backup that will log the transaction even if the program crashes
                     // in this manner, if the power outtage happens right after the user had paid, we can still recover the transaction from the backup file
