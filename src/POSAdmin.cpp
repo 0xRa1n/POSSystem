@@ -1677,7 +1677,7 @@ void POSAdmin::deleteInformation(string type, string username){
 
     string idToDelete;
     bool isFound = false;
-    for(int count = 1; count < rows.size(); ++count){
+    for(int count = 1; count < rows.size(); ++count){ // 1 since we need to skip the header
         if(rows[count].size() > 0 && stoi(rows[count][0]) == selectedId){ // check if the first column (ID) matches the selectedId
             isFound = true;
             idToDelete = rows[count][0]; // get the line to delete

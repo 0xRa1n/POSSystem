@@ -325,7 +325,8 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
 
     map<string, int> categoryCounts; // to count the number of items in each category
     for (const auto& item : cart) { // loop through each item in the cart
-        categoryCounts[item[1]] += stoi(item[2]); // count the quantity of each category in the cart
+        categoryCounts[item[1]] += stoi(item[2]); // count the quantity of each category in the cart (item[1] is category, item[2] is quantity)
+        // it would look something like this: { "Tops": 4, "Bottoms": 2, ... } if there are 4 tops and 2 bottoms in the cart
         itemTotal += stod(item[3]) * stoi(item[2]); // calculate the total price of items before discount and VAT (this will be used for the overall total)
         //item[1] is category, item[2] is quantity, item[3] is price
     }
@@ -349,7 +350,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                     for (int i = 0; i < quantity; ++i) {
                         if (itemsCounted < 3) { // Only count up to 3 items, otherwise, it should not include that item on the discount (as per buy 3 get __ discount)
                             subtotalForDiscount += price; // get the price of the item for that specific category
-                            itemsCounted++;
+                            itemsCounted++; // increment the count of items counted for this category
                         } else {
                             break; // Stop counting for this item if we already have 3
                         }
@@ -377,16 +378,16 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                 << "P" << fixed << setprecision(2) << stod(item[3]) / 1.12 << endl; // item[3] is the price, we need to convert it to decimal so that it can get and show two decimal places. if it werent converted, it would show as an integer and will show many zeros
     }
     cout << "\n\n";
-
-    cout << "Total Amount: P" << setprecision(2) << fixed << rawPrice << endl; // raw price before VAT and discount. setprecision gets the first two decimal places
-    cout << "Discounts Applied: P" << setprecision(2) << fixed << discountAmount << endl; // setprecision gets the first two decimal places. fixed makes sure that the decimal places are always shown, even if they are zeros
-
-    cout << "VAT (12%): P" << setprecision(2) << fixed << vatAmount << endl; // setprecision gets the first two decimal places
-    cout << "Amount Due: P" << setprecision(2) << fixed << finalAmountDue << endl; // final amount due after discount and VAT. setprecision gets the first two decimal places
-
+    cout << setprecision(2) << fixed; 
     // setprecision gets the first two decimal places
     // fixed makes sure that the decimal places are always shown, even if they are zeros
     // because if we don't use fixed, it will show as, for example, 123.5 instead of 123.50
+    // also, it avoids rounding off
+    
+    cout << "Total Amount: P" << rawPrice << endl; 
+    cout << "Discounts Applied: P" << discountAmount << endl;
+    cout << "VAT (12%): P" << vatAmount << endl; 
+    cout << "Amount Due: P" << finalAmountDue << endl;
 
     cout << "\nProceed to purchase? (1 = Yes, 0 = No): ";
     cin >> confirmation;
@@ -398,7 +399,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
     string paymentMethod;
     switch(confirmation){
         case 1: { // proceed to payment
-            long long referenceID;
+            long long referenceID; // since the length of the GCash reference ID is 12 digits, we need to use long long to store it
             stringstream namesStream, quantitiesStream; // stringstream is used here to concatenate the product names and quantities easily
             // while it is possible to use regular string concatenation, using stringstream is more efficient and cleaner for this purpose
             // the difference between using a stringstream and regular string is the for stringstream, we can easily append strings using the << operator, and we can also easily convert the stream to a string using the str() method
@@ -441,7 +442,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                             Sleep(1200);
                             return false;
                         }
-                    } catch (...) {
+                    } catch (...) { // catch all exceptions regarding the input
                         cout << "Invalid input for money received. Please enter a valid number.\n";
                         system("pause");
                         return false;
@@ -459,7 +460,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
 
                         switch(confirmation){
                             case 1: // try again
-                                return processTransaction(username);
+                                return processTransaction(username); // this is what we call recursion, where a function calls itself
                             case 0: // cancel transaction and clear the cart
                                 // clear the cart after cancelling the transaction
                                 cart.clear();
@@ -518,9 +519,9 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                             getline(ss, productName, ','); // get the product name
                             getline(ss, productQuantity, ','); // get the quantity
 
-                            // since there are multiple products, we need to loop through the vector of product names
+                            // since there are multiple products, we need to loop through the vector to get the list of product names
                             for(int cart_size = 0; cart_size < cart.size(); cart_size++){ // iterate through the cart
-                                if(productName == cart[cart_size][0]){
+                                if(productName == cart[cart_size][0]){ // if the product name matches the cart item
                                     int updatedQuantity = stoi(productQuantity) - stoi(cart[cart_size][2]); // subtract the quantity purchased | stoi means string to integer
                                     deductPurchasedQuantities(productsDatabase, productName, username, cart[cart_size][2]);
                                 }
@@ -532,7 +533,6 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
 
                         // remove the backup file after saving the transaction to the main database
                         remove("database/transactions/cash_backup.csv");
-
                         cout << "Change: " << change << endl;
                     }
                     break;
@@ -616,9 +616,9 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                         getline(ss, token, ','); // skip the category
                         getline(ss, productQuantity, ','); // get the quantity
 
-                        // since there are multiple products, we need to loop through the vector of product names
+                        // since there are multiple products, we need to loop through the vector to get the list of product names
                         for(int cart_size = 0; cart_size < cart.size(); cart_size++){ // iterate through the cart
-                            if(productName == cart[cart_size][0]){
+                            if(productName == cart[cart_size][0]){ // if the product name matches the cart item
                                 int updatedQuantity = stoi(productQuantity) - stoi(cart[cart_size][2]); // subtract the quantity purchased | stoi means string to integer
                                 deductPurchasedQuantities(productsDatabase, productName, username, cart[cart_size][2]);
                             }
