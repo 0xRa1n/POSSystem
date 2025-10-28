@@ -2,10 +2,8 @@
 
 // include all the packages that we only need IN THIS FILE
 #include <iostream>
-#include <cctype> // for toupper() and tolower()
 #include <sstream> // for stringstream
 #include <cstdlib> // for exit()
-#include <algorithm> // used for find
 #include <regex> // for regex
 #include <fstream> // for fstream, ifstream
 #include <iomanip> // for setw and left

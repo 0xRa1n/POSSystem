@@ -135,3 +135,5 @@ UPDATE,Graphic_Tee_Quantity_to_2,10_27_25,06:47:13_PM,cashier,Purchased_Quantity
 UPDATE,Vintage_Print_Tee_Quantity_to_1,10_27_25,06:47:13_PM,cashier,Purchased_Quantity_Deducted
 ADD,Demo,10_27_25,06:47:39_PM,admin,New_Product_Added
 UPDATE,Demo_Quantity_to_1,10_27_25,06:48:00_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tee_Quantity_to_1,10_28_25,11:11:31_AM,cashier,Purchased_Quantity_Deducted
+UPDATE,Plain_Oversized_Tee_Quantity_to_3,10_28_25,11:11:31_AM,cashier,Purchased_Quantity_Deducted

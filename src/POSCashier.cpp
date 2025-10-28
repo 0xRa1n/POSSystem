@@ -4,7 +4,6 @@
 
 // include all the packages that we only need IN THIS FILE
 #include <iostream>
-#include <cctype> // for toupper()
 #include <sstream> // for stringstream
 #include <regex> // for regex
 #include <fstream> // for fstream, ifstream

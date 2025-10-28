@@ -2,8 +2,7 @@
 #include "./include/utilities.h"
 
 // include all the packages that we only need IN THIS FILE
-#include <iostream>  // For cout, cin, streamsize
-#include <string>    // For the string type
+#include <iostream> 
 #include <limits>    // For numeric_limits
 #include <fstream> // for fstream, ifstream
 #include <sstream> // for stringstream
