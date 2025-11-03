@@ -15,3 +15,5 @@ TransNum,ProdNames,ProdQtys,AmtRefunded,TransPmMethod,Date,Time,User
 37,Demo,1,5,Cash,10_27_25,06:49:30_PM,admin
 37,Demo,1,5,Cash,10_27_25,06:54:03_PM,admin
 37,Demo,1,5,Cash,10_27_25,06:58:37_PM,admin
+35,Graphic_Tee|Vintage_Print_Tee,3,208.68,Cash,11_03_25,03:31:08_PM,admin
+51,Graphic_Tees,1,85,Cash,11_03_25,04:45:59_PM,admin

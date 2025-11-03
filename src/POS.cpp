@@ -183,7 +183,7 @@ void PointOfSale::adminMenu(string username) {
                     case 5: showHeader("Backup transaction data (GCash)"); readCSV("database/transactions/gcash_backup.csv"); // call the readBackupTransactions function from POSAdmin class
                         system("pause"); 
                         break;
-                    case 6: showHeader("View refund logs"); readCSV("database/transactions/refundLogs.csv"); // call the readRefundLogs function from POSAdmin class
+                    case 6: showHeader("View refund logs"); readCSV("database/logs/refundLogs.csv"); // call the readRefundLogs function from POSAdmin class
                         system("pause"); 
                         break;
                     case 7: currentState = previousState;  // go back to the previous state (which is Inventory). Then, break this case. It will find for the case named AdminState::Inventory to execute
@@ -347,7 +347,7 @@ void PointOfSale::managerMenu(string username) {
         switch (currentState) {
             case ManagerState::MainMenu: { // this will be the main menu for the admin
                 string menu[] = {"Inventory", "Monitoring", "Logout"};
-                int selection = showMenu("P.O.S. (Admin)", menu);
+                int selection = showMenu("P.O.S. (Manager)", menu);
                 switch (selection) {
                     case 1: currentState = ManagerState::Inventory; // change the currentState to Inventory
                         break;

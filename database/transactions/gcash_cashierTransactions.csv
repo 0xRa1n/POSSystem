@@ -1,2 +1,5 @@
 TransNum,ProdNames,ProdQtys,Amt,Tax,TotalAmt,Disc,MnyTndrd,Change,RefID,AmtRefundedDate,Date,Time,CashierName,Status
 45,Graphic_Tee,1,66.96,8.04,75.00,0.00,100.00,0.00,1111111111111,0.00,10_28_25,09:43:31_AM,cashier,Completed
+48,Graphic_Tees,1,75.89,9.11,85.00,0.00,85.00,0.00,1111111111111,0.00,11_03_25,03:50:13_PM,cashier,Completed
+50,Graphic_Tees,1,75.89,9.11,85.00,0.00,85.00,0.00,9999999999999,0.00,11_03_25,04:40:34_PM,cashier,Completed
+52,Plain_Oversized_Tee,1,53.57,6.43,60.00,0.00,60.00,0.00,9999999999999,0.00,11_03_25,04:44:51_PM,cashier,Completed

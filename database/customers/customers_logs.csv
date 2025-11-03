@@ -45,3 +45,9 @@ CustomerID,ProductNames,ProductQuantities,Date,Time1,Graphic_Tee,1,10_26_25,04:2
 44,Graphic_Tee,1,10_28_25,09:34:42_AM
 45,Graphic_Tee,1,10_28_25,09:43:26_AM
 46,Plain_Oversized_Tee|Graphic_Tee,3|1,10_28_25,11:10:48_AM
+47,Graphic_Tees,1,11_03_25,03:49:05_PM
+48,Graphic_Tees,1,11_03_25,03:49:57_PM
+49,Plain_Oversized_Tee,1,11_03_25,04:40:17_PM
+50,Graphic_Tees,1,11_03_25,04:40:27_PM
+51,Graphic_Tees,1,11_03_25,04:44:32_PM
+52,Plain_Oversized_Tee,1,11_03_25,04:44:43_PM

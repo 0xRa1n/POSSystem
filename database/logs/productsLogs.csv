@@ -137,3 +137,14 @@ ADD,Demo,10_27_25,06:47:39_PM,admin,New_Product_Added
 UPDATE,Demo_Quantity_to_1,10_27_25,06:48:00_PM,cashier,Purchased_Quantity_Deducted
 UPDATE,Graphic_Tee_Quantity_to_1,10_28_25,11:11:31_AM,cashier,Purchased_Quantity_Deducted
 UPDATE,Plain_Oversized_Tee_Quantity_to_3,10_28_25,11:11:31_AM,cashier,Purchased_Quantity_Deducted
+ADD,TestProduct,11_03_25,03:07:31_PM,admin,New_Product_Added
+UPDATE,Graphic_Tee_Category_to_Tops,11_03_25,03:24:40_PM,admin,Wrong_Category
+UPDATE,Graphic_Tee_SubCategory_to_T_Shirts,11_03_25,03:25:58_PM,admin,Wrong_Subcategory
+UPDATE,Graphic_Tee_to_Graphic_Tees,11_03_25,03:27:52_PM,admin,Wrong_ProductName
+UPDATE,Graphic_Tees_Quantity_to_2,11_03_25,03:28:21_PM,admin,Wrong_Qty
+UPDATE,Graphic_Tees_Price_to_85.00,11_03_25,03:29:06_PM,admin,Wrong_Price
+DELETE,TestProduct_ID_5,11_03_25,03:30:14_PM,admin,Deleted_Entry
+UPDATE,Graphic_Tees_Quantity_to_1,11_03_25,03:49:09_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Plain_Oversized_Tee_Quantity_to_1,11_03_25,04:40:20_PM,cashier,Purchased_Quantity_Deducted
+UPDATE,Graphic_Tees_Quantity_to_1,11_03_25,04:44:34_PM,cashier,Purchased_Quantity_Deducted
+ADD,Striped_Polo,11_03_25,04:49:41_PM,manager,New_Product_Added

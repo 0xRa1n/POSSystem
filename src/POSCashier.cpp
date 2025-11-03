@@ -419,6 +419,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
             cin >> paymentMethodInput;
             if(handleInputError()) return false; // handle invalid inputs
             if(paymentMethodInput == 0) return true; // cancel the transaction and go back to main menu
+            int transactionID = getLastId("database/customers/customers_logs.csv"); // get the last transaction id for backup redundancy
 
             switch(paymentMethodInput){
                 // to-do : make a function to save to the backup file
@@ -483,7 +484,8 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                             cout << "Error opening backup file for writing." << endl;
                             return false;
                         }
-                        backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,PmMethod,Date,Time,Cashier,Status\n" 
+                        backupFile << "TransID,ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,Change,PmMethod,Date,Time,Cashier,Status\n"
+                                    << transactionID << ","
                                     << namesStream.str() << ","
                                     << quantitiesStream.str() << ","
                                     << setprecision(2) << fixed << rawPrice << ","
@@ -532,7 +534,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                         saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, discountAmount, stod(cashUserInput), change, username, "Cash", 0); // save the transaction to the database, specifically at the cash_cashierTransactions.csv
 
                         // remove the backup file after saving the transaction to the main database
-                        remove("database/transactions/cash_backup.csv");
+                        // remove("database/transactions/cash_backup.csv");
                         cout << "Change: " << change << endl;
                     }
                     break;
@@ -580,7 +582,8 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                         cout << "Error opening backup file for writing." << endl;
                         return false;
                     }
-                    backupFile << "ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,PmMethod,RefID,Date,Time,Cashier,Status\n" 
+                    backupFile << "TransID,ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,PmMethod,RefID,Date,Time,Cashier,Status\n" 
+                                << transactionID << ","
                                 << namesStream.str() << ","
                                 << quantitiesStream.str() << ","
                                 << setprecision(2) << fixed << rawPrice << ","
@@ -626,7 +629,7 @@ bool POSCashier::processTransaction(string username) { // processTransaction is 
                     }
 
                     // remove if not needed
-                    remove("database/transactions/gcash_backup.csv");
+                    // remove("database/transactions/gcash_backup.csv");
                     
                     // save the transaction to the main database
                     saveTransaction(namesStream.str(), quantitiesStream.str(), rawPrice, finalAmountDue, discountAmount, stod(gcashUserInput), change, username, "GCash", referenceID); // save the transaction to the database, specifically at the gcash_cashierTransactions.csv

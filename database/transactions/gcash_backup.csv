@@ -1,0 +1,2 @@
+TransID,ProdNames,ProdQty,Amt,DcAmt,Tax,TotalAmt,UserMoney,PmMethod,RefID,Date,Time,Cashier,Status
+52,Plain_Oversized_Tee,1,53.57,0.00,6.43,60.00,60.00,GCash,9999999999999,11_03_25,04:44:42_PM,cashier,Completed
